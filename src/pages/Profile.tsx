@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -113,6 +113,25 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
+
+        <div className="flex gap-3 mb-6">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => toast.info("Edit profile coming soon")}
+          >
+            <Edit className="h-4 w-4" />
+            Edit Profile
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => toast.info("Settings coming soon")}
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Button>
+        </div>
 
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-4">
