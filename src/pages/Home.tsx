@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Heart, MapPin, Bell, ChevronRight, Settings } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import { StackReportDialog } from "@/components/StackReportDialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Park {
   id: string;
@@ -163,21 +163,17 @@ const Home = () => {
       {/* Park Selector */}
       <div className="px-4 mb-6">
         <div className="max-w-md mx-auto">
-          <Select value={selectedParkId} onValueChange={setSelectedParkId}>
-            <SelectTrigger className="w-full bg-card border-2 h-14 text-lg rounded-2xl">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-primary" />
-                <SelectValue />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {parks.map((park) => (
-                <SelectItem key={park.id} value={park.id}>
-                  {park.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ToggleGroup type="single" value={selectedParkId} onValueChange={(value) => value && setSelectedParkId(value)} className="grid grid-cols-3 gap-2 w-full">
+            {parks.map((park) => (
+              <ToggleGroupItem 
+                key={park.id} 
+                value={park.id}
+                className="bg-card/50 backdrop-blur border-2 border-dashed border-foreground/20 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary h-14 text-sm font-medium rounded-2xl"
+              >
+                {park.name}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
       </div>
 
