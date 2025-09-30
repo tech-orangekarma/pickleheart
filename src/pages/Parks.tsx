@@ -5,6 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { MapPin, Users, Heart, ChevronLeft, Info, Sun } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import carlSchurzParkImage from "@/assets/carl-schurz-park.png";
 
 interface Park {
   id: string;
@@ -143,9 +144,17 @@ const Parks = () => {
       {/* Park Image */}
       <div className="max-w-md mx-auto px-4 pt-4">
         <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-green-400 rounded-lg overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center text-white/70">
-            Park Image
-          </div>
+          {selectedPark?.name === "Carl Schurz" ? (
+            <img 
+              src={carlSchurzParkImage} 
+              alt="Carl Schurz Park pickleball courts" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white/70">
+              Park Image
+            </div>
+          )}
         </div>
 
         {/* Address */}
