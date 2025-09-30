@@ -173,7 +173,7 @@ const Parks = () => {
               alt="Central Park pickleball courts" 
               className="w-full h-full object-cover"
             />
-          ) : selectedPark?.name === "Riverside Park" ? (
+          ) : (selectedPark?.name?.toLowerCase().includes("riverside")) ? (
             <img 
               src={riversideParkImage} 
               alt="Riverside Park pickleball courts" 
