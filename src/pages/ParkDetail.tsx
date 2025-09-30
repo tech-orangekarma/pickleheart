@@ -3,8 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Loader2, ListOrdered, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { StackReportDialog } from "@/components/StackReportDialog";
+import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 
 interface Park {
   id: string;
@@ -36,6 +38,10 @@ const ParkDetail = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userPresenceId, setUserPresenceId] = useState<string | null>(null);
   const [checkInTimer, setCheckInTimer] = useState<number>(0);
+  const [showStackDialog, setShowStackDialog] = useState(false);
+  const [showSkillFilter, setShowSkillFilter] = useState(false);
+  const [skillRange, setSkillRange] = useState<[number, number]>([2.0, 8.0]);
+  const [lastLocationUpdate, setLastLocationUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!parkId) {
@@ -51,7 +57,7 @@ const ParkDetail = () => {
     });
 
     loadParkData();
-  }, [parkId, navigate]);
+  }, [parkId, navigate, skillRange]);
 
   // Start location tracking
   useEffect(() => {
@@ -74,6 +80,7 @@ const ParkDetail = () => {
           park.location.coordinates[0]
         );
         setDistanceToPark(distance);
+        setLastLocationUpdate(new Date());
 
         // Check if within 150m geofence
         if (distance <= 150) {
@@ -131,12 +138,33 @@ const ParkDetail = () => {
   };
 
   const handleOutOfGeofence = () => {
-    setCheckInTimer(0);
+    const timeSinceLastUpdate = new Date().getTime() - lastLocationUpdate.getTime();
+    const minutesAway = timeSinceLastUpdate / 1000 / 60;
+
+    // Auto checkout after 10 minutes away
+    if (userPresenceId && minutesAway >= 10) {
+      performCheckOut();
+    }
     
-    // If user was checked in and has been away for 10 minutes, check them out
-    if (userPresenceId) {
-      // This would need a more sophisticated timer for the 10-minute checkout
-      // For MVP, we'll implement this in a future iteration
+    setCheckInTimer(0);
+  };
+
+  const performCheckOut = async () => {
+    if (!userPresenceId) return;
+
+    try {
+      const { error } = await supabase
+        .from("presence")
+        .update({ checked_out_at: new Date().toISOString() })
+        .eq("id", userPresenceId);
+
+      if (error) throw error;
+
+      setUserPresenceId(null);
+      toast("You've been checked out");
+      loadParkData();
+    } catch (error) {
+      console.error("Error checking out:", error);
     }
   };
 
@@ -181,21 +209,32 @@ const ParkDetail = () => {
       // Load current presences
       const { data: presenceData, error: presenceError } = await supabase
         .from("presence")
-        .select(`
-          id,
-          user_id,
-          arrived_at,
-          profiles (
-            display_name,
-            dupr_rating
-          )
-        `)
-        .eq("park_id", parkId)
-        .is("checked_out_at", null)
-        .order("arrived_at", { ascending: false });
+      .select(`
+        id,
+        user_id,
+        arrived_at,
+        profiles (
+          display_name,
+          dupr_rating
+        )
+      `)
+      .eq("park_id", parkId)
+      .is("checked_out_at", null)
+      .order("arrived_at", { ascending: false });
 
       if (presenceError) throw presenceError;
-      setPresences(presenceData || []);
+
+      // Apply skill filter
+      let filteredPresences = presenceData || [];
+      if (skillRange[0] > 2.0 || skillRange[1] < 8.0) {
+        filteredPresences = filteredPresences.filter((p) => {
+          const rating = p.profiles?.dupr_rating;
+          if (!rating) return false;
+          return rating >= skillRange[0] && rating <= skillRange[1];
+        });
+      }
+
+      setPresences(filteredPresences);
     } catch (error) {
       console.error("Error loading park:", error);
     } finally {
@@ -290,11 +329,32 @@ const ParkDetail = () => {
           </Card>
         )}
 
-        <div>
-          <h2 className="text-xl font-headline mb-1">who's here now</h2>
-          <p className="text-sm text-muted-foreground">
-            {presences.length} {presences.length === 1 ? "player" : "players"}
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-headline mb-1">who's here now</h2>
+            <p className="text-sm text-muted-foreground">
+              {presences.length} {presences.length === 1 ? "player" : "players"}
+              {(skillRange[0] > 2.0 || skillRange[1] < 8.0) && " (filtered)"}
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowSkillFilter(true)}
+            >
+              <Filter className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShowStackDialog(true)}
+              disabled={!isTracking || (distanceTopark !== null && distanceTopark > 150)}
+            >
+              <ListOrdered className="w-4 h-4 mr-2" />
+              stacks
+            </Button>
+          </div>
         </div>
 
         {presences.length === 0 ? (
@@ -331,6 +391,26 @@ const ParkDetail = () => {
           </div>
         )}
       </main>
+
+      <StackReportDialog
+        parkId={parkId!}
+        isOpen={showStackDialog}
+        onClose={() => setShowStackDialog(false)}
+        onReported={() => {
+          toast.success("Stack count updated!");
+        }}
+        isInGeofence={distanceTopark !== null && distanceTopark <= 150}
+      />
+
+      <SkillFilterDialog
+        isOpen={showSkillFilter}
+        onClose={() => setShowSkillFilter(false)}
+        onApply={(range) => {
+          setSkillRange(range);
+          toast.success("Filter applied");
+        }}
+        currentRange={skillRange}
+      />
     </div>
   );
 };

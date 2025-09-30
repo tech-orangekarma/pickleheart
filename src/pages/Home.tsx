@@ -198,10 +198,15 @@ const Home = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
         <div className="max-w-md mx-auto flex justify-around items-center h-16">
           <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
-            <MapPin className="w-5 h-5" />
-            <span className="text-xs">parks</span>
+            <MapPin className="w-5 h-5 text-primary" />
+            <span className="text-xs text-primary">parks</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/friends")}
+          >
             <Users className="w-5 h-5" />
             <span className="text-xs">friends</span>
           </Button>
