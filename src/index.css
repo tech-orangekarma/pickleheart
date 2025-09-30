@@ -106,8 +106,10 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family: 'Nunito', sans-serif;
+    background: linear-gradient(180deg, hsl(var(--warm-cream)) 0%, hsl(353 86% 92%) 50%, hsl(353 96% 88%) 100%);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6, .headline {
     font-family: 'Comfortaa', sans-serif;

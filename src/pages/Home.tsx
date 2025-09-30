@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Heart, MapPin, Smile, Frown, Meh } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Users, Heart, MapPin, Bell, ChevronRight, Settings } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import { StackReportDialog } from "@/components/StackReportDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Park {
   id: string;
@@ -32,6 +32,7 @@ const Home = () => {
   const [showStackDialog, setShowStackDialog] = useState(false);
   const [showPlayersDialog, setShowPlayersDialog] = useState(false);
   const [playersAtPark, setPlayersAtPark] = useState<PlayerAtPark[]>([]);
+  const [displayName, setDisplayName] = useState<string>("Friend");
 
   useEffect(() => {
     loadData();
@@ -49,6 +50,17 @@ const Home = () => {
       if (!session) {
         navigate("/auth");
         return;
+      }
+
+      // Load user profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profileData?.display_name) {
+        setDisplayName(profileData.display_name);
       }
 
       // Load parks
@@ -106,92 +118,131 @@ const Home = () => {
     }
   };
 
-  const getQualityIcon = () => {
+  const getQualityMessage = () => {
+    const selectedPark = parks.find(p => p.id === selectedParkId);
+    const parkName = selectedPark?.name || "Park";
+    
     switch (quality) {
       case "great":
-        return <Smile className="w-20 h-20 text-green-500" />;
+        return `Yes! Courts are hot right now`;
       case "good":
-        return <Meh className="w-20 h-20 text-yellow-500" />;
+        return `Good time to play at ${parkName}`;
       case "bad":
-        return <Frown className="w-20 h-20 text-red-500" />;
+        return `Courts are pretty busy right now`;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">loading...</div>
       </div>
     );
   }
 
+  const selectedPark = parks.find(p => p.id === selectedParkId);
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Park Selection - Top */}
-      <header className="bg-card border-b border-border p-4">
-        <div className="max-w-md mx-auto">
-          <ToggleGroup 
-            type="single" 
-            value={selectedParkId} 
-            onValueChange={(value) => value && setSelectedParkId(value)}
-            className="justify-start flex-wrap"
-          >
-            {parks.map((park) => (
-              <ToggleGroupItem key={park.id} value={park.id} className="flex-1">
-                {park.name.split(" ")[0]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+    <div className="min-h-screen flex flex-col pb-16">
+      {/* Header */}
+      <header className="p-4">
+        <div className="max-w-md mx-auto flex items-center justify-between">
+          <h1 className="font-headline text-2xl">pickleheart</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium">Hey {displayName}!</span>
+            <button className="relative">
+              <Bell className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Quality Indicator - Center */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="text-center">
-          {getQualityIcon()}
-          <p className="text-2xl font-bold mt-4 capitalize">{quality}</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            {playersCount} {playersCount === 1 ? "player" : "players"} at park
-          </p>
-        </div>
-      </main>
-
-      {/* Action Buttons - Bottom */}
-      <div className="bg-card border-t border-border p-4 pb-20">
-        <div className="max-w-md mx-auto grid grid-cols-3 gap-2">
-          <Button 
-            variant="outline" 
-            className="flex-col h-20 text-xs"
-            onClick={() => setShowPlayersDialog(true)}
-          >
-            <Users className="w-5 h-5 mb-1" />
-            players at park
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-col h-20 text-xs"
-            onClick={() => setShowSkillDialog(true)}
-          >
-            <span className="text-lg font-bold">{skillPlayersCount}</span>
-            <span className="mt-1">{skillRange[0]}-{skillRange[1]} players</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-col h-20 text-xs"
-            onClick={() => setShowStackDialog(true)}
-          >
-            <MapPin className="w-5 h-5 mb-1" />
-            stack count
-          </Button>
+      {/* Park Selector */}
+      <div className="px-4 mb-6">
+        <div className="max-w-md mx-auto">
+          <Select value={selectedParkId} onValueChange={setSelectedParkId}>
+            <SelectTrigger className="w-full bg-card border-2 h-14 text-lg rounded-2xl">
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-primary" />
+                <SelectValue />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {parks.map((park) => (
+                <SelectItem key={park.id} value={park.id}>
+                  {park.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
+      {/* Center Status Section */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <h2 className="font-headline text-2xl mb-8">Good time to play?</h2>
+        
+        <div className="relative w-80 h-80 flex items-center justify-center mb-12">
+          {/* Decorative Circle */}
+          <div className={`absolute inset-8 rounded-full opacity-40 border-4 border-dashed border-foreground/20 ${
+            quality === 'great' ? 'bg-status-great' : 
+            quality === 'good' ? 'bg-status-good' : 
+            'bg-status-bad'
+          }`} />
+          
+          {/* Central Message */}
+          <div className="relative z-10 bg-card rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-2 border-dashed border-foreground/20">
+            <p className="text-xs text-muted-foreground mb-2">{selectedPark?.name}</p>
+            <p className="font-headline text-2xl text-center leading-tight">
+              {getQualityMessage()}
+            </p>
+            <Heart className="w-8 h-8 mt-3 text-primary fill-primary" />
+          </div>
+        </div>
+
+        {/* Info Cards */}
+        <div className="max-w-md mx-auto grid grid-cols-3 gap-3 w-full px-2">
+          <button
+            onClick={() => setShowPlayersDialog(true)}
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+          >
+            <div className="text-3xl font-bold mb-1">{playersCount}</div>
+            <div className="text-xs font-medium">Players<br/>Online</div>
+          </button>
+          
+          <button
+            onClick={() => setShowSkillDialog(true)}
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+          >
+            <div className="text-3xl font-bold mb-1">{skillRange[0]}-{skillRange[1]}</div>
+            <div className="text-xs font-medium">Average<br/>Skill Level</div>
+          </button>
+          
+          <button
+            onClick={() => setShowStackDialog(true)}
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+          >
+            <div className="text-3xl font-bold mb-1">—</div>
+            <div className="text-xs font-medium">Stack Count<br/>12 Waiting</div>
+          </button>
+        </div>
+
+        {/* Friends Section */}
+        <div className="mt-8 w-full max-w-md">
+          <h3 className="font-headline text-lg text-center mb-4">Your Friends Here now</h3>
+          <div className="h-16 bg-card/30 backdrop-blur rounded-2xl border-2 border-dashed border-foreground/20" />
+        </div>
+      </main>
+
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="max-w-md mx-auto flex justify-around items-center h-16">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur border-t border-border">
+        <div className="max-w-md mx-auto flex justify-around items-center h-16 px-2">
           <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
-            <Heart className="w-5 h-5 text-primary" />
-            <span className="text-xs text-primary">home</span>
+            <Heart className="w-5 h-5 text-primary fill-primary" />
+            <span className="text-xs text-primary">Home</span>
           </Button>
           <Button
             variant="ghost"
@@ -200,7 +251,7 @@ const Home = () => {
             onClick={() => navigate("/parks")}
           >
             <MapPin className="w-5 h-5" />
-            <span className="text-xs">parks</span>
+            <span className="text-xs">Parks</span>
           </Button>
           <Button
             variant="ghost"
@@ -209,7 +260,7 @@ const Home = () => {
             onClick={() => navigate("/friends")}
           >
             <Users className="w-5 h-5" />
-            <span className="text-xs">friends</span>
+            <span className="text-xs">Friends</span>
           </Button>
           <Button
             variant="ghost"
@@ -217,8 +268,16 @@ const Home = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/profile")}
           >
-            <Heart className="w-5 h-5" />
-            <span className="text-xs">me</span>
+            <Users className="w-5 h-5" />
+            <span className="text-xs">Profile</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-xs">Settings</span>
           </Button>
         </div>
       </nav>
