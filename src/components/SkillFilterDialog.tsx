@@ -30,8 +30,8 @@ export const SkillFilterDialog = ({
   };
 
   const handleReset = () => {
-    setRange([2.0, 8.0]);
-    onApply([2.0, 8.0]);
+    setRange([2.0, 5.0]);
+    onApply([2.0, 5.0]);
     onClose();
   };
 
@@ -58,7 +58,7 @@ export const SkillFilterDialog = ({
               value={[range[0], range[1]]}
               onValueChange={(vals) => setRange([vals[0], vals[1]])}
               min={2.0}
-              max={8.0}
+              max={5.0}
               step={0.25}
               minStepsBetweenThumbs={1}
             />
@@ -66,7 +66,7 @@ export const SkillFilterDialog = ({
 
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>2.0 (beginner)</span>
-            <span>8.0 (pro)</span>
+            <span>5.0+</span>
           </div>
         </div>
 
