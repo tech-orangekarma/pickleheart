@@ -362,7 +362,12 @@ const Friends = () => {
             <Users className="w-5 h-5 text-primary" />
             <span className="text-xs text-primary">friends</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/profile")}
+          >
             <Heart className="w-5 h-5" />
             <span className="text-xs">me</span>
           </Button>
