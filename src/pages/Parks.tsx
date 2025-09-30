@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Heart } from "lucide-react";
+import { MapPin, Users, Heart, ChevronLeft, Info, Sun } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Park {
   id: string;
@@ -13,17 +13,12 @@ interface Park {
   court_count: number;
 }
 
-interface ParkStats {
-  park_id: string;
-  player_count: number;
-  status: "bad" | "good" | "great";
-}
-
 const Parks = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [parks, setParks] = useState<Park[]>([]);
-  const [parkStats, setParkStats] = useState<Record<string, ParkStats>>({});
+  const [selectedParkId, setSelectedParkId] = useState<string>("");
+  const [playersCount, setPlayersCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,50 +71,29 @@ const Parks = () => {
       return;
     }
 
-    setParks(parksData || []);
-
-    // Calculate stats for each park
-    const stats: Record<string, ParkStats> = {};
-    for (const park of parksData || []) {
-      const { count } = await supabase
-        .from("presence")
-        .select("*", { count: "exact", head: true })
-        .eq("park_id", park.id)
-        .is("checked_out_at", null);
-
-      const playerCount = count || 0;
-      let status: "bad" | "good" | "great" = "bad";
-      if (playerCount >= 8) status = "great";
-      else if (playerCount >= 4) status = "good";
-
-      stats[park.id] = { park_id: park.id, player_count: playerCount, status };
+    if (parksData && parksData.length > 0) {
+      setParks(parksData);
+      setSelectedParkId(parksData[0].id);
     }
-
-    setParkStats(stats);
     setLoading(false);
   };
 
-  const getStatusColor = (status: "bad" | "good" | "great") => {
-    switch (status) {
-      case "bad":
-        return "bg-status-bad";
-      case "good":
-        return "bg-status-good";
-      case "great":
-        return "bg-status-great";
+  useEffect(() => {
+    if (selectedParkId) {
+      loadParkData();
     }
+  }, [selectedParkId]);
+
+  const loadParkData = async () => {
+    const { count } = await supabase
+      .from("presence")
+      .select("*", { count: "exact", head: true })
+      .eq("park_id", selectedParkId)
+      .is("checked_out_at", null);
+
+    setPlayersCount(count || 0);
   };
 
-  const getStatusLabel = (status: "bad" | "good" | "great") => {
-    switch (status) {
-      case "bad":
-        return "quiet";
-      case "good":
-        return "good vibes";
-      case "great":
-        return "it's on!";
-    }
-  };
 
   if (loading) {
     return (
@@ -129,74 +103,88 @@ const Parks = () => {
     );
   }
 
+  const selectedPark = parks.find(p => p.id === selectedParkId);
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border p-4">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-headline flex items-center gap-2">
-            <Heart className="w-6 h-6 text-primary" />
-            pickleheart
-          </h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => supabase.auth.signOut()}
+    <div className="min-h-screen bg-background pb-20">
+      {/* Header with park selector */}
+      <header className="bg-card p-4">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => navigate("/")}>
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <h1 className="font-headline text-xl">{selectedPark?.name}</h1>
+            <button>
+              <Info className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Park Tabs */}
+          <ToggleGroup 
+            type="single" 
+            value={selectedParkId} 
+            onValueChange={(value) => value && setSelectedParkId(value)} 
+            className="grid grid-cols-3 gap-2 w-full"
           >
-            sign out
-          </Button>
+            {parks.map((park) => (
+              <ToggleGroupItem 
+                key={park.id} 
+                value={park.id}
+                className="bg-card/50 backdrop-blur border-2 border-dashed border-foreground/20 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary h-10 text-sm font-medium rounded-xl"
+              >
+                {park.name}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto p-4 space-y-6 pb-24">
-        <div className="text-center py-6">
-          <h2 className="text-xl font-headline mb-2">where should you play?</h2>
-          <p className="text-muted-foreground text-sm">
-            tap a park to see who's there
-          </p>
+      {/* Park Image */}
+      <div className="max-w-md mx-auto px-4 pt-4">
+        <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-green-400 rounded-lg overflow-hidden">
+          <div className="w-full h-full flex items-center justify-center text-white/70">
+            Park Image
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {parks.map((park) => {
-            const stats = parkStats[park.id];
-            if (!stats) return null;
-
-            return (
-              <Card
-                key={park.id}
-                className="p-6 cursor-pointer hover:shadow-lg transition-all"
-                onClick={() => navigate(`/park/${park.id}`)}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-24 h-24 rounded-full ${getStatusColor(
-                      stats.status
-                    )} flex flex-col items-center justify-center shadow-lg`}
-                  >
-                    <Users className="w-8 h-8 mb-1" />
-                    <span className="text-2xl font-bold">
-                      {stats.player_count}
-                    </span>
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-xl font-headline mb-1">{park.name}</h3>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                      <MapPin className="w-4 h-4" />
-                      <span className="line-clamp-1">{park.address}</span>
-                    </div>
-                    <div className="inline-block px-3 py-1 rounded-full bg-muted text-sm font-medium">
-                      {getStatusLabel(stats.status)}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+        {/* Address */}
+        <div className="flex items-start gap-3 mt-6">
+          <MapPin className="w-6 h-6 flex-shrink-0 mt-1" />
+          <div>
+            <span className="font-medium">Address: </span>
+            <span className="text-muted-foreground">{selectedPark?.address}</span>
+          </div>
         </div>
-      </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="max-w-md mx-auto flex justify-around items-center h-16">
+        {/* Info Cards */}
+        <div className="grid grid-cols-3 gap-3 mt-6">
+          {/* Players Card */}
+          <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
+            <div className="text-4xl mb-2">🏓</div>
+            <div className="text-3xl font-bold mb-1">{playersCount}</div>
+            <div className="text-xs text-center font-medium">Players<br/>here now</div>
+          </div>
+
+          {/* Courts Card */}
+          <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
+            <div className="text-4xl mb-2">🎾</div>
+            <div className="text-3xl font-bold mb-1">{selectedPark?.court_count || 0}</div>
+            <div className="text-xs text-center font-medium">Courts<br/>Available</div>
+          </div>
+
+          {/* Weather Card */}
+          <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
+            <Sun className="w-8 h-8 mb-2 text-yellow-500" />
+            <div className="text-lg font-bold mb-1">Sunny</div>
+            <div className="text-2xl font-bold">72°F</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur border-t border-border">
+        <div className="max-w-md mx-auto flex justify-around items-center h-16 px-2">
           <Button
             variant="ghost"
             size="sm"
@@ -204,11 +192,15 @@ const Parks = () => {
             onClick={() => navigate("/")}
           >
             <Heart className="w-5 h-5" />
-            <span className="text-xs">home</span>
+            <span className="text-xs">Home</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
-            <MapPin className="w-5 h-5 text-primary" />
-            <span className="text-xs text-primary">parks</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+          >
+            <MapPin className="w-5 h-5 text-primary fill-primary" />
+            <span className="text-xs text-primary">Parks</span>
           </Button>
           <Button
             variant="ghost"
@@ -217,7 +209,7 @@ const Parks = () => {
             onClick={() => navigate("/friends")}
           >
             <Users className="w-5 h-5" />
-            <span className="text-xs">friends</span>
+            <span className="text-xs">Friends</span>
           </Button>
           <Button
             variant="ghost"
@@ -225,8 +217,8 @@ const Parks = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/profile")}
           >
-            <Heart className="w-5 h-5" />
-            <span className="text-xs">me</span>
+            <Users className="w-5 h-5" />
+            <span className="text-xs">Profile</span>
           </Button>
         </div>
       </nav>
