@@ -29,7 +29,7 @@ const Privacy = () => {
       .from("welcome_progress")
       .select("*")
       .eq("user_id", uid)
-      .single();
+      .maybeSingle();
 
     if (data && data.completed_privacy) {
       navigate("/welcome/delight");
@@ -40,7 +40,16 @@ const Privacy = () => {
     if (!userId) return;
 
     try {
-      // Create or update privacy settings
+      // CRITICAL: Create profile first (required for foreign key)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: userId,
+        });
+
+      if (profileError) throw profileError;
+
+      // Now create privacy settings
       const { error: privacyError } = await supabase
         .from("privacy_settings")
         .upsert({

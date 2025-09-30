@@ -55,7 +55,7 @@ const Home = () => {
       .from("welcome_progress")
       .select("*")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (!progress || !progress.completed_ready) {
       navigate("/welcome/privacy");
