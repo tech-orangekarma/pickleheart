@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, Settings, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 
 interface Profile {
   id: string;
@@ -13,12 +14,14 @@ interface Profile {
   phone: string | null;
   dupr_rating: number | null;
   home_park_id: string | null;
+  avatar_url: string | null;
 }
 
 const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -88,8 +91,8 @@ const Profile = () => {
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src="" />
+            <Avatar className="h-24 w-24">
+                <AvatarImage src={profile?.avatar_url || ""} />
                 <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
                   {getInitials(profile?.display_name || null)}
                 </AvatarFallback>
@@ -118,7 +121,7 @@ const Profile = () => {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => toast.info("Edit profile coming soon")}
+            onClick={() => setEditDialogOpen(true)}
           >
             <Edit className="h-4 w-4" />
             Edit Profile
@@ -132,6 +135,15 @@ const Profile = () => {
             Settings
           </Button>
         </div>
+
+        {profile && (
+          <EditProfileDialog
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            profile={profile}
+            onProfileUpdated={loadProfile}
+          />
+        )}
 
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-4">
