@@ -206,15 +206,15 @@ const Home = () => {
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
             <div className="text-3xl font-bold mb-1">{playersCount}</div>
-            <div className="text-xs font-medium">Players<br/>Online</div>
+            <div className="text-xs font-medium">Players at<br/>the Park</div>
           </button>
           
           <button
             onClick={() => setShowSkillDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
-            <div className="text-3xl font-bold mb-1">{skillRange[0]}-{skillRange[1]}</div>
-            <div className="text-xs font-medium">Average<br/>Skill Level</div>
+            <div className="text-3xl font-bold mb-1">{skillPlayersCount}</div>
+            <div className="text-xs font-medium">{skillRange[0]}-{skillRange[1]}<br/>Players at the Park</div>
           </button>
           
           <button
@@ -224,12 +224,6 @@ const Home = () => {
             <div className="text-3xl font-bold mb-1">—</div>
             <div className="text-xs font-medium">Stack Count<br/>12 Waiting</div>
           </button>
-        </div>
-
-        {/* Friends Section */}
-        <div className="mt-8 w-full max-w-md">
-          <h3 className="font-headline text-lg text-center mb-4">Your Friends Here now</h3>
-          <div className="h-16 bg-card/30 backdrop-blur rounded-2xl border-2 border-dashed border-foreground/20" />
         </div>
       </main>
 
