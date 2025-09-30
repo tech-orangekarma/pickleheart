@@ -7,6 +7,7 @@ import { MapPin, Users, Heart, ChevronLeft, Info, Sun } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import carlSchurzParkImage from "@/assets/carl-schurz-park.png";
+import centralParkImage from "@/assets/central-park.png";
 
 interface Park {
   id: string;
@@ -163,6 +164,12 @@ const Parks = () => {
             <img 
               src={carlSchurzParkImage} 
               alt="Carl Schurz Park pickleball courts" 
+              className="w-full h-full object-cover"
+            />
+          ) : selectedPark?.name === "Central Park" ? (
+            <img 
+              src={centralParkImage} 
+              alt="Central Park pickleball courts" 
               className="w-full h-full object-cover"
             />
           ) : (
