@@ -144,7 +144,7 @@ const Parks = () => {
       {/* Park Image */}
       <div className="max-w-md mx-auto px-4 pt-4">
         <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-green-400 rounded-lg overflow-hidden">
-          {selectedPark?.name === "Carl Schurz" ? (
+          {selectedPark?.name === "Carl Schurz Park" ? (
             <img 
               src={carlSchurzParkImage} 
               alt="Carl Schurz Park pickleball courts" 
