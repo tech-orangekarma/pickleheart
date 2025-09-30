@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Heart, MapPin, Bell, ChevronRight, Settings } from "lucide-react";
+import { Users, Heart, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -260,14 +260,6 @@ const Home = () => {
           >
             <Users className="w-5 h-5" />
             <span className="text-xs">Profile</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-col h-auto gap-1"
-          >
-            <Settings className="w-5 h-5" />
-            <span className="text-xs">Settings</span>
           </Button>
         </div>
       </nav>
