@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -78,46 +79,25 @@ export const StackReportDialog = ({
         )}
 
         <div className="py-6">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setStackCount(Math.max(0, stackCount - 1))}
-              disabled={stackCount === 0}
-            >
-              -
-            </Button>
-            <div className="text-6xl font-bold text-primary w-24 text-center">
+          <div className="text-center mb-6">
+            <div className="text-6xl font-bold text-primary mb-2">
               {stackCount}
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setStackCount(Math.min(15, stackCount + 1))}
-              disabled={stackCount === 15}
-            >
-              +
-            </Button>
+            <div className="text-sm text-muted-foreground">
+              {stackCount === 0 && "No wait"}
+              {stackCount === 1 && "1 person waiting"}
+              {stackCount > 1 && `${stackCount} people waiting`}
+            </div>
           </div>
 
-          <div className="text-center text-sm text-muted-foreground mb-6">
-            {stackCount === 0 && "No wait"}
-            {stackCount === 1 && "1 person waiting"}
-            {stackCount > 1 && `${stackCount} people waiting`}
-          </div>
-
-          <div className="grid grid-cols-4 gap-2">
-            {[0, 3, 5, 8, 10, 12, 15].map((num) => (
-              <Button
-                key={num}
-                variant={stackCount === num ? "default" : "outline"}
-                size="sm"
-                onClick={() => setStackCount(num)}
-              >
-                {num}
-              </Button>
-            ))}
-          </div>
+          <Slider
+            value={[stackCount]}
+            onValueChange={(value) => setStackCount(value[0])}
+            min={0}
+            max={15}
+            step={1}
+            className="w-full"
+          />
         </div>
 
         <div className="flex gap-3">
