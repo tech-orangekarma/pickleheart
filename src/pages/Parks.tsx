@@ -5,6 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { MapPin, Users, Heart, ChevronLeft, Info, Sun } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import carlSchurzParkImage from "@/assets/carl-schurz-park.png";
 
 interface Park {
@@ -21,6 +22,7 @@ const Parks = () => {
   const [selectedParkId, setSelectedParkId] = useState<string>("");
   const [playersCount, setPlayersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [courtsDialogOpen, setCourtsDialogOpen] = useState(false);
 
   useEffect(() => {
     // Check auth and get session
@@ -106,6 +108,19 @@ const Parks = () => {
 
   const selectedPark = parks.find(p => p.id === selectedParkId);
 
+  const getCourtDetails = () => {
+    switch (selectedPark?.name) {
+      case "Carl Schurz Park":
+        return "Three courts with permanent lines and permanent nets.";
+      case "Central Park":
+        return "3 courts with permanent lines and bring your own net.";
+      case "Riverside Park":
+        return "5 courts with permanent lines and permanent net, with one additional makeshift court with permanent lines and a portable net.";
+      default:
+        return "Court information not available.";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header with park selector */}
@@ -169,11 +184,14 @@ const Parks = () => {
         {/* Info Cards */}
         <div className="grid grid-cols-3 gap-3 mt-6">
           {/* Courts Card */}
-          <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
+          <button 
+            onClick={() => setCourtsDialogOpen(true)}
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center hover:bg-card/70 transition-colors"
+          >
             <div className="text-4xl mb-2">🎾</div>
             <div className="text-3xl font-bold mb-1">{selectedPark?.court_count || 0}</div>
             <div className="text-xs text-center font-medium">Courts<br/>Available</div>
-          </div>
+          </button>
 
           {/* Norms Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
@@ -229,6 +247,18 @@ const Parks = () => {
           </Button>
         </div>
       </nav>
+
+      {/* Courts Details Dialog */}
+      <Dialog open={courtsDialogOpen} onOpenChange={setCourtsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Courts Available at {selectedPark?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-foreground">{getCourtDetails()}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
