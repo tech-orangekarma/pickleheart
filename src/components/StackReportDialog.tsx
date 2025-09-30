@@ -84,9 +84,7 @@ export const StackReportDialog = ({
               {stackCount}
             </div>
             <div className="text-sm text-muted-foreground">
-              {stackCount === 0 && "No wait"}
-              {stackCount === 1 && "1 person waiting"}
-              {stackCount > 1 && `${stackCount} people waiting`}
+              stack count
             </div>
           </div>
 
