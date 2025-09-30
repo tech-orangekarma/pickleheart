@@ -132,6 +132,15 @@ const Home = () => {
     }
   };
 
+  const formatRating = (rating: number) => {
+    // Remove trailing zeros but keep at least one decimal place
+    const formatted = rating.toFixed(2);
+    if (formatted.endsWith('0') && !formatted.endsWith('.0')) {
+      return rating.toFixed(1);
+    }
+    return formatted;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -214,7 +223,7 @@ const Home = () => {
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
             <div className="text-3xl font-bold mb-1">{skillPlayersCount}</div>
-            <div className="text-xs font-medium">{skillRange[0].toFixed(1)}-{skillRange[1].toFixed(1)}<br/>Players at the Park</div>
+            <div className="text-xs font-medium">{formatRating(skillRange[0])}-{formatRating(skillRange[1])}<br/>Players at the Park</div>
           </button>
           
           <button
