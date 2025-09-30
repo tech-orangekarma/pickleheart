@@ -355,6 +355,15 @@ const Friends = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/")}
           >
+            <Heart className="w-5 h-5" />
+            <span className="text-xs">home</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/parks")}
+          >
             <MapPin className="w-5 h-5" />
             <span className="text-xs">parks</span>
           </Button>

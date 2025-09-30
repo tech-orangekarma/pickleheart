@@ -1,123 +1,81 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Heart } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { MapPin, Users, Heart, TrendingUp, Clock } from "lucide-react";
 
-interface Park {
-  id: string;
-  name: string;
-  address: string;
-  court_count: number;
+interface Profile {
+  display_name: string | null;
+  dupr_rating: number | null;
+  avatar_url: string | null;
 }
 
-interface ParkStats {
-  park_id: string;
-  player_count: number;
-  status: "bad" | "good" | "great";
+interface RecentActivity {
+  park_name: string;
+  visited_at: string;
 }
 
 const Home = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [parks, setParks] = useState<Park[]>([]);
-  const [parkStats, setParkStats] = useState<Record<string, ParkStats>>({});
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [friendsCount, setFriendsCount] = useState(0);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check auth and get session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    loadHomeData();
+  }, []);
+
+  const loadHomeData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
-      setUser(session.user);
-      checkWelcomeProgress(session.user.id);
-    });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
+      // Load profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("display_name, dupr_rating, avatar_url")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profileData) setProfile(profileData);
+
+      // Count friends
+      const { data: friendsData } = await supabase
+        .from("friendships")
+        .select("id")
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${session.user.id},addressee_id.eq.${session.user.id}`);
+
+      setFriendsCount(friendsData?.length || 0);
+
+      // Get recent visits
+      const { data: visitsData } = await supabase
+        .from("visits")
+        .select(`
+          visited_at,
+          parks(name)
+        `)
+        .eq("user_id", session.user.id)
+        .order("visited_at", { ascending: false })
+        .limit(3);
+
+      if (visitsData) {
+        setRecentActivity(
+          visitsData.map((v: any) => ({
+            park_name: v.parks.name,
+            visited_at: v.visited_at,
+          }))
+        );
       }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const checkWelcomeProgress = async (userId: string) => {
-    const { data: progress } = await supabase
-      .from("welcome_progress")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (!progress || !progress.completed_ready) {
-      navigate("/welcome/privacy");
-      return;
-    }
-
-    loadParksData();
-  };
-
-  const loadParksData = async () => {
-    const { data: parksData, error } = await supabase
-      .from("parks")
-      .select("*")
-      .order("name");
-
-    if (error) {
-      console.error("Error loading parks:", error);
-      return;
-    }
-
-    setParks(parksData || []);
-
-    // Calculate stats for each park
-    const stats: Record<string, ParkStats> = {};
-    for (const park of parksData || []) {
-      const { count } = await supabase
-        .from("presence")
-        .select("*", { count: "exact", head: true })
-        .eq("park_id", park.id)
-        .is("checked_out_at", null);
-
-      const playerCount = count || 0;
-      let status: "bad" | "good" | "great" = "bad";
-      if (playerCount >= 8) status = "great";
-      else if (playerCount >= 4) status = "good";
-
-      stats[park.id] = { park_id: park.id, player_count: playerCount, status };
-    }
-
-    setParkStats(stats);
-    setLoading(false);
-  };
-
-  const getStatusColor = (status: "bad" | "good" | "great") => {
-    switch (status) {
-      case "bad":
-        return "bg-status-bad";
-      case "good":
-        return "bg-status-good";
-      case "great":
-        return "bg-status-great";
-    }
-  };
-
-  const getStatusLabel = (status: "bad" | "good" | "great") => {
-    switch (status) {
-      case "bad":
-        return "quiet";
-      case "good":
-        return "good vibes";
-      case "great":
-        return "it's on!";
+    } catch (error) {
+      console.error("Error loading home data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,74 +90,110 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border p-4">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-headline flex items-center gap-2">
-            <Heart className="w-6 h-6 text-primary" />
-            pickleheart
+        <div className="max-w-md mx-auto">
+          <h1 className="text-2xl font-headline">
+            welcome back{profile?.display_name ? `, ${profile.display_name}` : ""}
           </h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => supabase.auth.signOut()}
-          >
-            sign out
-          </Button>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto p-4 space-y-6 pb-24">
-        <div className="text-center py-6">
-          <h2 className="text-xl font-headline mb-2">where should you play?</h2>
-          <p className="text-muted-foreground text-sm">
-            tap a park to see who's there
-          </p>
+      <main className="max-w-md mx-auto p-4 pb-24 space-y-4">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {profile?.dupr_rating?.toFixed(2) || "—"}
+                </p>
+                <p className="text-xs text-muted-foreground">DUPR Rating</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{friendsCount}</p>
+                <p className="text-xs text-muted-foreground">Friends</p>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        <div className="space-y-4">
-          {parks.map((park) => {
-            const stats = parkStats[park.id];
-            if (!stats) return null;
+        {/* Quick Actions */}
+        <Card className="p-4">
+          <h2 className="font-semibold mb-3">quick actions</h2>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/parks")}
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              find nearby parks
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/friends")}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              see who's playing
+            </Button>
+          </div>
+        </Card>
 
-            return (
-              <Card
-                key={park.id}
-                className="p-6 cursor-pointer hover:shadow-lg transition-all"
-                onClick={() => navigate(`/park/${park.id}`)}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-24 h-24 rounded-full ${getStatusColor(
-                      stats.status
-                    )} flex flex-col items-center justify-center shadow-lg`}
-                  >
-                    <Users className="w-8 h-8 mb-1" />
-                    <span className="text-2xl font-bold">
-                      {stats.player_count}
-                    </span>
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-xl font-headline mb-1">{park.name}</h3>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                      <MapPin className="w-4 h-4" />
-                      <span className="line-clamp-1">{park.address}</span>
-                    </div>
-                    <div className="inline-block px-3 py-1 rounded-full bg-muted text-sm font-medium">
-                      {getStatusLabel(stats.status)}
-                    </div>
-                  </div>
+        {/* Recent Activity */}
+        {recentActivity.length > 0 && (
+          <Card className="p-4">
+            <h2 className="font-semibold mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              recent activity
+            </h2>
+            <div className="space-y-2">
+              {recentActivity.map((activity, idx) => (
+                <div
+                  key={idx}
+                  className="text-sm flex items-center justify-between py-2 border-b last:border-0"
+                >
+                  <span className="text-muted-foreground">
+                    {activity.park_name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(activity.visited_at).toLocaleDateString()}
+                  </span>
                 </div>
-              </Card>
-            );
-          })}
-        </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
         <div className="max-w-md mx-auto flex justify-around items-center h-16">
-          <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
-            <MapPin className="w-5 h-5 text-primary" />
-            <span className="text-xs text-primary">parks</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+          >
+            <Heart className="w-5 h-5 text-primary" />
+            <span className="text-xs text-primary">home</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/parks")}
+          >
+            <MapPin className="w-5 h-5" />
+            <span className="text-xs">parks</span>
           </Button>
           <Button
             variant="ghost"

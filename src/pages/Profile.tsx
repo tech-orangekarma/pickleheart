@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Heart, Users } from "lucide-react";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 
@@ -176,6 +176,46 @@ const Profile = () => {
           Sign Out
         </Button>
       </div>
+
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+        <div className="max-w-md mx-auto flex justify-around items-center h-16">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/")}
+          >
+            <Heart className="w-5 h-5" />
+            <span className="text-xs">home</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/parks")}
+          >
+            <MapPin className="w-5 h-5" />
+            <span className="text-xs">parks</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+            onClick={() => navigate("/friends")}
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-xs">friends</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
+          >
+            <Heart className="w-5 h-5 text-primary" />
+            <span className="text-xs text-primary">me</span>
+          </Button>
+        </div>
+      </nav>
     </div>
   );
 };
