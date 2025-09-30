@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        headline: ['Comfortaa', 'sans-serif'],
+        body: ['Nunito', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +60,21 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        brand: {
+          blush: "hsl(var(--blush-pink))",
+          coral: "hsl(var(--coral-pink))",
+          butter: "hsl(var(--light-butter))",
+          sage: "hsl(var(--sage-green))",
+          powder: "hsl(var(--powder-blue))",
+          deep: "hsl(var(--deep-blue))",
+          cream: "hsl(var(--warm-cream))",
+          slate: "hsl(var(--slate-gray))",
+        },
+        status: {
+          bad: "hsl(var(--status-bad))",
+          good: "hsl(var(--status-good))",
+          great: "hsl(var(--status-great))",
         },
       },
       borderRadius: {
