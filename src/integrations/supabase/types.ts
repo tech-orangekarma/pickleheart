@@ -275,11 +275,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          birthday: string | null
           created_at: string
           display_name: string | null
           dupr_linked_at: string | null
           dupr_rating: number | null
           dupr_source: Database["public"]["Enums"]["dupr_source"] | null
+          gender: string | null
           home_park_id: string | null
           id: string
           phone: string | null
@@ -287,11 +289,13 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           display_name?: string | null
           dupr_linked_at?: string | null
           dupr_rating?: number | null
           dupr_source?: Database["public"]["Enums"]["dupr_source"] | null
+          gender?: string | null
           home_park_id?: string | null
           id: string
           phone?: string | null
@@ -299,11 +303,13 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           display_name?: string | null
           dupr_linked_at?: string | null
           dupr_rating?: number | null
           dupr_source?: Database["public"]["Enums"]["dupr_source"] | null
+          gender?: string | null
           home_park_id?: string | null
           id?: string
           phone?: string | null

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -9,9 +11,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -21,6 +37,8 @@ interface EditProfileDialogProps {
     display_name: string | null;
     dupr_rating: number | null;
     avatar_url: string | null;
+    gender: string | null;
+    birthday: string | null;
   };
   onProfileUpdated: () => void;
 }
@@ -34,6 +52,10 @@ export const EditProfileDialog = ({
   const [displayName, setDisplayName] = useState(profile.display_name || "");
   const [duprRating, setDuprRating] = useState(
     profile.dupr_rating?.toString() || ""
+  );
+  const [gender, setGender] = useState<string>(profile.gender || "");
+  const [birthday, setBirthday] = useState<Date | undefined>(
+    profile.birthday ? new Date(profile.birthday) : undefined
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
@@ -92,6 +114,8 @@ export const EditProfileDialog = ({
           display_name: displayName || null,
           dupr_rating: duprRating ? parseFloat(duprRating) : null,
           avatar_url: avatarUrl,
+          gender: gender || null,
+          birthday: birthday ? format(birthday, "yyyy-MM-dd") : null,
         })
         .eq("id", profile.id);
 
@@ -172,6 +196,50 @@ export const EditProfileDialog = ({
               onChange={(e) => setDuprRating(e.target.value)}
               placeholder="e.g., 4.5"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender</Label>
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Birthday</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !birthday && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {birthday ? format(birthday, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={birthday}
+                  onSelect={setBirthday}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 

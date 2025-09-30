@@ -15,6 +15,8 @@ interface Profile {
   dupr_rating: number | null;
   home_park_id: string | null;
   avatar_url: string | null;
+  gender: string | null;
+  birthday: string | null;
 }
 
 const Profile = () => {
@@ -156,6 +158,24 @@ const Profile = () => {
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Phone</p>
                 <p className="text-lg">{profile.phone}</p>
+              </div>
+            )}
+
+            {profile?.gender && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Gender</p>
+                <p className="text-lg">
+                  {profile.gender === 'prefer_not_to_say' 
+                    ? 'Prefer not to say' 
+                    : profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+                </p>
+              </div>
+            )}
+
+            {profile?.birthday && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Birthday</p>
+                <p className="text-lg">{new Date(profile.birthday).toLocaleDateString()}</p>
               </div>
             )}
 
