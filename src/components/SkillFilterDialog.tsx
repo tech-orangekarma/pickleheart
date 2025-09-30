@@ -53,32 +53,15 @@ export const SkillFilterDialog = ({
             <p className="text-sm text-muted-foreground">DUPR Rating Range</p>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Minimum Rating: {range[0].toFixed(2)}
-              </label>
-              <Slider
-                value={[range[0]]}
-                onValueChange={(vals) => setRange([vals[0], range[1]])}
-                min={2.0}
-                max={range[1]}
-                step={0.25}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Maximum Rating: {range[1].toFixed(2)}
-              </label>
-              <Slider
-                value={[range[1]]}
-                onValueChange={(vals) => setRange([range[0], vals[0]])}
-                min={range[0]}
-                max={8.0}
-                step={0.25}
-              />
-            </div>
+          <div className="space-y-4 px-2">
+            <Slider
+              value={[range[0], range[1]]}
+              onValueChange={(vals) => setRange([vals[0], vals[1]])}
+              min={2.0}
+              max={8.0}
+              step={0.25}
+              minStepsBetweenThumbs={1}
+            />
           </div>
 
           <div className="flex justify-between text-xs text-muted-foreground">
