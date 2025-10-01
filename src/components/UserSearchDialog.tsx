@@ -64,11 +64,9 @@ export function UserSearchDialog({ open, onOpenChange, currentUserId }: UserSear
         ) || []
       );
 
-      // Get all profiles except current user and existing friends
+      // Get all profiles except current user and existing friends using security definer function
       const { data, error } = await supabase
-        .from("public_profiles")
-        .select("id, display_name, age, gender, avatar_url")
-        .neq("id", currentUserId);
+        .rpc("get_public_profiles_for_search", { current_user_id: currentUserId });
 
       if (error) throw error;
 

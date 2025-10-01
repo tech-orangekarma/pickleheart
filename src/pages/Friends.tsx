@@ -123,13 +123,7 @@ const Friends = () => {
       // Load accepted friendships
       const { data: acceptedData, error: acceptedError } = await supabase
         .from("friendships")
-        .select(`
-          id,
-          requester_id,
-          addressee_id,
-          requester:public_profiles!friendships_requester_id_fkey(id, display_name, dupr_rating, avatar_url, age, gender),
-          addressee:public_profiles!friendships_addressee_id_fkey(id, display_name, dupr_rating, avatar_url, age, gender)
-        `)
+        .select("id, requester_id, addressee_id")
         .eq("status", "accepted")
         .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`);
 
@@ -166,9 +160,10 @@ const Friends = () => {
               ? friendship.addressee_id
               : friendship.requester_id;
           
-          const profile = friendship.requester_id === uid
-            ? friendship.addressee
-            : friendship.requester;
+          // Get friend profile using security definer function
+          const { data: profileData } = await supabase
+            .rpc("get_public_profile", { profile_id: friendId })
+            .single();
 
           const { data: presenceData } = await supabase
             .from("presence")
@@ -183,7 +178,14 @@ const Friends = () => {
 
           return {
             friendId,
-            profile,
+            profile: profileData || {
+              id: friendId,
+              display_name: null,
+              dupr_rating: null,
+              avatar_url: null,
+              age: null,
+              gender: null,
+            },
             presence: presenceData,
           } as FriendWithPresence;
         })
