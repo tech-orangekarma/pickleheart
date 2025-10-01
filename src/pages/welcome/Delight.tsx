@@ -56,7 +56,7 @@ const Delight = () => {
           love it
         </Button>
 
-        <p className="mt-6 text-xs text-muted-foreground">step 2 of 6</p>
+        <p className="mt-6 text-xs text-muted-foreground">step 1 of 7</p>
       </div>
     </div>
   );

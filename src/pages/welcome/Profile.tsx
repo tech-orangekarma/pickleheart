@@ -12,7 +12,6 @@ const Profile = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
-  const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [birthday, setBirthday] = useState("");
 
@@ -38,7 +37,6 @@ const Profile = () => {
         .upsert({
           id: userId,
           display_name: displayName.trim(),
-          phone: phone.trim() || null,
           gender: gender || null,
           birthday: birthday || null,
         });
@@ -116,23 +114,6 @@ const Profile = () => {
               />
             </div>
           </div>
-
-          <div>
-            <Label htmlFor="phone" className="text-base">
-              phone number (optional)
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="e.g., (555) 123-4567"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="mt-2"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              We'll only use this for important app updates
-            </p>
-          </div>
         </div>
 
         <Button 
@@ -145,7 +126,7 @@ const Profile = () => {
         </Button>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          step 4 of 6
+          step 3 of 7
         </p>
       </div>
     </div>

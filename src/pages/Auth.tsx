@@ -30,7 +30,7 @@ const Auth = () => {
         const isNewSignUp = localStorage.getItem("new_signup");
         if (isNewSignUp) {
           localStorage.removeItem("new_signup");
-          navigate("/welcome/privacy");
+          navigate("/welcome/delight");
           return;
         }
 

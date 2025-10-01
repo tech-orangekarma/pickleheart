@@ -137,7 +137,7 @@ const Level = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          step 5 of 6
+          step 4 of 7
         </p>
       </div>
     </div>

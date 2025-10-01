@@ -20,36 +20,14 @@ const Privacy = () => {
         return;
       }
       setUserId(session.user.id);
-      loadProgress(session.user.id);
     });
   }, [navigate]);
-
-  const loadProgress = async (uid: string) => {
-    const { data } = await supabase
-      .from("welcome_progress")
-      .select("*")
-      .eq("user_id", uid)
-      .maybeSingle();
-
-    if (data && data.completed_privacy) {
-      navigate("/welcome/delight");
-    }
-  };
 
   const handleContinue = async () => {
     if (!userId) return;
 
     try {
-      // CRITICAL: Create profile first (required for foreign key)
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: userId,
-        });
-
-      if (profileError) throw profileError;
-
-      // Now create privacy settings
+      // Create privacy settings
       const { error: privacyError } = await supabase
         .from("privacy_settings")
         .upsert({
@@ -63,18 +41,18 @@ const Privacy = () => {
 
       if (privacyError) throw privacyError;
 
-      // Create or update welcome progress
+      // Update welcome progress
       const { error: progressError } = await supabase
         .from("welcome_progress")
         .upsert({
           user_id: userId,
           completed_privacy: true,
-          current_step: "delight",
+          current_step: "ready",
         });
 
       if (progressError) throw progressError;
 
-      navigate("/welcome/delight");
+      navigate("/welcome/ready");
     } catch (error) {
       console.error("Error saving privacy:", error);
       toast.error("Failed to save settings");
@@ -158,7 +136,7 @@ const Privacy = () => {
 
         <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            step 1 of 6 • you can change this anytime
+            step 6 of 7 • you can change this anytime
           </p>
         </div>
       </div>
