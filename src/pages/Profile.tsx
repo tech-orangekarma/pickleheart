@@ -44,6 +44,20 @@ const Profile = () => {
         return;
       }
 
+      // Check if user has completed welcome flow
+      const { data: welcomeProgress } = await supabase
+        .from("welcome_progress")
+        .select("completed_ready, current_step")
+        .eq("user_id", user.id)
+        .single();
+
+      // If welcome flow not completed, redirect to appropriate step
+      if (!welcomeProgress?.completed_ready) {
+        const step = welcomeProgress?.current_step || "delight";
+        navigate(`/welcome/${step}`);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")

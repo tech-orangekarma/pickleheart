@@ -36,20 +36,9 @@ const Auth = () => {
           return;
         }
 
-        // For existing users signing in, go directly to home
+        // For existing users signing in, check welcome completion status
+        // The Home page will handle redirecting to welcome flow if needed
         navigate("/");
-      }
-    });
-
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // Trigger the same logic as auth state change
-        const isNewSignUp = localStorage.getItem("new_signup");
-        if (isNewSignUp) {
-          localStorage.removeItem("new_signup");
-          navigate("/welcome/delight");
-        }
       }
     });
 

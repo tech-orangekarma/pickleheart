@@ -51,8 +51,22 @@ const ParkDetail = () => {
     }
 
     // Get current user
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
+        // Check if user has completed welcome flow
+        const { data: welcomeProgress } = await supabase
+          .from("welcome_progress")
+          .select("completed_ready, current_step")
+          .eq("user_id", session.user.id)
+          .single();
+
+        // If welcome flow not completed, redirect to appropriate step
+        if (!welcomeProgress?.completed_ready) {
+          const step = welcomeProgress?.current_step || "delight";
+          navigate(`/welcome/${step}`);
+          return;
+        }
+
         setUserId(session.user.id);
       }
     });
