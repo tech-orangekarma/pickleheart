@@ -37,7 +37,7 @@ const Privacy = () => {
           share_arrival_time: selectedMode === "standard",
           share_name: false,
           do_not_share_at_all: false,
-        });
+        }, { onConflict: 'user_id' });
 
       if (privacyError) throw privacyError;
 
@@ -48,7 +48,7 @@ const Privacy = () => {
           user_id: userId,
           completed_privacy: true,
           current_step: "ready",
-        });
+        }, { onConflict: 'user_id' });
 
       if (progressError) throw progressError;
 
