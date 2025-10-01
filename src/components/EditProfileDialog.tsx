@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,7 @@ interface EditProfileDialogProps {
     avatar_url: string | null;
     gender: string | null;
     birthday: string | null;
+    home_park_id: string | null;
   };
   onProfileUpdated: () => void;
 }
@@ -57,11 +58,25 @@ export const EditProfileDialog = ({
   const [birthday, setBirthday] = useState<Date | undefined>(
     profile.birthday ? new Date(profile.birthday) : undefined
   );
+  const [homeParkId, setHomeParkId] = useState<string>(profile.home_park_id || "");
+  const [parks, setParks] = useState<{ id: string; name: string }[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     profile.avatar_url
   );
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadParks();
+  }, []);
+
+  const loadParks = async () => {
+    const { data } = await supabase
+      .from("parks")
+      .select("id, name")
+      .order("name");
+    if (data) setParks(data);
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -116,6 +131,7 @@ export const EditProfileDialog = ({
           avatar_url: avatarUrl,
           gender: gender || null,
           birthday: birthday ? format(birthday, "yyyy-MM-dd") : null,
+          home_park_id: homeParkId || null,
         })
         .eq("id", profile.id);
 
@@ -240,6 +256,22 @@ export const EditProfileDialog = ({
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="home-park">Home Park</Label>
+            <Select value={homeParkId} onValueChange={setHomeParkId}>
+              <SelectTrigger id="home-park">
+                <SelectValue placeholder="Select your home park" />
+              </SelectTrigger>
+              <SelectContent>
+                {parks.map((park) => (
+                  <SelectItem key={park.id} value={park.id}>
+                    {park.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

@@ -49,17 +49,35 @@ const Friends = () => {
   }, [navigate]);
 
   const loadData = async (uid: string) => {
-    await Promise.all([loadParks(), loadFriends(uid)]);
+    await Promise.all([loadParks(uid), loadFriends(uid)]);
   };
 
-  const loadParks = async () => {
+  const loadParks = async (uid: string) => {
     try {
+      // Get user's home park
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("home_park_id")
+        .eq("id", uid)
+        .single();
+
       const { data, error } = await supabase
         .from("parks")
         .select("id, name")
         .order("name");
 
       if (error) throw error;
+      
+      // Sort parks to put home park first
+      if (data && profileData?.home_park_id) {
+        const homeParkIndex = data.findIndex(p => p.id === profileData.home_park_id);
+        if (homeParkIndex > 0) {
+          const homePark = data[homeParkIndex];
+          data.splice(homeParkIndex, 1);
+          data.unshift(homePark);
+        }
+      }
+      
       setParks(data || []);
     } catch (error) {
       console.error("Error loading parks:", error);

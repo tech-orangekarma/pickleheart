@@ -19,9 +19,15 @@ interface Profile {
   birthday: string | null;
 }
 
+interface Park {
+  id: string;
+  name: string;
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [homePark, setHomePark] = useState<Park | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -45,6 +51,16 @@ const Profile = () => {
 
       if (error) throw error;
       setProfile(data);
+
+      // Load home park if set
+      if (data?.home_park_id) {
+        const { data: parkData } = await supabase
+          .from("parks")
+          .select("id, name")
+          .eq("id", data.home_park_id)
+          .maybeSingle();
+        if (parkData) setHomePark(parkData);
+      }
     } catch (error) {
       console.error("Error loading profile:", error);
       toast.error("Failed to load profile");
@@ -179,10 +195,13 @@ const Profile = () => {
               </div>
             )}
 
-            {profile?.home_park_id && (
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Home park set</p>
+            {homePark && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Home Park</p>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <p className="text-lg">{homePark.name}</p>
+                </div>
               </div>
             )}
           </CardContent>
