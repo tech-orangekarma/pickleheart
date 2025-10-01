@@ -34,6 +34,8 @@ const Home = () => {
   const [showPlayersDialog, setShowPlayersDialog] = useState(false);
   const [playersAtPark, setPlayersAtPark] = useState<PlayerAtPark[]>([]);
   const [displayName, setDisplayName] = useState<string>("Friend");
+  const [friendRequestsCount, setFriendRequestsCount] = useState(0);
+  const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -83,6 +85,15 @@ const Home = () => {
         setParks(sortedParks);
         setSelectedParkId(sortedParks[0].id);
       }
+
+      // Load pending friend requests count
+      const { data: friendRequests } = await supabase
+        .from("friendships")
+        .select("id")
+        .eq("addressee_id", session.user.id)
+        .eq("status", "pending");
+      
+      setFriendRequestsCount(friendRequests?.length || 0);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -169,11 +180,16 @@ const Home = () => {
           <h1 className="font-headline text-2xl">pickleheart</h1>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">Hey {displayName}!</span>
-            <button className="relative">
+            <button 
+              className="relative"
+              onClick={() => setShowNotificationsDialog(true)}
+            >
               <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                3
-              </span>
+              {friendRequestsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                  {friendRequestsCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -322,6 +338,32 @@ const Home = () => {
               )}
             </div>
             <Button className="w-full mt-4" onClick={() => setShowPlayersDialog(false)}>Close</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications Dialog */}
+      {showNotificationsDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowNotificationsDialog(false)}>
+          <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-4">Notifications</h2>
+            <div className="space-y-2">
+              {friendRequestsCount === 0 ? (
+                <p className="text-muted-foreground text-center py-4">No new notifications</p>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowNotificationsDialog(false);
+                    navigate("/friends");
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-background rounded-lg hover:bg-accent transition-colors"
+                >
+                  <span className="font-medium">{friendRequestsCount} Friend Request{friendRequestsCount !== 1 ? 's' : ''}</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <Button className="w-full mt-4" onClick={() => setShowNotificationsDialog(false)}>Close</Button>
           </div>
         </div>
       )}
