@@ -79,6 +79,18 @@ const Profile = () => {
       .slice(0, 2);
   };
 
+  const calculateAge = (birthday: string | null) => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -190,8 +202,8 @@ const Profile = () => {
 
             {profile?.birthday && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Birthday</p>
-                <p className="text-lg">{new Date(profile.birthday).toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground mb-1">Age</p>
+                <p className="text-lg">{calculateAge(profile.birthday)} years</p>
               </div>
             )}
 
