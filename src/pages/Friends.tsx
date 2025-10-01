@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
+import { FriendOptionsDialog } from "@/components/FriendOptionsDialog";
+import { UserSearchDialog } from "@/components/UserSearchDialog";
 
 interface Park {
   id: string;
@@ -37,7 +39,9 @@ const Friends = () => {
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkIndex, setSelectedParkIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -318,7 +322,7 @@ const Friends = () => {
         {/* Add Friends Button */}
         <div className="pt-4">
           <Button
-            onClick={() => setInviteDialogOpen(true)}
+            onClick={() => setOptionsDialogOpen(true)}
             className="w-full py-6 text-lg font-semibold"
             size="lg"
           >
@@ -327,6 +331,19 @@ const Friends = () => {
           </Button>
         </div>
       </main>
+
+      <FriendOptionsDialog
+        open={optionsDialogOpen}
+        onOpenChange={setOptionsDialogOpen}
+        onSearchUsers={() => setSearchDialogOpen(true)}
+        onQRInvite={() => setInviteDialogOpen(true)}
+      />
+
+      <UserSearchDialog
+        open={searchDialogOpen}
+        onOpenChange={setSearchDialogOpen}
+        currentUserId={userId || ""}
+      />
 
       <InviteFriendsDialog 
         open={inviteDialogOpen} 
