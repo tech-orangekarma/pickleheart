@@ -7,8 +7,9 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDuprRating(rating: number): string {
   const formatted = rating.toFixed(2);
-  // Remove trailing zero if second decimal is 0
-  return formatted.endsWith('0') && !formatted.endsWith('00') 
-    ? rating.toFixed(1) 
-    : formatted;
+  // Remove trailing zero if not the only decimal digit (e.g., 3.50 → 3.5, but 3.00 → 3.0)
+  if (formatted.endsWith('0') && !formatted.endsWith('.0')) {
+    return formatted.slice(0, -1);
+  }
+  return formatted;
 }
