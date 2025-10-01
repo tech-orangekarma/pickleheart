@@ -1104,6 +1104,30 @@ export type Database = {
         Args: { "": number }
         Returns: string
       }
+      get_public_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          display_name: string
+          dupr_rating: number
+          gender: string
+          home_park_id: string
+          id: string
+        }[]
+      }
+      get_public_profiles_for_search: {
+        Args: { current_user_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          display_name: string
+          dupr_rating: number
+          gender: string
+          home_park_id: string
+          id: string
+        }[]
+      }
       gettransactionid: {
         Args: Record<PropertyKey, never>
         Returns: unknown
