@@ -66,6 +66,19 @@ const Parks = () => {
   };
 
   const loadParksData = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Get user's home park
+    let homeParkId = null;
+    if (session?.user) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("home_park_id")
+        .eq("id", session.user.id)
+        .maybeSingle();
+      homeParkId = profileData?.home_park_id;
+    }
+
     const { data: parksData, error } = await supabase
       .from("parks")
       .select("*")
@@ -77,8 +90,17 @@ const Parks = () => {
     }
 
     if (parksData && parksData.length > 0) {
-      setParks(parksData);
-      setSelectedParkId(parksData[0].id);
+      // Sort parks with home park first
+      const sortedParks = [...parksData];
+      if (homeParkId) {
+        const homeParkIndex = sortedParks.findIndex(p => p.id === homeParkId);
+        if (homeParkIndex > 0) {
+          const [homePark] = sortedParks.splice(homeParkIndex, 1);
+          sortedParks.unshift(homePark);
+        }
+      }
+      setParks(sortedParks);
+      setSelectedParkId(sortedParks[0].id);
     }
     setLoading(false);
   };

@@ -52,10 +52,10 @@ const Home = () => {
         return;
       }
 
-      // Load user profile
+      // Load user profile with home park
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("display_name")
+        .select("display_name, home_park_id")
         .eq("id", session.user.id)
         .single();
 
@@ -70,8 +70,17 @@ const Home = () => {
         .order("name");
 
       if (parksData && parksData.length > 0) {
-        setParks(parksData);
-        setSelectedParkId(parksData[0].id);
+        // Sort parks with home park first
+        const sortedParks = [...parksData];
+        if (profileData?.home_park_id) {
+          const homeParkIndex = sortedParks.findIndex(p => p.id === profileData.home_park_id);
+          if (homeParkIndex > 0) {
+            const [homePark] = sortedParks.splice(homeParkIndex, 1);
+            sortedParks.unshift(homePark);
+          }
+        }
+        setParks(sortedParks);
+        setSelectedParkId(sortedParks[0].id);
       }
     } catch (error) {
       console.error("Error loading data:", error);
