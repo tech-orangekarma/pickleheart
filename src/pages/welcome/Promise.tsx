@@ -48,7 +48,7 @@ const Promise = () => {
           <div>
             <h3 className="font-headline text-lg mb-2">🔒 privacy first</h3>
             <p className="text-muted-foreground text-sm">
-              Your data is yours. We'll never sell or share it.
+              Your data is yours. We'll never share it with other users without your permission.
             </p>
           </div>
           
