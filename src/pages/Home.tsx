@@ -72,12 +72,24 @@ const Home = () => {
       // Load user profile with home park
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("display_name, home_park_id")
+        .select("display_name, home_park_id, dupr_rating")
         .eq("id", session.user.id)
         .single();
 
       if (profileData?.display_name) {
         setDisplayName(profileData.display_name);
+      }
+
+      // Set skill range based on user's rating
+      if (profileData?.dupr_rating) {
+        const rating = profileData.dupr_rating;
+        if (rating > 4.75) {
+          setSkillRange([4.5, 5.0]);
+        } else {
+          const lower = Math.max(0, rating - 0.25);
+          const upper = Math.min(5.0, rating + 0.25);
+          setSkillRange([lower, upper]);
+        }
       }
 
       // Load parks
