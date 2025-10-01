@@ -20,6 +20,8 @@ interface FriendProfile {
   display_name: string | null;
   dupr_rating: number | null;
   avatar_url: string | null;
+  birthday: string | null;
+  gender: string | null;
 }
 
 interface FriendWithPresence {
@@ -109,8 +111,8 @@ const Friends = () => {
           id,
           requester_id,
           addressee_id,
-          requester:profiles!friendships_requester_id_fkey(id, display_name, dupr_rating, avatar_url),
-          addressee:profiles!friendships_addressee_id_fkey(id, display_name, dupr_rating, avatar_url)
+          requester:profiles!friendships_requester_id_fkey(id, display_name, dupr_rating, avatar_url, birthday, gender),
+          addressee:profiles!friendships_addressee_id_fkey(id, display_name, dupr_rating, avatar_url, birthday, gender)
         `)
         .eq("status", "accepted")
         .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`);
@@ -219,6 +221,18 @@ const Friends = () => {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const calculateAge = (birthday: string | null) => {
+    if (!birthday) return null;
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const getFriendStatus = (friend: FriendWithPresence) => {
@@ -402,6 +416,17 @@ const Friends = () => {
                           {status.label}
                         </span>
                       </div>
+
+                      {/* Age and Gender */}
+                      {(friend.profile.birthday || friend.profile.gender) && (
+                        <div className="text-sm text-muted-foreground mb-1">
+                          {calculateAge(friend.profile.birthday) && (
+                            <span>{calculateAge(friend.profile.birthday)} years old</span>
+                          )}
+                          {friend.profile.birthday && friend.profile.gender && <span> • </span>}
+                          {friend.profile.gender && <span>{friend.profile.gender}</span>}
+                        </div>
+                      )}
 
                       {friend.profile.dupr_rating && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
