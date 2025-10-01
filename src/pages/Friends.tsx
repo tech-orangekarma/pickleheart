@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
+import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 
 interface Park {
   id: string;
@@ -36,6 +37,7 @@ const Friends = () => {
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkIndex, setSelectedParkIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -316,7 +318,7 @@ const Friends = () => {
         {/* Add Friends Button */}
         <div className="pt-4">
           <Button
-            onClick={() => toast.info("Add friends feature coming soon!")}
+            onClick={() => setInviteDialogOpen(true)}
             className="w-full py-6 text-lg font-semibold"
             size="lg"
           >
@@ -325,6 +327,11 @@ const Friends = () => {
           </Button>
         </div>
       </main>
+
+      <InviteFriendsDialog 
+        open={inviteDialogOpen} 
+        onOpenChange={setInviteDialogOpen}
+      />
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
