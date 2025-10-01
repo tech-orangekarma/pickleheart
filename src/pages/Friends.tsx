@@ -130,26 +130,30 @@ const Friends = () => {
       if (acceptedError) throw acceptedError;
 
       // Load pending requests where current user is the addressee
-      const { data: pendingData, error: pendingError } = await supabase
+      const { data: pendingData, error: pendingError} = await supabase
         .from("friendships")
-        .select(`
-          id,
-          requester_id,
-          created_at,
-          requester:profiles!friendships_requester_id_fkey(display_name, dupr_rating, avatar_url)
-        `)
+        .select("id, requester_id, created_at")
         .eq("status", "pending")
         .eq("addressee_id", uid);
 
       if (!pendingError && pendingData) {
-        const requests: PendingRequest[] = pendingData.map((req: any) => ({
-          id: req.id,
-          requester_id: req.requester_id,
-          display_name: req.requester?.display_name || "Unknown User",
-          dupr_rating: req.requester?.dupr_rating || null,
-          avatar_url: req.requester?.avatar_url || null,
-          created_at: req.created_at,
-        }));
+        // Load profiles for pending requests using secure function
+        const requests: PendingRequest[] = await Promise.all(
+          pendingData.map(async (req) => {
+            const { data: profileData } = await supabase
+              .rpc("get_public_profile", { profile_id: req.requester_id })
+              .single();
+            
+            return {
+              id: req.id,
+              requester_id: req.requester_id,
+              display_name: profileData?.display_name || "Unknown User",
+              dupr_rating: profileData?.dupr_rating || null,
+              avatar_url: profileData?.avatar_url || null,
+              created_at: req.created_at,
+            };
+          })
+        );
         setPendingRequests(requests);
       }
 
