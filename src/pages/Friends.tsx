@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, MapPin, Search } from "lucide-react";
+import { Users, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Park {
@@ -147,14 +147,6 @@ const Friends = () => {
     (f) => f.presence && selectedPark && f.presence.park_id === selectedPark.id
   );
 
-  const navigatePark = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setSelectedParkIndex((prev) => (prev === 0 ? parks.length - 1 : prev - 1));
-    } else {
-      setSelectedParkIndex((prev) => (prev === parks.length - 1 ? 0 : prev + 1));
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -167,40 +159,28 @@ const Friends = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ChevronLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-headline">Friends at</h1>
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <Search className="w-6 h-6" />
-          </Button>
+        <div className="max-w-md mx-auto flex items-center justify-center">
+          <h1 className="text-xl font-headline">Friends</h1>
         </div>
       </header>
 
-      {/* Park Selector */}
+      {/* Park Tabs */}
       {parks.length > 0 && (
         <div className="bg-card border-b border-border py-4">
-          <div className="max-w-md mx-auto flex items-center justify-center gap-4 px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigatePark("prev")}
-              disabled={parks.length <= 1}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <h2 className="text-lg font-semibold min-w-[200px] text-center">
-              {selectedPark?.name || "Select a park"}
-            </h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigatePark("next")}
-              disabled={parks.length <= 1}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
+          <div className="max-w-md mx-auto px-4">
+            <div className="flex gap-2 justify-center">
+              {parks.map((park, index) => (
+                <Button
+                  key={park.id}
+                  variant={selectedParkIndex === index ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedParkIndex(index)}
+                  className="flex-1"
+                >
+                  {park.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       )}
