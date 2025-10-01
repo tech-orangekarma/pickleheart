@@ -36,29 +36,8 @@ const Auth = () => {
           return;
         }
 
-        // For existing users, check if they've completed welcome flow
-        const { data: progress } = await supabase
-          .from("welcome_progress")
-          .select("completed_ready")
-          .eq("user_id", session.user.id)
-          .single();
-
-        if (progress?.completed_ready) {
-          navigate("/");
-        } else {
-          // Continue welcome flow from where they left off
-          const { data: currentProgress } = await supabase
-            .from("welcome_progress")
-            .select("current_step")
-            .eq("user_id", session.user.id)
-            .single();
-
-          if (currentProgress?.current_step) {
-            navigate(`/welcome/${currentProgress.current_step}`);
-          } else {
-            navigate("/welcome/delight");
-          }
-        }
+        // For existing users signing in, go directly to home
+        navigate("/");
       }
     });
 
