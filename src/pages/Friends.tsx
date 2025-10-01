@@ -32,10 +32,20 @@ interface FriendWithPresence {
   } | null;
 }
 
+interface PendingRequest {
+  id: string;
+  requester_id: string;
+  display_name: string;
+  dupr_rating: number | null;
+  avatar_url: string | null;
+  created_at: string;
+}
+
 const Friends = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<FriendWithPresence[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkIndex, setSelectedParkIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -92,6 +102,7 @@ const Friends = () => {
 
   const loadFriends = async (uid: string) => {
     try {
+      // Load accepted friendships
       const { data: acceptedData, error: acceptedError } = await supabase
         .from("friendships")
         .select(`
@@ -105,6 +116,30 @@ const Friends = () => {
         .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`);
 
       if (acceptedError) throw acceptedError;
+
+      // Load pending requests where current user is the addressee
+      const { data: pendingData, error: pendingError } = await supabase
+        .from("friendships")
+        .select(`
+          id,
+          requester_id,
+          created_at,
+          requester:profiles!friendships_requester_id_fkey(display_name, dupr_rating, avatar_url)
+        `)
+        .eq("status", "pending")
+        .eq("addressee_id", uid);
+
+      if (!pendingError && pendingData) {
+        const requests: PendingRequest[] = pendingData.map((req: any) => ({
+          id: req.id,
+          requester_id: req.requester_id,
+          display_name: req.requester?.display_name || "Unknown User",
+          dupr_rating: req.requester?.dupr_rating || null,
+          avatar_url: req.requester?.avatar_url || null,
+          created_at: req.created_at,
+        }));
+        setPendingRequests(requests);
+      }
 
       const friendsWithPresence = await Promise.all(
         (acceptedData || []).map(async (friendship) => {
@@ -142,6 +177,38 @@ const Friends = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAcceptRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from("friendships")
+      .update({ status: "accepted" })
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error accepting request:", error);
+      toast.error("Failed to accept friend request");
+      return;
+    }
+
+    toast.success("Friend request accepted!");
+    if (userId) loadFriends(userId);
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from("friendships")
+      .delete()
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error rejecting request:", error);
+      toast.error("Failed to reject friend request");
+      return;
+    }
+
+    toast.success("Friend request rejected");
+    if (userId) loadFriends(userId);
   };
 
   const getInitials = (name: string | null) => {
@@ -210,6 +277,50 @@ const Friends = () => {
       )}
 
       <main className="max-w-md mx-auto p-6 pb-24 space-y-6">
+        {/* Pending Friend Requests */}
+        {pendingRequests.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3">Friend Requests</h2>
+            <div className="space-y-3">
+              {pendingRequests.map((request) => (
+                <Card key={request.id} className="p-4 border-2 border-dashed">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <Avatar className="flex-shrink-0">
+                        <AvatarImage src={request.avatar_url || undefined} />
+                        <AvatarFallback>{getInitials(request.display_name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{request.display_name}</p>
+                        {request.dupr_rating && (
+                          <p className="text-sm text-muted-foreground">
+                            DUPR: {request.dupr_rating.toFixed(1)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAcceptRequest(request.id)}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejectRequest(request.id)}
+                      >
+                        Deny
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Friends at Selected Park - Horizontal */}
         <div>
           <p className="text-sm text-muted-foreground mb-4 text-center">
