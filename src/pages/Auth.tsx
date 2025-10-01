@@ -16,16 +16,10 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
         // Check if this is a new sign-up
         const isNewSignUp = localStorage.getItem("new_signup");
         if (isNewSignUp) {
@@ -39,8 +33,43 @@ const Auth = () => {
         if (pendingInviteCode) {
           localStorage.removeItem("pending_invite_code");
           navigate(`/invite/${pendingInviteCode}`);
-        } else {
+          return;
+        }
+
+        // For existing users, check if they've completed welcome flow
+        const { data: progress } = await supabase
+          .from("welcome_progress")
+          .select("completed_ready")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (progress?.completed_ready) {
           navigate("/");
+        } else {
+          // Continue welcome flow from where they left off
+          const { data: currentProgress } = await supabase
+            .from("welcome_progress")
+            .select("current_step")
+            .eq("user_id", session.user.id)
+            .single();
+
+          if (currentProgress?.current_step) {
+            navigate(`/welcome/${currentProgress.current_step}`);
+          } else {
+            navigate("/welcome/delight");
+          }
+        }
+      }
+    });
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // Trigger the same logic as auth state change
+        const isNewSignUp = localStorage.getItem("new_signup");
+        if (isNewSignUp) {
+          localStorage.removeItem("new_signup");
+          navigate("/welcome/delight");
         }
       }
     });
