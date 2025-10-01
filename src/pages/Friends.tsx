@@ -277,50 +277,6 @@ const Friends = () => {
       )}
 
       <main className="max-w-md mx-auto p-6 pb-24 space-y-6">
-        {/* Pending Friend Requests */}
-        {pendingRequests.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-3">Friend Requests</h2>
-            <div className="space-y-3">
-              {pendingRequests.map((request) => (
-                <Card key={request.id} className="p-4 border-2 border-dashed">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Avatar className="flex-shrink-0">
-                        <AvatarImage src={request.avatar_url || undefined} />
-                        <AvatarFallback>{getInitials(request.display_name)}</AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{request.display_name}</p>
-                        {request.dupr_rating && (
-                          <p className="text-sm text-muted-foreground">
-                            DUPR: {request.dupr_rating.toFixed(1)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAcceptRequest(request.id)}
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRejectRequest(request.id)}
-                      >
-                        Deny
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Friends at Selected Park - Horizontal */}
         <div>
           <p className="text-sm text-muted-foreground mb-4 text-center">
@@ -360,7 +316,50 @@ const Friends = () => {
 
         {/* All Friends - Vertical List */}
         <div className="space-y-4">
-          {friends.length === 0 ? (
+          {/* Pending Friend Requests */}
+          {pendingRequests.length > 0 && (
+            <>
+              <h2 className="text-lg font-semibold">Friend Requests</h2>
+              {pendingRequests.map((request) => (
+                <Card key={request.id} className="p-4 border-2 border-dashed">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <Avatar className="flex-shrink-0">
+                        <AvatarImage src={request.avatar_url || undefined} />
+                        <AvatarFallback>{getInitials(request.display_name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{request.display_name}</p>
+                        {request.dupr_rating && (
+                          <p className="text-sm text-muted-foreground">
+                            DUPR: {request.dupr_rating.toFixed(1)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAcceptRequest(request.id)}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejectRequest(request.id)}
+                      >
+                        Deny
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              {friends.length > 0 && <h2 className="text-lg font-semibold mt-6">Friends</h2>}
+            </>
+          )}
+
+          {friends.length === 0 && pendingRequests.length === 0 ? (
             <Card className="p-8 text-center">
               <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
