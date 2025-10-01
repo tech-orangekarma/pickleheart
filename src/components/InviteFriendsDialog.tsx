@@ -1,16 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Copy, Share2 } from "lucide-react";
 import QRCode from "react-qr-code";
-
-interface Park {
-  id: string;
-  name: string;
-}
 
 interface InviteFriendsDialogProps {
   open: boolean;
@@ -18,42 +12,12 @@ interface InviteFriendsDialogProps {
 }
 
 export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogProps) {
-  const [parks, setParks] = useState<Park[]>([]);
-  const [selectedParkId, setSelectedParkId] = useState<string>("");
   const [inviteLink, setInviteLink] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadParks();
-  }, []);
-
-  const loadParks = async () => {
-    const { data, error } = await supabase
-      .from("parks")
-      .select("id, name")
-      .order("name");
-
-    if (error) {
-      console.error("Error loading parks:", error);
-      return;
-    }
-
-    setParks(data || []);
-    if (data && data.length > 0) {
-      setSelectedParkId(data[0].id);
-    }
-  };
-
   const generateInvite = async () => {
-    if (!selectedParkId) {
-      toast({
-        title: "Please select a park",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setIsGenerating(true);
 
@@ -72,7 +36,7 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
         .from("invites")
         .insert({
           inviter_id: user.id,
-          park_id: selectedParkId,
+          park_id: null,
           invite_code: inviteCode,
           expires_at: expirationDate.toISOString(),
         });
@@ -84,8 +48,8 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
       setExpiresAt(expirationDate);
 
       toast({
-        title: "Invite created!",
-        description: "Share the QR code or link with your friends",
+        title: "Friend invite created!",
+        description: "Share the QR code or link to become friends",
       });
     } catch (error) {
       console.error("Error generating invite:", error);
@@ -114,10 +78,9 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
   };
 
   const shareInvite = async () => {
-    const parkName = parks.find(p => p.id === selectedParkId)?.name || "park";
     const shareData = {
-      title: "Join me at the park!",
-      text: `Let's play pickleball at ${parkName}!`,
+      title: "Let's be friends on PicklePlay!",
+      text: "Join me on PicklePlay - Let's play pickleball together!",
       url: inviteLink,
     };
 
@@ -140,30 +103,19 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Select Park</label>
-            <Select value={selectedParkId} onValueChange={setSelectedParkId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a park" />
-              </SelectTrigger>
-              <SelectContent>
-                {parks.map((park) => (
-                  <SelectItem key={park.id} value={park.id}>
-                    {park.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {!inviteLink ? (
-            <Button 
-              onClick={generateInvite} 
-              disabled={isGenerating || !selectedParkId}
-              className="w-full"
-            >
-              {isGenerating ? "Generating..." : "Generate Invite"}
-            </Button>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground text-center">
+                Generate an invite link to share with friends. When they sign up or log in, you'll automatically become friends!
+              </p>
+              <Button 
+                onClick={generateInvite} 
+                disabled={isGenerating}
+                className="w-full"
+              >
+                {isGenerating ? "Generating..." : "Generate Friend Invite"}
+              </Button>
+            </div>
           ) : (
             <>
               <div className="flex justify-center p-6 bg-white rounded-lg">

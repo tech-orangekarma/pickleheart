@@ -99,7 +99,7 @@ export type Database = {
           invite_code: string
           inviter_id: string
           message: string | null
-          park_id: string
+          park_id: string | null
         }
         Insert: {
           created_at?: string
@@ -108,7 +108,7 @@ export type Database = {
           invite_code: string
           inviter_id: string
           message?: string | null
-          park_id: string
+          park_id?: string | null
         }
         Update: {
           created_at?: string
@@ -117,7 +117,7 @@ export type Database = {
           invite_code?: string
           inviter_id?: string
           message?: string | null
-          park_id?: string
+          park_id?: string | null
         }
         Relationships: [
           {

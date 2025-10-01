@@ -26,7 +26,14 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/");
+        // Check for pending invite code
+        const pendingInviteCode = localStorage.getItem("pending_invite_code");
+        if (pendingInviteCode) {
+          localStorage.removeItem("pending_invite_code");
+          navigate(`/invite/${pendingInviteCode}`);
+        } else {
+          navigate("/");
+        }
       }
     });
 
