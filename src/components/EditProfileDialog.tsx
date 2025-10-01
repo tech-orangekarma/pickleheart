@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -18,16 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -55,9 +48,18 @@ export const EditProfileDialog = ({
     profile.dupr_rating?.toString() || ""
   );
   const [gender, setGender] = useState<string>(profile.gender || "");
-  const [birthday, setBirthday] = useState<Date | undefined>(
-    profile.birthday ? new Date(profile.birthday) : undefined
+  
+  const birthdayDate = profile.birthday ? new Date(profile.birthday) : null;
+  const [birthMonth, setBirthMonth] = useState<string>(
+    birthdayDate ? (birthdayDate.getMonth() + 1).toString() : ""
   );
+  const [birthDay, setBirthDay] = useState<string>(
+    birthdayDate ? birthdayDate.getDate().toString() : ""
+  );
+  const [birthYear, setBirthYear] = useState<string>(
+    birthdayDate ? birthdayDate.getFullYear().toString() : ""
+  );
+  
   const [homeParkId, setHomeParkId] = useState<string>(profile.home_park_id || "");
   const [parks, setParks] = useState<{ id: string; name: string }[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -65,6 +67,14 @@ export const EditProfileDialog = ({
     profile.avatar_url
   );
   const [loading, setLoading] = useState(false);
+  
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => (currentYear - i).toString());
 
   useEffect(() => {
     loadParks();
@@ -122,6 +132,13 @@ export const EditProfileDialog = ({
     setLoading(true);
     try {
       const avatarUrl = await uploadAvatar(profile.id);
+      
+      // Construct birthday from month, day, year
+      let birthdayString = null;
+      if (birthMonth && birthDay && birthYear) {
+        const date = new Date(parseInt(birthYear), parseInt(birthMonth) - 1, parseInt(birthDay));
+        birthdayString = format(date, "yyyy-MM-dd");
+      }
 
       const { error } = await supabase
         .from("profiles")
@@ -130,7 +147,7 @@ export const EditProfileDialog = ({
           dupr_rating: duprRating ? parseFloat(duprRating) : null,
           avatar_url: avatarUrl,
           gender: gender || null,
-          birthday: birthday ? format(birthday, "yyyy-MM-dd") : null,
+          birthday: birthdayString,
           home_park_id: homeParkId || null,
         })
         .eq("id", profile.id);
@@ -230,32 +247,52 @@ export const EditProfileDialog = ({
 
           <div className="space-y-2">
             <Label>Birthday</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !birthday && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {birthday ? format(birthday, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={birthday}
-                  onSelect={setBirthday}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="grid grid-cols-3 gap-2">
+              <Select value={birthMonth} onValueChange={setBirthMonth}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <ScrollArea className="h-[200px]">
+                    {months.map((month, index) => (
+                      <SelectItem key={month} value={(index + 1).toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </ScrollArea>
+                </SelectContent>
+              </Select>
+              
+              <Select value={birthDay} onValueChange={setBirthDay}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Day" />
+                </SelectTrigger>
+                <SelectContent>
+                  <ScrollArea className="h-[200px]">
+                    {days.map((day) => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </ScrollArea>
+                </SelectContent>
+              </Select>
+              
+              <Select value={birthYear} onValueChange={setBirthYear}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <ScrollArea className="h-[200px]">
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </ScrollArea>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
