@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, Settings, Edit, Heart, Users } from "lucide-react";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { formatDuprRating } from "@/lib/utils";
 
 interface Profile {
   id: string;
@@ -140,7 +141,7 @@ const Profile = () => {
               {profile?.dupr_rating && (
                 <div className="bg-muted rounded-lg px-6 py-3">
                   <p className="text-sm text-muted-foreground mb-1">DUPR Rating</p>
-                  <p className="text-3xl font-bold">{profile.dupr_rating.toFixed(2)}</p>
+                  <p className="text-3xl font-bold">{formatDuprRating(profile.dupr_rating)}</p>
                 </div>
               )}
             </div>

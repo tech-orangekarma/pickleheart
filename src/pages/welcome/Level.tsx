@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Award, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
+import { formatDuprRating } from "@/lib/utils";
 
 const Level = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const Level = () => {
             (Self-assessment questionnaire would go here - simplified for MVP)
           </p>
           <Button onClick={handleManualEntry} className="w-full">
-            use rating: {duprRating.toFixed(2)}
+            use rating: {formatDuprRating(duprRating)}
           </Button>
         </div>
       </div>
@@ -93,7 +94,7 @@ const Level = () => {
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm text-muted-foreground">DUPR Rating</span>
                 <span className="text-3xl font-bold text-primary">
-                  {duprRating.toFixed(2)}
+                  {formatDuprRating(duprRating)}
                 </span>
               </div>
               <Slider

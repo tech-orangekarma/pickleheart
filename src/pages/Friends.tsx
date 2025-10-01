@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 import { FriendOptionsDialog } from "@/components/FriendOptionsDialog";
 import { UserSearchDialog } from "@/components/UserSearchDialog";
+import { formatDuprRating } from "@/lib/utils";
 
 interface Park {
   id: string;
@@ -346,7 +347,7 @@ const Friends = () => {
                         <p className="font-medium truncate">{request.display_name}</p>
                         {request.dupr_rating && (
                           <p className="text-sm text-muted-foreground">
-                            DUPR: {request.dupr_rating.toFixed(1)}
+                            DUPR: {formatDuprRating(request.dupr_rating)}
                           </p>
                         )}
                       </div>
@@ -431,7 +432,7 @@ const Friends = () => {
                       {friend.profile.dupr_rating && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span className="text-lg">🎾</span>
-                          <span>DUPR Rating: {friend.profile.dupr_rating.toFixed(1)}</span>
+                          <span>DUPR Rating: {formatDuprRating(friend.profile.dupr_rating)}</span>
                         </div>
                       )}
                     </div>

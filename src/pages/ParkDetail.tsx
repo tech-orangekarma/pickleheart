@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, Users, Loader2, ListOrdered, Filter } from "lucide-r
 import { toast } from "sonner";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
+import { formatDuprRating } from "@/lib/utils";
 
 interface Park {
   id: string;
@@ -379,7 +380,7 @@ const ParkDetail = () => {
                         <>
                           <span>•</span>
                           <span>
-                            {presence.profiles.dupr_rating.toFixed(2)} DUPR
+                            {formatDuprRating(presence.profiles.dupr_rating)} DUPR
                           </span>
                         </>
                       )}

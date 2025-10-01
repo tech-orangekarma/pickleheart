@@ -6,6 +6,7 @@ import { Users, Heart, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { formatDuprRating } from "@/lib/utils";
 
 interface Park {
   id: string;
@@ -314,7 +315,7 @@ const Home = () => {
                   <div key={player.id} className="flex items-center justify-between p-3 bg-background rounded-lg">
                     <span className="font-medium">{player.display_name || "Anonymous"}</span>
                     <span className="text-sm text-muted-foreground">
-                      {player.dupr_rating?.toFixed(2) || "—"}
+                      {player.dupr_rating ? formatDuprRating(player.dupr_rating) : "—"}
                     </span>
                   </div>
                 ))
