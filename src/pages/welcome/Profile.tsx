@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,6 +13,8 @@ const Profile = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthday, setBirthday] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -36,6 +39,8 @@ const Profile = () => {
           id: userId,
           display_name: displayName.trim(),
           phone: phone.trim() || null,
+          gender: gender || null,
+          birthday: birthday || null,
         });
 
       if (profileError) throw profileError;
@@ -78,6 +83,38 @@ const Profile = () => {
               className="mt-2"
               autoFocus
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="gender" className="text-base">
+                gender (optional)
+              </Label>
+              <Select value={gender} onValueChange={setGender}>
+                <SelectTrigger id="gender" className="mt-2">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="birthday" className="text-base">
+                birthday (optional)
+              </Label>
+              <Input
+                id="birthday"
+                type="date"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                className="mt-2"
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </div>
           </div>
 
           <div>
