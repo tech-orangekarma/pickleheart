@@ -10,7 +10,7 @@ import { Search, UserPlus } from "lucide-react";
 interface UserProfile {
   id: string;
   display_name: string | null;
-  birthday: string | null;
+  age: number | null;
   gender: string | null;
   avatar_url: string | null;
 }
@@ -66,8 +66,8 @@ export function UserSearchDialog({ open, onOpenChange, currentUserId }: UserSear
 
       // Get all profiles except current user and existing friends
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, display_name, birthday, gender, avatar_url")
+        .from("public_profiles")
+        .select("id, display_name, age, gender, avatar_url")
         .neq("id", currentUserId);
 
       if (error) throw error;
@@ -87,17 +87,6 @@ export function UserSearchDialog({ open, onOpenChange, currentUserId }: UserSear
     }
   };
 
-  const calculateAge = (birthday: string | null) => {
-    if (!birthday) return null;
-    const birthDate = new Date(birthday);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
 
   const sendFriendRequest = async (userId: string) => {
     setSendingRequests((prev) => new Set(prev).add(userId));
@@ -168,7 +157,6 @@ export function UserSearchDialog({ open, onOpenChange, currentUserId }: UserSear
             </div>
           ) : (
             filteredUsers.map((user) => {
-              const age = calculateAge(user.birthday);
               return (
                 <div
                   key={user.id}
@@ -184,7 +172,7 @@ export function UserSearchDialog({ open, onOpenChange, currentUserId }: UserSear
                       {user.display_name || "Anonymous"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {age ? `${age} years old` : "Age unknown"}
+                      {user.age ? `${user.age} years old` : "Age unknown"}
                       {user.gender && ` • ${user.gender}`}
                     </p>
                   </div>
