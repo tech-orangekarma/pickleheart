@@ -26,6 +26,14 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
+        // Check if this is a new sign-up
+        const isNewSignUp = localStorage.getItem("new_signup");
+        if (isNewSignUp) {
+          localStorage.removeItem("new_signup");
+          navigate("/welcome/privacy");
+          return;
+        }
+
         // Check for pending invite code
         const pendingInviteCode = localStorage.getItem("pending_invite_code");
         if (pendingInviteCode) {
@@ -54,6 +62,9 @@ const Auth = () => {
       });
 
       if (error) throw error;
+      
+      // Mark this as a new sign-up to trigger welcome flow
+      localStorage.setItem("new_signup", "true");
       
       toast.success("Welcome! Check your email to confirm your account.");
     } catch (error: any) {
