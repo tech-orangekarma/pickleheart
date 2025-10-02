@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useGlobalGeofence } from "./hooks/useGlobalGeofence";
+import { GeofenceDebugPanel } from "./components/GeofenceDebugPanel";
 import Home from "./pages/Home";
 import Parks from "./pages/Parks";
 import ParkDetail from "./pages/ParkDetail";
@@ -26,7 +27,9 @@ const AppContent = () => {
   useGlobalGeofence();
 
   return (
-    <Routes>
+    <>
+      <GeofenceDebugPanel />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/parks" element={<Parks />} />
       <Route path="/park/:parkId" element={<ParkDetail />} />
@@ -44,6 +47,7 @@ const AppContent = () => {
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 };
 

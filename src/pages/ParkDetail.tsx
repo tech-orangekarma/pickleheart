@@ -116,8 +116,23 @@ const ParkDetail = () => {
         }
       },
       (error) => {
-        console.error("Geolocation error:", error);
-        toast.error("Unable to get your location. Please enable location services.");
+        console.error("[ParkDetail] Geolocation error:", {
+          code: error.code,
+          message: error.message,
+          details: error.code === 1 ? "PERMISSION_DENIED" : 
+                   error.code === 2 ? "POSITION_UNAVAILABLE" : 
+                   error.code === 3 ? "TIMEOUT" : "UNKNOWN",
+          parkId,
+          userId
+        });
+        
+        const errorMessages = {
+          1: "Location permission denied. Please enable location access.",
+          2: "Unable to determine location. Check GPS/network connection.",
+          3: "Location request timed out."
+        };
+        
+        toast.error(errorMessages[error.code as 1 | 2 | 3] || "Unable to get your location");
         setIsTracking(false);
       },
       {
@@ -175,6 +190,14 @@ const ParkDetail = () => {
   const performCheckOut = async (isManual = false) => {
     if (!userPresenceId) return;
 
+    console.log("[ParkDetail] Check-out initiated", {
+      isManual,
+      userPresenceId,
+      parkId,
+      distance: distanceTopark,
+      timestamp: new Date().toISOString()
+    });
+
     setIsManualAction(true);
     try {
       const { error } = await supabase
@@ -182,14 +205,23 @@ const ParkDetail = () => {
         .update({ checked_out_at: new Date().toISOString() })
         .eq("id", userPresenceId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("[ParkDetail] Check-out failed:", {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
 
+      console.log("[ParkDetail] ✓ Check-out successful");
       setUserPresenceId(null);
       toast.success(isManual ? "Checked out from park" : "Auto-checked out from park");
       loadParkData();
-    } catch (error) {
-      console.error("Error checking out:", error);
-      toast.error("Failed to check out");
+    } catch (error: any) {
+      console.error("[ParkDetail] Check-out error:", error);
+      toast.error(`Failed to check out: ${error.message || "Unknown error"}`);
     } finally {
       setIsManualAction(false);
     }
@@ -197,6 +229,16 @@ const ParkDetail = () => {
 
   const performCheckIn = async (isManual = false) => {
     if (!userId || !parkId) return;
+
+    console.log("[ParkDetail] Check-in initiated", {
+      isManual,
+      userId,
+      parkId,
+      parkName: park?.name,
+      distance: distanceTopark,
+      locationPermissionGranted,
+      timestamp: new Date().toISOString()
+    });
 
     setIsManualAction(true);
     try {
@@ -210,14 +252,27 @@ const ParkDetail = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("[ParkDetail] Check-in failed:", {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
 
+      console.log("[ParkDetail] ✓ Check-in successful", {
+        presenceId: data.id,
+        auto_checked_in: data.auto_checked_in
+      });
+      
       setUserPresenceId(data.id);
       toast.success(isManual ? "Checked in to park" : "Auto-checked in to park");
       loadParkData(); // Refresh the list
-    } catch (error) {
-      console.error("Error checking in:", error);
-      toast.error("Failed to check in");
+    } catch (error: any) {
+      console.error("[ParkDetail] Check-in error:", error);
+      toast.error(`Failed to check in: ${error.message || "Unknown error"}`);
     } finally {
       setIsManualAction(false);
     }
