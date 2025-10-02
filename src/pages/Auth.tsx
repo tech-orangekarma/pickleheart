@@ -20,15 +20,7 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        // Check if this is a new sign-up
-        const isNewSignUp = localStorage.getItem("new_signup");
-        if (isNewSignUp) {
-          localStorage.removeItem("new_signup");
-          navigate("/welcome/delight");
-          return;
-        }
-
-        // Check for pending invite code
+        // Check for pending invite code first
         const pendingInviteCode = localStorage.getItem("pending_invite_code");
         if (pendingInviteCode) {
           localStorage.removeItem("pending_invite_code");
@@ -36,9 +28,20 @@ const Auth = () => {
           return;
         }
 
-        // For existing users signing in, check welcome completion status
-        // The Home page will handle redirecting to welcome flow if needed
-        navigate("/");
+        // Check if user profile exists in the database
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (profile) {
+          // Profile exists, send to home page
+          navigate("/");
+        } else {
+          // Profile doesn't exist, send through welcome process
+          navigate("/welcome/delight");
+        }
       }
     });
 
@@ -59,9 +62,6 @@ const Auth = () => {
       });
 
       if (error) throw error;
-      
-      // Mark this as a new sign-up to trigger welcome flow
-      localStorage.setItem("new_signup", "true");
       
       toast.success("Welcome! Check your email to confirm your account.");
     } catch (error: any) {
