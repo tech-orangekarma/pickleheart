@@ -156,7 +156,7 @@ const ParkDetail = () => {
 
   const handleInGeofence = () => {
     // Auto check-in immediately if not already checked in and haven't attempted auto check-in yet
-    if (!userPresenceId && !hasAttemptedAutoCheckIn && !isManualAction) {
+    if (!userPresenceId && !hasAttemptedAutoCheckIn) {
       setHasAttemptedAutoCheckIn(true);
       performCheckIn(false);
     }
@@ -167,7 +167,7 @@ const ParkDetail = () => {
     const minutesAway = timeSinceLastUpdate / 1000 / 60;
 
     // Auto checkout after 10 minutes away
-    if (userPresenceId && minutesAway >= 10 && !isManualAction) {
+    if (userPresenceId && minutesAway >= 10) {
       performCheckOut(false);
     }
   };
