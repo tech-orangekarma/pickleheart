@@ -38,7 +38,7 @@ const ParkDetail = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userPresenceId, setUserPresenceId] = useState<string | null>(null);
-  const [checkInTimer, setCheckInTimer] = useState<number>(0);
+  const [hasAttemptedAutoCheckIn, setHasAttemptedAutoCheckIn] = useState<boolean>(false);
   const [showStackDialog, setShowStackDialog] = useState(false);
   const [showSkillFilter, setShowSkillFilter] = useState(false);
   const [skillRange, setSkillRange] = useState<[number, number]>([2.0, 8.0]);
@@ -132,12 +132,12 @@ const ParkDetail = () => {
     };
   }, [userId, park, locationPermissionGranted]);
 
-  // Auto check-in after 5 minutes in geofence
+  // Reset auto check-in flag when user manually checks out
   useEffect(() => {
-    if (checkInTimer >= 5 * 60 && !userPresenceId) {
-      performCheckIn();
+    if (!userPresenceId) {
+      setHasAttemptedAutoCheckIn(false);
     }
-  }, [checkInTimer, userPresenceId]);
+  }, [userPresenceId]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3; // Earth's radius in meters
@@ -155,12 +155,11 @@ const ParkDetail = () => {
   };
 
   const handleInGeofence = () => {
-    // Start counting time in geofence
-    const timer = setInterval(() => {
-      setCheckInTimer((prev) => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
+    // Auto check-in immediately if not already checked in and haven't attempted auto check-in yet
+    if (!userPresenceId && !hasAttemptedAutoCheckIn && !isManualAction) {
+      setHasAttemptedAutoCheckIn(true);
+      performCheckIn(false);
+    }
   };
 
   const handleOutOfGeofence = () => {
@@ -168,11 +167,9 @@ const ParkDetail = () => {
     const minutesAway = timeSinceLastUpdate / 1000 / 60;
 
     // Auto checkout after 10 minutes away
-    if (userPresenceId && minutesAway >= 10) {
-      performCheckOut();
+    if (userPresenceId && minutesAway >= 10 && !isManualAction) {
+      performCheckOut(false);
     }
-    
-    setCheckInTimer(0);
   };
 
   const performCheckOut = async (isManual = false) => {
@@ -376,18 +373,7 @@ const ParkDetail = () => {
               <Loader2 className="w-5 h-5 animate-spin text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-medium">
-                  {distanceTopark <= 150 ? (
-                    <>
-                      You're at the park! 
-                      {checkInTimer > 0 && checkInTimer < 300 && (
-                        <span className="ml-2 text-muted-foreground">
-                          Auto check-in in {Math.ceil((300 - checkInTimer) / 60)}m
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    `${Math.round(distanceTopark)}m away`
-                  )}
+                  {distanceTopark <= 150 ? "You're at the park!" : `${Math.round(distanceTopark)}m away`}
                 </p>
               </div>
             </div>
