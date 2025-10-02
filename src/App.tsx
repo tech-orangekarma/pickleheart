@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useGlobalGeofence } from "./hooks/useGlobalGeofence";
 import Home from "./pages/Home";
 import Parks from "./pages/Parks";
 import ParkDetail from "./pages/ParkDetail";
@@ -21,30 +22,38 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  useGlobalGeofence();
+
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/parks" element={<Parks />} />
+      <Route path="/park/:parkId" element={<ParkDetail />} />
+      <Route path="/friends" element={<Friends />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/invite/:code" element={<InviteAccept />} />
+      <Route path="/welcome/privacy" element={<Privacy />} />
+      <Route path="/welcome/delight" element={<Delight />} />
+      <Route path="/welcome/promise" element={<Promise />} />
+      <Route path="/welcome/profile" element={<WelcomeProfile />} />
+      <Route path="/welcome/level" element={<Level />} />
+      <Route path="/welcome/location" element={<Location />} />
+      <Route path="/welcome/ready" element={<Ready />} />
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/parks" element={<Parks />} />
-          <Route path="/park/:parkId" element={<ParkDetail />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/invite/:code" element={<InviteAccept />} />
-          <Route path="/welcome/privacy" element={<Privacy />} />
-          <Route path="/welcome/delight" element={<Delight />} />
-          <Route path="/welcome/promise" element={<Promise />} />
-          <Route path="/welcome/profile" element={<WelcomeProfile />} />
-          <Route path="/welcome/level" element={<Level />} />
-          <Route path="/welcome/location" element={<Location />} />
-          <Route path="/welcome/ready" element={<Ready />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppContent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
