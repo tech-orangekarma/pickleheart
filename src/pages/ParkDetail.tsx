@@ -43,6 +43,8 @@ const ParkDetail = () => {
   const [showSkillFilter, setShowSkillFilter] = useState(false);
   const [skillRange, setSkillRange] = useState<[number, number]>([2.0, 8.0]);
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date>(new Date());
+  const [locationPermissionGranted, setLocationPermissionGranted] = useState<boolean | null>(null);
+  const [isManualAction, setIsManualAction] = useState(false);
 
   useEffect(() => {
     if (!parkId) {
@@ -68,15 +70,24 @@ const ParkDetail = () => {
         }
 
         setUserId(session.user.id);
+
+        // Check location permission
+        const { data: privacyData } = await supabase
+          .from("privacy_settings")
+          .select("location_permission_granted")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        setLocationPermissionGranted(privacyData?.location_permission_granted ?? null);
       }
     });
 
     loadParkData();
   }, [parkId, navigate, skillRange]);
 
-  // Start location tracking
+  // Start location tracking (only if permission granted)
   useEffect(() => {
-    if (!userId || !park) return;
+    if (!userId || !park || locationPermissionGranted !== true) return;
 
     setIsTracking(true);
 
@@ -119,7 +130,7 @@ const ParkDetail = () => {
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [userId, park]);
+  }, [userId, park, locationPermissionGranted]);
 
   // Auto check-in after 5 minutes in geofence
   useEffect(() => {
@@ -164,9 +175,10 @@ const ParkDetail = () => {
     setCheckInTimer(0);
   };
 
-  const performCheckOut = async () => {
+  const performCheckOut = async (isManual = false) => {
     if (!userPresenceId) return;
 
+    setIsManualAction(true);
     try {
       const { error } = await supabase
         .from("presence")
@@ -176,23 +188,27 @@ const ParkDetail = () => {
       if (error) throw error;
 
       setUserPresenceId(null);
-      toast("You've been checked out");
+      toast.success(isManual ? "Checked out from park" : "Auto-checked out from park");
       loadParkData();
     } catch (error) {
       console.error("Error checking out:", error);
+      toast.error("Failed to check out");
+    } finally {
+      setIsManualAction(false);
     }
   };
 
-  const performCheckIn = async () => {
+  const performCheckIn = async (isManual = false) => {
     if (!userId || !parkId) return;
 
+    setIsManualAction(true);
     try {
       const { data, error } = await supabase
         .from("presence")
         .insert({
           user_id: userId,
           park_id: parkId,
-          auto_checked_in: true,
+          auto_checked_in: !isManual,
         })
         .select()
         .single();
@@ -200,10 +216,13 @@ const ParkDetail = () => {
       if (error) throw error;
 
       setUserPresenceId(data.id);
-      toast.success("You've been checked in!");
+      toast.success(isManual ? "Checked in to park" : "Auto-checked in to park");
       loadParkData(); // Refresh the list
     } catch (error) {
       console.error("Error checking in:", error);
+      toast.error("Failed to check in");
+    } finally {
+      setIsManualAction(false);
     }
   };
 
@@ -314,6 +333,37 @@ const ParkDetail = () => {
               <div className="text-sm text-muted-foreground">
                 {park.court_count} {park.court_count === 1 ? "court" : "courts"}
               </div>
+
+              {/* Manual check-in/out buttons */}
+              <div className="mt-4 flex gap-2">
+                {userPresenceId ? (
+                  <Button
+                    onClick={() => performCheckOut(true)}
+                    variant="outline"
+                    size="sm"
+                    disabled={isManualAction}
+                  >
+                    {isManualAction ? "Checking out..." : "Check Out"}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => performCheckIn(true)}
+                    size="sm"
+                    disabled={isManualAction}
+                  >
+                    {isManualAction ? "Checking in..." : "Check In"}
+                  </Button>
+                )}
+              </div>
+
+              {/* Location permission warning */}
+              {locationPermissionGranted === false && (
+                <Card className="mt-3 p-3 bg-muted/50 border-muted">
+                  <p className="text-xs text-muted-foreground">
+                    📍 Enable location in Profile settings to see distance and use auto check-in
+                  </p>
+                </Card>
+              )}
             </div>
           </div>
         </div>

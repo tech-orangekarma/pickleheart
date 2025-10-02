@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit, Heart, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Heart, Users, Navigation } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { formatDuprRating } from "@/lib/utils";
@@ -31,6 +32,8 @@ const Profile = () => {
   const [homePark, setHomePark] = useState<Park | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
+  const [updatingLocation, setUpdatingLocation] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -76,6 +79,15 @@ const Profile = () => {
           .maybeSingle();
         if (parkData) setHomePark(parkData);
       }
+
+      // Load location permission
+      const { data: privacyData } = await supabase
+        .from("privacy_settings")
+        .select("location_permission_granted")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setLocationPermission(privacyData?.location_permission_granted ?? null);
     } catch (error) {
       console.error("Error loading profile:", error);
       toast.error("Failed to load profile");
@@ -109,6 +121,49 @@ const Profile = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
+  };
+
+  const handleLocationToggle = async () => {
+    if (updatingLocation) return;
+
+    const newValue = !locationPermission;
+    
+    // If enabling, request browser permission
+    if (newValue) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            () => resolve(),
+            (error) => reject(error),
+            { timeout: 10000 }
+          );
+        });
+      } catch (error) {
+        toast.error("Location permission denied by browser");
+        return;
+      }
+    }
+
+    setUpdatingLocation(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("privacy_settings")
+        .update({ location_permission_granted: newValue })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setLocationPermission(newValue);
+      toast.success(newValue ? "Location enabled" : "Location disabled");
+    } catch (error) {
+      console.error("Error updating location permission:", error);
+      toast.error("Failed to update location permission");
+    } finally {
+      setUpdatingLocation(false);
+    }
   };
 
   if (loading) {
@@ -192,6 +247,24 @@ const Profile = () => {
 
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-4">
+            {/* Location Permission Setting */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="flex items-center gap-3">
+                <Navigation className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="font-medium">Location Services</p>
+                  <p className="text-xs text-muted-foreground">
+                    Enable auto check-in and distance tracking
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={locationPermission === true}
+                onCheckedChange={handleLocationToggle}
+                disabled={updatingLocation}
+              />
+            </div>
+
             <div>
               <p className="text-sm text-muted-foreground mb-1">Display Name</p>
               <p className="text-lg">{profile?.display_name || "Not set"}</p>

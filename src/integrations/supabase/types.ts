@@ -268,6 +268,7 @@ export type Database = {
           created_at: string
           do_not_share_at_all: boolean
           id: string
+          location_permission_granted: boolean | null
           mode: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time: boolean
           share_name: boolean
@@ -279,6 +280,7 @@ export type Database = {
           created_at?: string
           do_not_share_at_all?: boolean
           id?: string
+          location_permission_granted?: boolean | null
           mode?: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time?: boolean
           share_name?: boolean
@@ -290,6 +292,7 @@ export type Database = {
           created_at?: string
           do_not_share_at_all?: boolean
           id?: string
+          location_permission_granted?: boolean | null
           mode?: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time?: boolean
           share_name?: boolean
@@ -1139,6 +1142,10 @@ export type Database = {
       gidx_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      is_user_at_park: {
+        Args: { _park_id: string; _user_id: string }
+        Returns: boolean
       }
       json: {
         Args: { "": unknown }

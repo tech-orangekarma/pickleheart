@@ -23,11 +23,29 @@ const Privacy = () => {
     });
   }, [navigate]);
 
-  const handleLocationStep = () => {
+  const handleLocationStep = async () => {
     if (locationPermission === null) {
       toast.error("Please select a location permission option");
       return;
     }
+
+    // If user wants location, request browser permission
+    if (locationPermission === true) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            () => resolve(),
+            (error) => reject(error),
+            { timeout: 10000 }
+          );
+        });
+        toast.success("Location permission granted");
+      } catch (error) {
+        toast.error("Location permission denied. You can enable it later in settings.");
+        setLocationPermission(false);
+      }
+    }
+    
     setStep(2);
   };
 
@@ -45,6 +63,7 @@ const Privacy = () => {
           share_arrival_time: true,
           share_name: nameVisibility === "everyone",
           do_not_share_at_all: false,
+          location_permission_granted: locationPermission,
         }, { onConflict: 'user_id' });
 
       if (privacyError) throw privacyError;
