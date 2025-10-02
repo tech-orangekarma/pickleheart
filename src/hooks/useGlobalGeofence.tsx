@@ -5,7 +5,8 @@ import { toast } from "sonner";
 interface Park {
   id: string;
   name: string;
-  location: any;
+  longitude: number;
+  latitude: number;
 }
 
 export const useGlobalGeofence = () => {
@@ -68,9 +69,8 @@ export const useGlobalGeofence = () => {
         });
 
         // Get all parks
-        const { data: parks, error: parksError } = await supabase
-          .from("parks")
-          .select("id, name, location");
+      const { data: parks, error: parksError } = await supabase
+        .rpc("get_parks_with_coordinates");
 
         if (parksError) {
           console.error("[Geofence] Error fetching parks:", parksError);
@@ -94,8 +94,8 @@ export const useGlobalGeofence = () => {
         console.log("[Geofence] Existing presence:", existingPresence ? `Checked in at park ${existingPresence.park_id}` : "None");
 
         for (const park of parks || []) {
-          const parkLng = (park.location as any)?.coordinates?.[0];
-          const parkLat = (park.location as any)?.coordinates?.[1];
+        const parkLng = park.longitude;
+        const parkLat = park.latitude;
           if (!parkLng || !parkLat) {
             console.warn("[Geofence] Park missing coordinates:", park.name);
             continue;

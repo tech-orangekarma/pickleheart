@@ -1103,6 +1103,17 @@ export type Database = {
         Args: { "": string }
         Returns: unknown
       }
+      get_parks_with_coordinates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          court_count: number
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+        }[]
+      }
       get_proj4_from_srid: {
         Args: { "": number }
         Returns: string
