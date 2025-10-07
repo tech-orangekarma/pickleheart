@@ -164,6 +164,9 @@ const Privacy = () => {
         <div className="text-center mb-8">
           <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">who can see your name?</h1>
+          <p className="text-muted-foreground">
+            everyone else will see your skill level age and gender, but not know its you
+          </p>
         </div>
 
         <div className="space-y-3 mb-8">
