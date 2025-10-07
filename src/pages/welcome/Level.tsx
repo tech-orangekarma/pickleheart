@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Award, HelpCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDuprRating } from "@/lib/utils";
@@ -19,6 +20,7 @@ const Level = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [duprRating, setDuprRating] = useState(2.0);
+  const [ratingInput, setRatingInput] = useState("2.0");
   const [showAssessment, setShowAssessment] = useState(false);
 
   useEffect(() => {
@@ -27,6 +29,20 @@ const Level = () => {
       else setUserId(session.user.id);
     });
   }, [navigate]);
+
+  const handleRatingInputChange = (value: string) => {
+    setRatingInput(value);
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 2.0 && numValue <= 5.0) {
+      setDuprRating(numValue);
+    }
+  };
+
+  const handleSliderChange = (vals: number[]) => {
+    const newRating = vals[0];
+    setDuprRating(newRating);
+    setRatingInput(formatDuprRating(newRating));
+  };
 
   const handleManualEntry = async () => {
     if (!userId) return;
@@ -100,14 +116,16 @@ const Level = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm text-muted-foreground">DUPR Rating</span>
-                <span className="text-3xl font-bold text-primary">
-                  {formatDuprRating(duprRating)}
-                  {duprRating >= 5.0 && "+"}
-                </span>
+                <Input
+                  type="text"
+                  value={ratingInput}
+                  onChange={(e) => handleRatingInputChange(e.target.value)}
+                  className="w-24 text-3xl font-bold text-primary text-center border-0 focus-visible:ring-0 p-0"
+                />
               </div>
               <Slider
                 value={[duprRating]}
-                onValueChange={(vals) => setDuprRating(vals[0])}
+                onValueChange={handleSliderChange}
                 min={2.0}
                 max={5.0}
                 step={0.25}
