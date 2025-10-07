@@ -8,10 +8,17 @@ import { Award, HelpCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDuprRating } from "@/lib/utils";
 
+const getSkillLabel = (rating: number) => {
+  if (rating < 2.5) return "beginner/casual";
+  if (rating < 3.5) return "intermediate";
+  if (rating < 4.5) return "advanced";
+  return "expert";
+};
+
 const Level = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
-  const [duprRating, setDuprRating] = useState(3.5);
+  const [duprRating, setDuprRating] = useState(2.0);
   const [showAssessment, setShowAssessment] = useState(false);
 
   useEffect(() => {
@@ -91,23 +98,29 @@ const Level = () => {
         <Card className="p-6 mb-6">
           <div className="space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">DUPR Rating</span>
                 <span className="text-3xl font-bold text-primary">
                   {formatDuprRating(duprRating)}
+                  {duprRating >= 5.0 && "+"}
                 </span>
               </div>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                {getSkillLabel(duprRating)}
+              </p>
               <Slider
                 value={[duprRating]}
                 onValueChange={(vals) => setDuprRating(vals[0])}
                 min={2.0}
-                max={8.0}
+                max={5.0}
                 step={0.25}
                 className="mb-2"
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>2.0 (beginner)</span>
-                <span>8.0 (pro)</span>
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <span>2.0</span>
+                <span>3.0</span>
+                <span>4.0</span>
+                <span>5.0+</span>
               </div>
             </div>
 
@@ -147,7 +160,7 @@ const Level = () => {
         </Button>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          step 4 of 7
+          step 5 of 8
         </p>
       </div>
     </div>
