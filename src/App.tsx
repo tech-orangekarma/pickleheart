@@ -10,6 +10,7 @@ import ParkDetail from "./pages/ParkDetail";
 import Friends from "./pages/Friends";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import ResetPasswords from "./pages/ResetPasswords";
 import InviteAccept from "./pages/InviteAccept";
 import Privacy from "./pages/welcome/Privacy";
 import Delight from "./pages/welcome/Delight";
@@ -34,6 +35,7 @@ const AppContent = () => {
       <Route path="/friends" element={<Friends />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-passwords" element={<ResetPasswords />} />
       <Route path="/invite/:code" element={<InviteAccept />} />
       <Route path="/welcome/privacy" element={<Privacy />} />
       <Route path="/welcome/delight" element={<Delight />} />
