@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MapPin, ArrowLeft, Heart } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Park {
   id: string;
@@ -18,6 +28,8 @@ const Location = () => {
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParks, setSelectedParks] = useState<string[]>([]);
   const [favoritePark, setFavoritePark] = useState<string | null>(null);
+  const [showSuggestDialog, setShowSuggestDialog] = useState(false);
+  const [suggestedParkName, setSuggestedParkName] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -90,6 +102,28 @@ const Location = () => {
     navigate("/welcome/privacy");
   };
 
+  const handleSuggestPark = async () => {
+    if (!userId || !suggestedParkName.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from("park_suggestions")
+        .insert({
+          user_id: userId,
+          park_name: suggestedParkName.trim(),
+        });
+
+      if (error) throw error;
+
+      toast.success("Park suggestion submitted!");
+      setShowSuggestDialog(false);
+      setSuggestedParkName("");
+    } catch (error) {
+      console.error("Error submitting suggestion:", error);
+      toast.error("Failed to submit suggestion");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -141,6 +175,14 @@ const Location = () => {
           })}
         </div>
 
+        <Button
+          variant="outline"
+          onClick={() => setShowSuggestDialog(true)}
+          className="w-full mb-6"
+        >
+          suggest a new park
+        </Button>
+
         <div className="space-y-3">
           <Button 
             onClick={handleContinue} 
@@ -170,6 +212,42 @@ const Location = () => {
           step 5 of 7
         </p>
       </div>
+
+      <Dialog open={showSuggestDialog} onOpenChange={setShowSuggestDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suggest a New Park</DialogTitle>
+            <DialogDescription>
+              Enter the name of a park you'd like to see added
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="park-name">Park Name</Label>
+              <Input
+                id="park-name"
+                placeholder="Enter park name"
+                value={suggestedParkName}
+                onChange={(e) => setSuggestedParkName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSuggestDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSuggestPark}
+              disabled={!suggestedParkName.trim()}
+            >
+              Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
