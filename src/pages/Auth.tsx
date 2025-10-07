@@ -67,6 +67,9 @@ const Auth = () => {
         if (!data?.ok) {
           throw new Error(data?.error || "Failed to create account");
         }
+
+        // Wait for password update to propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Sign in with password
