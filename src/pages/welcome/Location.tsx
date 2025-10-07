@@ -111,7 +111,7 @@ const Location = () => {
                 key={park.id}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
                   isSelected
-                    ? "border-primary bg-primary/10"
+                    ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
                     : "border-border bg-background hover:border-primary/50"
                 }`}
                 onClick={() => toggleParkSelection(park.id)}
