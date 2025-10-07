@@ -16,36 +16,32 @@ const admin = createClient(supabaseUrl!, serviceRoleKey!);
 
 const DEFAULT_PASSWORD = "pickleheart2024";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response("Method Not Allowed", { status: 405, headers: corsHeaders });
   }
 
   try {
-    const { email } = await req.json().catch(() => ({ email: undefined }));
+    const { email, mode } = await req.json().catch(() => ({ email: undefined, mode: undefined }));
 
     if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ error: "Invalid email" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 1) Try to create the user (auto-confirmed)
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password: DEFAULT_PASSWORD,
-      email_confirm: true,
-    });
-
-    if (!createError) {
-      return new Response(
-        JSON.stringify({ ok: true, created: true, user_id: created.user?.id }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // 2) If already exists, find user by email via GoTrue Admin API and update password
+    // Check if user exists
     const res = await fetch(
       `${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
       {
@@ -58,43 +54,91 @@ serve(async (req) => {
     );
 
     if (!res.ok) {
+      console.error("Failed to look up user by email");
       return new Response(
-        JSON.stringify({ error: "Failed to look up user by email" }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
+        JSON.stringify({ error: "Failed to look up user" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const payload = await res.json();
     const user = payload?.users?.[0] ?? null;
 
-    if (!user?.id) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
+    // Mode: "signin" - only allow if user exists
+    if (mode === "signin") {
+      if (!user?.id) {
+        return new Response(JSON.stringify({ error: "No account found with this email" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // User exists, ensure password is set correctly
+      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
+        password: DEFAULT_PASSWORD,
+        email_confirm: true,
       });
+
+      if (updateError) {
+        console.error("Failed to update user password:", updateError);
+        return new Response(JSON.stringify({ error: updateError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(
+        JSON.stringify({ ok: true, exists: true, user_id: user.id }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
+    // Mode: "signup" - create if doesn't exist, or sign in if exists
+    if (user?.id) {
+      // User already exists, update password
+      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
+        password: DEFAULT_PASSWORD,
+        email_confirm: true,
+      });
+
+      if (updateError) {
+        console.error("Failed to update user password:", updateError);
+        return new Response(JSON.stringify({ error: updateError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(
+        JSON.stringify({ ok: true, exists: true, user_id: user.id }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // User doesn't exist, create new user
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
       password: DEFAULT_PASSWORD,
       email_confirm: true,
     });
 
-    if (updateError) {
-      return new Response(JSON.stringify({ error: updateError.message }), {
+    if (createError) {
+      console.error("Failed to create user:", createError);
+      return new Response(JSON.stringify({ error: createError.message }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     return new Response(
-      JSON.stringify({ ok: true, created: false, user_id: user.id }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      JSON.stringify({ ok: true, exists: false, user_id: created.user?.id }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
-    console.error(err);
+    console.error("Unexpected error:", err);
     return new Response(JSON.stringify({ error: "Unexpected error" }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

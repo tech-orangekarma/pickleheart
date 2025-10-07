@@ -59,11 +59,19 @@ const Auth = () => {
       // Use a default password behind the scenes (no user input)
       const defaultPassword = "pickleheart2024";
 
-      // Ensure the user exists and has the default password set (auto-confirmed)
-      const { error: functionError } = await supabase.functions.invoke("email-login", {
-        body: { email: parsedEmail },
+      // Call edge function to ensure user exists/is created based on mode
+      const { data, error: functionError } = await supabase.functions.invoke("email-login", {
+        body: { 
+          email: parsedEmail,
+          mode: isSignUp ? "signup" : "signin"
+        },
       });
+
       if (functionError) throw functionError;
+      
+      if (!data?.ok) {
+        throw new Error(data?.error || "Failed to authenticate");
+      }
 
       // Now sign in silently with the default password
       const { error: signInError } = await supabase.auth.signInWithPassword({
