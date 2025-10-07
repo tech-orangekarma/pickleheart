@@ -14,34 +14,44 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [isSignUp, setIsSignUp] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [statusText, setStatusText] = useState("");
 
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[Auth] Auth state changed:', event, !!session);
+      
       if (session) {
-        // Check for pending invite code first
-        const pendingInviteCode = localStorage.getItem("pending_invite_code");
-        if (pendingInviteCode) {
-          localStorage.removeItem("pending_invite_code");
-          navigate(`/invite/${pendingInviteCode}`);
-          return;
-        }
+        // Defer async operations to prevent deadlock
+        setTimeout(() => {
+          (async () => {
+            // Check for pending invite code first
+            const pendingInviteCode = localStorage.getItem("pending_invite_code");
+            if (pendingInviteCode) {
+              localStorage.removeItem("pending_invite_code");
+              navigate(`/invite/${pendingInviteCode}`);
+              return;
+            }
 
-        // Check if user profile exists in the database
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", session.user.id)
-          .maybeSingle();
+            // Check if user profile exists in the database
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("id", session.user.id)
+              .maybeSingle();
 
-        if (profile) {
-          // Profile exists, send to home page
-          navigate("/");
-        } else {
-          // Profile doesn't exist, send through welcome process
-          navigate("/welcome/delight");
-        }
+            if (profile) {
+              // Profile exists, send to home page
+              console.log('[Auth] Profile exists, navigating to home');
+              navigate("/");
+            } else {
+              // Profile doesn't exist, send through welcome process
+              console.log('[Auth] No profile, navigating to welcome');
+              navigate("/welcome/delight");
+            }
+          })();
+        }, 0);
       }
     });
 
@@ -51,16 +61,36 @@ const Auth = () => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setStatusText("");
+
+    // Global timeout - abort if this takes too long
+    const globalTimeout = setTimeout(() => {
+      setLoading(false);
+      setStatusText("");
+      toast.error("This is taking too long. Please try again.");
+    }, 20000);
 
     try {
       const parsedEmail = z.string().trim().email().max(255).parse(email);
       const emailToUse = parsedEmail.toLowerCase();
 
       if (isSignUp) {
-        // Sign up flow - create user if doesn't exist
-        const { data, error: functionError } = await supabase.functions.invoke("email-login", {
+        console.log('[Auth] Creating account for:', emailToUse);
+        setStatusText("creating account...");
+        
+        // Sign up flow with timeout
+        const functionPromise = supabase.functions.invoke("email-login", {
           body: { email: emailToUse },
         });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Account creation timed out")), 10000)
+        );
+
+        const { data, error: functionError } = await Promise.race([
+          functionPromise,
+          timeoutPromise
+        ]) as any;
 
         if (functionError) throw functionError;
         
@@ -68,15 +98,36 @@ const Auth = () => {
           throw new Error(data?.error || "Failed to create account");
         }
 
+        console.log('[Auth] Account created, waiting for propagation');
         // Wait for password update to propagate
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      // Sign in with password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: emailToUse,
-        password: "pickle",
-      });
+      // Sign in with password with retry logic
+      console.log('[Auth] Signing in...');
+      setStatusText("signing you in...");
+      
+      let signInError = null;
+      const delays = [0, 300, 700, 1200]; // Backoff delays
+      
+      for (let attempt = 0; attempt < delays.length; attempt++) {
+        if (attempt > 0) {
+          console.log(`[Auth] Retry attempt ${attempt} after ${delays[attempt]}ms`);
+          await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+        }
+        
+        const { error } = await supabase.auth.signInWithPassword({
+          email: emailToUse,
+          password: "pickle",
+        });
+
+        if (!error) {
+          signInError = null;
+          break;
+        }
+        
+        signInError = error;
+      }
 
       if (signInError) {
         if (signInError.message.includes("Invalid login credentials")) {
@@ -87,11 +138,15 @@ const Auth = () => {
         return;
       }
 
+      console.log('[Auth] Signed in successfully');
       toast.success(isSignUp ? "Account created! Welcome!" : "Welcome back!");
     } catch (error: any) {
+      console.error('[Auth] Error:', error);
       toast.error(error?.message || "Failed to sign in");
     } finally {
+      clearTimeout(globalTimeout);
       setLoading(false);
+      setStatusText("");
     }
   };
 
@@ -149,14 +204,21 @@ const Auth = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={loading}
-            >
-              {loading ? "continuing..." : isSignUp ? "sign up" : "sign in"}
-            </Button>
+            <div className="space-y-2">
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? "continuing..." : isSignUp ? "sign up" : "sign in"}
+              </Button>
+              {statusText && (
+                <p className="text-xs text-center text-muted-foreground">
+                  {statusText}
+                </p>
+              )}
+            </div>
           </form>
         </Card>
       </div>
