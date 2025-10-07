@@ -208,7 +208,7 @@ const Privacy = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Location Access Disabled</AlertDialogTitle>
               <AlertDialogDescription className="text-left space-y-3">
-                We get it, privacy matters. Just keep in mind, without location access, Pickleheart won't automatically check you in. So unless you check in your friends want know you're there. You can update your settings anytime if you change your mind.
+                We get it, privacy matters. Just keep in mind, without location access, Pickleheart won't automatically check you in. So unless you check in, your friends want know you're there. You can update your settings anytime if you change your mind.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
