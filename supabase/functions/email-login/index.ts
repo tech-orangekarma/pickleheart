@@ -41,68 +41,70 @@ serve(async (req) => {
       });
     }
 
-    // Check if user exists
-    const res = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
-      {
-        headers: {
-          apikey: serviceRoleKey!,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!res.ok) {
-      console.error("Failed to look up user by email");
-      return new Response(
-        JSON.stringify({ error: "Failed to look up user" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const payload = await res.json();
-    const user = payload?.users?.[0] ?? null;
-
-    // If user exists, update password; otherwise create new user
-    if (user?.id) {
-      // User already exists, update password
-      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
-        password: DEFAULT_PASSWORD,
-        email_confirm: true,
-      });
-
-      if (updateError) {
-        console.error("Failed to update user password:", updateError);
-        return new Response(JSON.stringify({ error: updateError.message }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(
-        JSON.stringify({ ok: true, exists: true, user_id: user.id }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    // User doesn't exist, create new user
+    // Try to create user first; if already exists, update password
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email,
       password: DEFAULT_PASSWORD,
       email_confirm: true,
     });
 
+    // Created successfully
+    if (!createError && created?.user?.id) {
+      return new Response(
+        JSON.stringify({ ok: true, exists: false, user_id: created.user.id }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // If creation failed (likely because the user already exists), try to find by email and update password
     if (createError) {
-      console.error("Failed to create user:", createError);
-      return new Response(JSON.stringify({ error: createError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.log("[email-login] createUser failed, attempting update path:", createError.message);
+    }
+
+    // Fallback: list users in pages and find by email (avoids direct HTTP calls)
+    let foundUserId: string | null = null;
+    for (let page = 1; page <= 5 && !foundUserId; page++) {
+      const { data: list, error: listError } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+      if (listError) {
+        console.error("[email-login] Failed to list users:", listError);
+        break;
+      }
+      const users = list?.users ?? [] as any[];
+      const match = users.find((u: any) => u?.email?.toLowerCase() === email.toLowerCase());
+      if (match) {
+        foundUserId = match.id ?? null;
+        break;
+      }
+      if (!users.length) {
+        // No more users
+        break;
+      }
+    }
+
+    if (!foundUserId) {
+      console.error("[email-login] Unable to locate user by email after createUser failure");
+      return new Response(
+        JSON.stringify({ error: "User lookup failed" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Update existing user's password and confirm email
+    const { error: updateError } = await admin.auth.admin.updateUserById(foundUserId, {
+      password: DEFAULT_PASSWORD,
+      email_confirm: true,
+    });
+
+    if (updateError) {
+      console.error("[email-login] Failed to update user password:", updateError);
+      return new Response(
+        JSON.stringify({ error: updateError.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     return new Response(
-      JSON.stringify({ ok: true, exists: false, user_id: created.user?.id }),
+      JSON.stringify({ ok: true, exists: true, user_id: foundUserId }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
