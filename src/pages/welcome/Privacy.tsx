@@ -47,7 +47,9 @@ const Privacy = () => {
     setStep(2);
   };
 
-  const handleContinue = async () => {
+  const handleNameVisibilitySelection = async (visibility: "everyone" | "friends" | "none") => {
+    setNameVisibility(visibility);
+
     if (!userId) return;
 
     try {
@@ -59,7 +61,7 @@ const Privacy = () => {
           mode: "standard",
           share_skill_level: true,
           share_arrival_time: true,
-          share_name: nameVisibility === "everyone",
+          share_name: visibility === "everyone",
           do_not_share_at_all: false,
           location_permission_granted: locationPermission,
         }, { onConflict: 'user_id' });
@@ -161,74 +163,43 @@ const Privacy = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
-          <h1 className="text-3xl font-headline mb-2">name visibility</h1>
-          <p className="text-muted-foreground">
-            When you're at the park, who can see your name?
-          </p>
+          <h1 className="text-3xl font-headline mb-2">who can see your name?</h1>
         </div>
 
         <div className="space-y-3 mb-8">
-          <Card
-            className={`p-4 cursor-pointer transition-all ${
+          <div
+            className={`p-4 rounded-lg border cursor-pointer transition-all ${
               nameVisibility === "everyone"
-                ? "border-primary bg-primary/5"
-                : "hover:border-primary/50"
+                ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
+                : "border-border bg-background hover:border-primary/50"
             }`}
-            onClick={() => setNameVisibility("everyone")}
+            onClick={() => handleNameVisibilitySelection("everyone")}
           >
-            <div className="flex items-start gap-3">
-              <Eye className="w-5 h-5 mt-1 text-primary" />
-              <div>
-                <h3 className="font-semibold mb-1">Everyone can see it</h3>
-                <p className="text-sm text-muted-foreground">
-                  All players at the park can see your name
-                </p>
-              </div>
-            </div>
-          </Card>
+            <h3 className="font-semibold text-center">everyone can see it</h3>
+          </div>
 
-          <Card
-            className={`p-4 cursor-pointer transition-all ${
+          <div
+            className={`p-4 rounded-lg border cursor-pointer transition-all ${
               nameVisibility === "friends"
-                ? "border-primary bg-primary/5"
-                : "hover:border-primary/50"
+                ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
+                : "border-border bg-background hover:border-primary/50"
             }`}
-            onClick={() => setNameVisibility("friends")}
+            onClick={() => handleNameVisibilitySelection("friends")}
           >
-            <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 mt-1 text-primary" />
-              <div>
-                <h3 className="font-semibold mb-1">Only friends can see it</h3>
-                <p className="text-sm text-muted-foreground">
-                  Your name is visible only to your friends
-                </p>
-              </div>
-            </div>
-          </Card>
+            <h3 className="font-semibold text-center">only friends can see it</h3>
+          </div>
 
-          <Card
-            className={`p-4 cursor-pointer transition-all ${
+          <div
+            className={`p-4 rounded-lg border cursor-pointer transition-all ${
               nameVisibility === "none"
-                ? "border-primary bg-primary/5"
-                : "hover:border-primary/50"
+                ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
+                : "border-border bg-background hover:border-primary/50"
             }`}
-            onClick={() => setNameVisibility("none")}
+            onClick={() => handleNameVisibilitySelection("none")}
           >
-            <div className="flex items-start gap-3">
-              <EyeOff className="w-5 h-5 mt-1 text-muted-foreground" />
-              <div>
-                <h3 className="font-semibold mb-1">No one can see it</h3>
-                <p className="text-sm text-muted-foreground">
-                  Your name stays private from everyone
-                </p>
-              </div>
-            </div>
-          </Card>
+            <h3 className="font-semibold text-center">no one can see it</h3>
+          </div>
         </div>
-
-        <Button onClick={handleContinue} className="w-full" size="lg">
-          continue
-        </Button>
 
         <Button
           variant="ghost"
