@@ -27,8 +27,10 @@ const Purpose = () => {
     });
   }, [navigate]);
 
-  const handleContinue = async () => {
-    if (!userId || !selectedPurpose) return;
+  const handleSelectPurpose = async (purposeValue: string) => {
+    if (!userId) return;
+    
+    setSelectedPurpose(purposeValue);
 
     try {
       await supabase.from("welcome_progress").upsert({
@@ -37,7 +39,10 @@ const Purpose = () => {
         current_step: "level",
       });
 
-      navigate("/welcome/level");
+      // Auto-navigate after a brief delay
+      setTimeout(() => {
+        navigate("/welcome/level");
+      }, 300);
     } catch (error) {
       console.error("Error saving purpose:", error);
       toast.error("Failed to save your response");
@@ -59,10 +64,10 @@ const Purpose = () => {
           {purposeOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setSelectedPurpose(option.value)}
+              onClick={() => handleSelectPurpose(option.value)}
               className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                 selectedPurpose === option.value
-                  ? "border-primary bg-primary/10"
+                  ? "border-[#F5E6B3] bg-[#FFF9E6]"
                   : "border-border hover:border-primary/50"
               }`}
             >
@@ -70,15 +75,6 @@ const Purpose = () => {
             </button>
           ))}
         </div>
-
-        <Button 
-          onClick={handleContinue} 
-          className="w-full" 
-          size="lg"
-          disabled={!selectedPurpose}
-        >
-          continue
-        </Button>
 
         <Button
           variant="ghost"
