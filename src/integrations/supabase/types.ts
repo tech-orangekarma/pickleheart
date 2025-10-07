@@ -512,6 +512,7 @@ export type Database = {
           completed_privacy: boolean
           completed_profile: boolean
           completed_promise: boolean
+          completed_purpose: boolean
           completed_ready: boolean
           created_at: string
           current_step: string
@@ -526,6 +527,7 @@ export type Database = {
           completed_privacy?: boolean
           completed_profile?: boolean
           completed_promise?: boolean
+          completed_purpose?: boolean
           completed_ready?: boolean
           created_at?: string
           current_step?: string
@@ -540,6 +542,7 @@ export type Database = {
           completed_privacy?: boolean
           completed_profile?: boolean
           completed_promise?: boolean
+          completed_purpose?: boolean
           completed_ready?: boolean
           created_at?: string
           current_step?: string
