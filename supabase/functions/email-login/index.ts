@@ -32,7 +32,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, mode } = await req.json().catch(() => ({ email: undefined, mode: undefined }));
+    const { email } = await req.json().catch(() => ({ email: undefined }));
 
     if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ error: "Invalid email" }), {
@@ -64,36 +64,7 @@ serve(async (req) => {
     const payload = await res.json();
     const user = payload?.users?.[0] ?? null;
 
-    // Mode: "signin" - only allow if user exists
-    if (mode === "signin") {
-      if (!user?.id) {
-        return new Response(JSON.stringify({ error: "No account found with this email" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // User exists, ensure password is set correctly
-      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
-        password: DEFAULT_PASSWORD,
-        email_confirm: true,
-      });
-
-      if (updateError) {
-        console.error("Failed to update user password:", updateError);
-        return new Response(JSON.stringify({ error: updateError.message }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(
-        JSON.stringify({ ok: true, exists: true, user_id: user.id }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    // Mode: "signup" - create if doesn't exist, or sign in if exists
+    // If user exists, update password; otherwise create new user
     if (user?.id) {
       // User already exists, update password
       const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {

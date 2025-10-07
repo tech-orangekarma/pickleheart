@@ -13,7 +13,6 @@ const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(true);
 
   useEffect(() => {
     const {
@@ -59,12 +58,9 @@ const Auth = () => {
       // Use a default password behind the scenes (no user input)
       const defaultPassword = "pickleheart2024";
 
-      // Call edge function to ensure user exists/is created based on mode
+      // Call edge function to ensure user exists or create new user
       const { data, error: functionError } = await supabase.functions.invoke("email-login", {
-        body: { 
-          email: parsedEmail,
-          mode: isSignUp ? "signup" : "signin"
-        },
+        body: { email: parsedEmail },
       });
 
       if (functionError) throw functionError;
@@ -98,33 +94,12 @@ const Auth = () => {
         </div>
 
         <Card className="p-8">
-          <div className="flex gap-2 mb-6">
-            <Button
-              type="button"
-              variant={isSignUp ? "default" : "outline"}
-              onClick={() => setIsSignUp(true)}
-              className="flex-1"
-            >
-              sign up
-            </Button>
-            <Button
-              type="button"
-              variant={!isSignUp ? "default" : "outline"}
-              onClick={() => setIsSignUp(false)}
-              className="flex-1"
-            >
-              sign in
-            </Button>
-          </div>
-
           <div className="text-center mb-6">
             <h2 className="text-2xl font-headline mb-2">
-              {isSignUp ? "create account" : "welcome back"}
+              welcome to pickleheart
             </h2>
             <p className="text-sm text-muted-foreground">
-              {isSignUp 
-                ? "Join the community and never miss a good game" 
-                : "Sign in to see who's playing"}
+              Enter your email to continue
             </p>
           </div>
 
@@ -148,7 +123,7 @@ const Auth = () => {
               size="lg"
               disabled={loading}
             >
-              {loading ? "continuing..." : isSignUp ? "get started" : "sign in"}
+              {loading ? "continuing..." : "continue"}
             </Button>
           </form>
         </Card>
