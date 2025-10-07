@@ -76,14 +76,18 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        },
       });
 
       if (error) throw error;
+      
+      toast.success("Check your email for the magic link to sign in!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      toast.error(error.message || "Failed to send magic link");
     } finally {
       setLoading(false);
     }
@@ -203,55 +207,23 @@ const Auth = () => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="signin-password">password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full"
                   size="lg"
                   disabled={loading}
                 >
-                  {loading ? "signing in..." : "sign in"}
+                  {loading ? "sending magic link..." : "send magic link"}
                 </Button>
               </form>
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-6 text-center">
                 <Button
                   variant="ghost"
-                  onClick={handleResetPassword}
-                  className="w-full text-sm"
-                  disabled={loading}
-                >
-                  forgot password?
-                </Button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border"></div>
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">or</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
                   onClick={() => setIsSignUp(true)}
-                  className="w-full"
-                  size="lg"
+                  className="text-sm"
                 >
-                  create new account
+                  don't have an account? <span className="underline ml-1">sign up</span>
                 </Button>
               </div>
             </>
