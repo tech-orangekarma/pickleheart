@@ -100,7 +100,7 @@ const Auth = () => {
 
         console.log('[Auth] Account created, waiting for propagation');
         // Wait for password update to propagate
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       // Sign in with password with retry logic
@@ -108,7 +108,7 @@ const Auth = () => {
       setStatusText("signing you in...");
       
       let signInError = null;
-      const delays = [0, 300, 700, 1200]; // Backoff delays
+      const delays = [0, 500, 1000, 1500, 2000]; // Backoff delays
       
       for (let attempt = 0; attempt < delays.length; attempt++) {
         if (attempt > 0) {
