@@ -126,35 +126,37 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6 mb-8">
-          <div>
-            <Label htmlFor="firstName" className="text-base">
-              first name *
-            </Label>
-            <Input
-              id="firstName"
-              type="text"
-              placeholder="e.g., Alex"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="mt-2"
-              autoFocus
-              maxLength={50}
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName" className="text-base">
+                first name *
+              </Label>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="e.g., Alex"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="mt-2"
+                autoFocus
+                maxLength={50}
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="lastName" className="text-base">
-              last name *
-            </Label>
-            <Input
-              id="lastName"
-              type="text"
-              placeholder="e.g., Smith"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="mt-2"
-              maxLength={50}
-            />
+            <div>
+              <Label htmlFor="lastName" className="text-base">
+                last name *
+              </Label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="e.g., Smith"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="mt-2"
+                maxLength={50}
+              />
+            </div>
           </div>
 
           <div>
