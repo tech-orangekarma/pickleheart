@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MapPin, ArrowLeft } from "lucide-react";
+import { MapPin, ArrowLeft, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 interface Park {
@@ -16,7 +16,8 @@ const Location = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [parks, setParks] = useState<Park[]>([]);
-  const [selectedPark, setSelectedPark] = useState<string | null>(null);
+  const [selectedParks, setSelectedParks] = useState<string[]>([]);
+  const [favoritePark, setFavoritePark] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,14 +42,26 @@ const Location = () => {
     setParks(data || []);
   };
 
+  const toggleParkSelection = (parkId: string) => {
+    setSelectedParks(prev => 
+      prev.includes(parkId) 
+        ? prev.filter(id => id !== parkId)
+        : [...prev, parkId]
+    );
+  };
+
+  const toggleFavorite = (parkId: string) => {
+    setFavoritePark(prev => prev === parkId ? null : parkId);
+  };
+
   const handleContinue = async () => {
     if (!userId) return;
 
     try {
-      if (selectedPark) {
+      if (favoritePark) {
         await supabase
           .from("profiles")
-          .update({ home_park_id: selectedPark })
+          .update({ home_park_id: favoritePark })
           .eq("id", userId);
       }
 
@@ -84,25 +97,48 @@ const Location = () => {
           <MapPin className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">where do you play?</h1>
           <p className="text-muted-foreground">
-            Choose your home park (you can change this later)
+            Select parks you play at and favorite your home park
           </p>
         </div>
 
         <div className="space-y-3 mb-6">
-          {parks.map((park) => (
-            <Card
-              key={park.id}
-              className={`p-4 cursor-pointer transition-all ${
-                selectedPark === park.id
-                  ? "border-primary bg-primary/5"
-                  : "hover:border-primary/50"
-              }`}
-              onClick={() => setSelectedPark(park.id)}
-            >
-              <h3 className="font-semibold mb-1">{park.name}</h3>
-              <p className="text-sm text-muted-foreground">{park.address}</p>
-            </Card>
-          ))}
+          {parks.map((park) => {
+            const isSelected = selectedParks.includes(park.id);
+            const isFavorite = favoritePark === park.id;
+            
+            return (
+              <div
+                key={park.id}
+                className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                  isSelected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-background hover:border-primary/50"
+                }`}
+                onClick={() => toggleParkSelection(park.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{park.name}</h3>
+                  {isSelected && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(park.id);
+                      }}
+                      className="p-1 hover:scale-110 transition-transform"
+                    >
+                      <Heart
+                        className={`w-5 h-5 ${
+                          isFavorite
+                            ? "fill-primary text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="space-y-3">
@@ -110,7 +146,7 @@ const Location = () => {
             onClick={handleContinue} 
             className="w-full" 
             size="lg"
-            disabled={!selectedPark}
+            disabled={!favoritePark}
           >
             continue
           </Button>
