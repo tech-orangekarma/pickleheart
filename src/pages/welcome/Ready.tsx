@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Heart, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import heartIcon from "@/assets/heart-icon.png";
 
 const Ready = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Ready = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <div className="relative mb-8">
-          <Heart className="w-24 h-24 mx-auto text-primary animate-pulse" />
+          <img src={heartIcon} alt="heart" className="w-24 h-24 mx-auto animate-pulse" />
           <Sparkles className="w-8 h-8 absolute top-0 right-1/3 text-accent animate-bounce" />
           <Sparkles className="w-6 h-6 absolute bottom-0 left-1/3 text-secondary animate-bounce delay-100" />
         </div>

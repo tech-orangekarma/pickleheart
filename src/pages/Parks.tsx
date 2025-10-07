@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Heart, ChevronLeft, Info, Sun } from "lucide-react";
+import { MapPin, Users, ChevronLeft, Info, Sun } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import heartIcon from "@/assets/heart-icon.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import carlSchurzParkImage from "@/assets/carl-schurz-park.png";
 import centralParkImage from "@/assets/central-park.png";
@@ -252,7 +253,7 @@ const Parks = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/")}
           >
-            <Heart className="w-5 h-5" />
+            <img src={heartIcon} alt="heart" className="w-5 h-5" />
             <span className="text-xs">Home</span>
           </Button>
           <Button

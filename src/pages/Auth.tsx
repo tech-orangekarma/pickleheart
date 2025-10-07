@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Heart } from "lucide-react";
 import { toast } from "sonner";
+import heartIcon from "@/assets/heart-icon.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -114,7 +114,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Heart className="w-16 h-16 mx-auto mb-4 text-primary" />
+          <img src={heartIcon} alt="heart" className="w-16 h-16 mx-auto mb-4" />
           <h1 className="text-4xl font-headline mb-2">pickleheart</h1>
           <p className="text-muted-foreground">find your people at the park</p>
         </div>

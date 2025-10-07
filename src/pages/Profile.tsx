@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit, Heart, Users, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { formatDuprRating } from "@/lib/utils";
@@ -324,7 +325,7 @@ const Profile = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/")}
           >
-            <Heart className="w-5 h-5" />
+            <img src={heartIcon} alt="heart" className="w-5 h-5" />
             <span className="text-xs">home</span>
           </Button>
           <Button
@@ -350,7 +351,7 @@ const Profile = () => {
             size="sm"
             className="flex-col h-auto gap-1"
           >
-            <Heart className="w-5 h-5 text-primary" />
+            <img src={heartIcon} alt="heart" className="w-5 h-5" />
             <span className="text-xs text-primary">me</span>
           </Button>
         </div>

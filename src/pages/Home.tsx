@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Heart, MapPin, Bell, ChevronRight } from "lucide-react";
+import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
+import heartIcon from "@/assets/heart-icon.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatDuprRating } from "@/lib/utils";
@@ -256,7 +257,7 @@ const Home = () => {
             <p className="font-headline text-2xl text-center leading-tight">
               {getQualityMessage()}
             </p>
-            <Heart className="w-8 h-8 mt-3 text-primary fill-primary" />
+            <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3" />
           </div>
         </div>
 
@@ -297,7 +298,7 @@ const Home = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur border-t border-border">
         <div className="max-w-md mx-auto flex justify-around items-center h-16 px-2">
           <Button variant="ghost" size="sm" className="flex-col h-auto gap-1">
-            <Heart className="w-5 h-5 text-primary fill-primary" />
+            <img src={heartIcon} alt="heart" className="w-5 h-5" />
             <span className="text-xs text-primary">Home</span>
           </Button>
           <Button
