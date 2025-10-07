@@ -21,7 +21,7 @@ const Privacy = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
-  const [nameVisibility, setNameVisibility] = useState<"everyone" | "friends" | "none">("friends");
+  const [nameVisibility, setNameVisibility] = useState<"everyone" | "friends" | "none" | null>(null);
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
   const [showLocationWarning, setShowLocationWarning] = useState(false);
 
