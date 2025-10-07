@@ -23,14 +23,11 @@ const Privacy = () => {
     });
   }, [navigate]);
 
-  const handleLocationStep = async () => {
-    if (locationPermission === null) {
-      toast.error("Please select a location permission option");
-      return;
-    }
+  const handleLocationSelection = async (allowed: boolean) => {
+    setLocationPermission(allowed);
 
     // If user wants location, request browser permission
-    if (locationPermission === true) {
+    if (allowed === true) {
       try {
         await new Promise<void>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
@@ -46,6 +43,7 @@ const Privacy = () => {
       }
     }
     
+    // Automatically move to next step
     setStep(2);
   };
 
@@ -105,7 +103,7 @@ const Privacy = () => {
                   ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
                   : "border-border bg-background hover:border-primary/50"
               }`}
-              onClick={() => setLocationPermission(true)}
+              onClick={() => handleLocationSelection(true)}
             >
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-1 text-primary" />
@@ -124,7 +122,7 @@ const Privacy = () => {
                   ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
                   : "border-border bg-background hover:border-primary/50"
               }`}
-              onClick={() => setLocationPermission(false)}
+              onClick={() => handleLocationSelection(false)}
             >
               <div className="flex items-start gap-3">
                 <EyeOff className="w-5 h-5 mt-1 text-muted-foreground" />
@@ -137,10 +135,6 @@ const Privacy = () => {
               </div>
             </Card>
           </div>
-
-          <Button onClick={handleLocationStep} className="w-full" size="lg">
-            continue
-          </Button>
 
           <Button
             variant="ghost"
