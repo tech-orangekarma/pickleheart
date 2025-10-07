@@ -326,9 +326,11 @@ export type Database = {
           dupr_linked_at: string | null
           dupr_rating: number | null
           dupr_source: Database["public"]["Enums"]["dupr_source"] | null
+          first_name: string | null
           gender: string | null
           home_park_id: string | null
           id: string
+          last_name: string | null
           phone: string | null
           updated_at: string
         }
@@ -340,9 +342,11 @@ export type Database = {
           dupr_linked_at?: string | null
           dupr_rating?: number | null
           dupr_source?: Database["public"]["Enums"]["dupr_source"] | null
+          first_name?: string | null
           gender?: string | null
           home_park_id?: string | null
           id: string
+          last_name?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -354,9 +358,11 @@ export type Database = {
           dupr_linked_at?: string | null
           dupr_rating?: number | null
           dupr_source?: Database["public"]["Enums"]["dupr_source"] | null
+          first_name?: string | null
           gender?: string | null
           home_park_id?: string | null
           id?: string
+          last_name?: string | null
           phone?: string | null
           updated_at?: string
         }

@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(50, "First name must be less than 50 characters"),
+  lastName: z.string().trim().min(1, "Last name is required").max(50, "Last name must be less than 50 characters"),
+  displayName: z.string().trim().min(1, "Display name is required").max(50, "Display name must be less than 50 characters"),
+});
 
 const months = [
   { value: "01", label: "January" },
@@ -40,6 +47,8 @@ const generateYears = () => {
 const Profile = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [gender, setGender] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -57,8 +66,18 @@ const Profile = () => {
   }, [navigate]);
 
   const handleContinue = async () => {
-    if (!userId || !displayName.trim()) {
-      toast.error("Please enter your name");
+    if (!userId) return;
+
+    // Validate input
+    const validation = profileSchema.safeParse({
+      firstName,
+      lastName,
+      displayName,
+    });
+
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
@@ -73,7 +92,9 @@ const Profile = () => {
         .from("profiles")
         .upsert({
           id: userId,
-          display_name: displayName.trim(),
+          first_name: validation.data.firstName,
+          last_name: validation.data.lastName,
+          display_name: validation.data.displayName,
           gender: gender || null,
           birthday: birthdayString,
         });
@@ -106,17 +127,48 @@ const Profile = () => {
 
         <div className="space-y-6 mb-8">
           <div>
+            <Label htmlFor="firstName" className="text-base">
+              first name *
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              placeholder="e.g., Alex"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="mt-2"
+              autoFocus
+              maxLength={50}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="lastName" className="text-base">
+              last name *
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              placeholder="e.g., Smith"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="mt-2"
+              maxLength={50}
+            />
+          </div>
+
+          <div>
             <Label htmlFor="displayName" className="text-base">
               display name *
             </Label>
             <Input
               id="displayName"
               type="text"
-              placeholder="e.g., Alex"
+              placeholder="e.g., Alex S."
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="mt-2"
-              autoFocus
+              maxLength={50}
             />
           </div>
 
@@ -190,7 +242,7 @@ const Profile = () => {
           onClick={handleContinue} 
           className="w-full" 
           size="lg"
-          disabled={!displayName.trim()}
+          disabled={!firstName.trim() || !lastName.trim() || !displayName.trim()}
         >
           continue
         </Button>
