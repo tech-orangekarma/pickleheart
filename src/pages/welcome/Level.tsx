@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Award, HelpCircle } from "lucide-react";
+import { Award, HelpCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDuprRating } from "@/lib/utils";
 
@@ -80,6 +80,16 @@ const Level = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/welcome/profile")}
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          back
+        </Button>
+        
         <div className="text-center mb-8">
           <Award className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">what's your level?</h1>

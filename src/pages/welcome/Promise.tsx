@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 
 const Promise = () => {
@@ -31,6 +32,16 @@ const Promise = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/welcome/delight")}
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          back
+        </Button>
+        
         <img src={heartIcon} alt="heart" className="w-20 h-20 mx-auto mb-6" />
         
         <h1 className="text-4xl font-headline mb-6">

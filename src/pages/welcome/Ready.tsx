@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowLeft } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 
 const Ready = () => {
@@ -29,6 +29,16 @@ const Ready = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/welcome/privacy")}
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          back
+        </Button>
+        
         <div className="relative mb-8">
           <img src={heartIcon} alt="heart" className="w-24 h-24 mx-auto animate-pulse" />
           <Sparkles className="w-8 h-8 absolute top-0 right-1/3 text-accent animate-bounce" />
