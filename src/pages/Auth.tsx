@@ -12,6 +12,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
 
   useEffect(() => {
     const {
@@ -54,23 +55,32 @@ const Auth = () => {
       // Use a default password for all users (no security as requested)
       const defaultPassword = "pickleheart2024";
       
-      // Try to sign in first
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: defaultPassword,
-      });
-
-      // If sign in fails, create the account
-      if (signInError) {
-        const { error: signUpError } = await supabase.auth.signUp({
+      if (isSignUp) {
+        // Try to sign in first, if that fails create new account
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password: defaultPassword,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
         });
 
-        if (signUpError) throw signUpError;
+        if (signInError) {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: defaultPassword,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+            },
+          });
+
+          if (signUpError) throw signUpError;
+        }
+      } else {
+        // Sign in only
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: defaultPassword,
+        });
+
+        if (signInError) throw signInError;
       }
       
       toast.success("Welcome!");
@@ -91,10 +101,33 @@ const Auth = () => {
         </div>
 
         <Card className="p-8">
+          <div className="flex gap-2 mb-6">
+            <Button
+              type="button"
+              variant={isSignUp ? "default" : "outline"}
+              onClick={() => setIsSignUp(true)}
+              className="flex-1"
+            >
+              sign up
+            </Button>
+            <Button
+              type="button"
+              variant={!isSignUp ? "default" : "outline"}
+              onClick={() => setIsSignUp(false)}
+              className="flex-1"
+            >
+              sign in
+            </Button>
+          </div>
+
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-headline mb-2">get started</h2>
+            <h2 className="text-2xl font-headline mb-2">
+              {isSignUp ? "create account" : "welcome back"}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Enter your email to continue
+              {isSignUp 
+                ? "Join the community and never miss a good game" 
+                : "Sign in to see who's playing"}
             </p>
           </div>
 
@@ -118,7 +151,7 @@ const Auth = () => {
               size="lg"
               disabled={loading}
             >
-              {loading ? "continuing..." : "continue"}
+              {loading ? "continuing..." : isSignUp ? "get started" : "sign in"}
             </Button>
           </form>
         </Card>
