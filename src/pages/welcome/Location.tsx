@@ -116,8 +116,8 @@ const Location = () => {
                 }`}
                 onClick={() => toggleParkSelection(park.id)}
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{park.name}</h3>
+                <div className="flex items-center justify-center">
+                  <h3 className="font-semibold text-center">{park.name}</h3>
                   {isSelected && (
                     <button
                       onClick={(e) => {
