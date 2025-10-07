@@ -52,15 +52,15 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate email input
       const parsedEmail = z.string().trim().email().max(255).parse(email);
+      const emailToUse = parsedEmail.toLowerCase();
 
       // Use a default password behind the scenes (no user input)
       const defaultPassword = "pickleheart2024";
 
       // Call edge function to ensure user exists or create new user
       const { data, error: functionError } = await supabase.functions.invoke("email-login", {
-        body: { email: parsedEmail },
+        body: { email: emailToUse },
       });
 
       if (functionError) throw functionError;
@@ -69,14 +69,23 @@ const Auth = () => {
         throw new Error(data?.error || "Failed to authenticate");
       }
 
-      // Now sign in silently with the default password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: parsedEmail,
-        password: defaultPassword,
-      });
-      if (signInError) throw signInError;
-
-      toast.success("Welcome!");
+      // Now sign in silently with the default password (retry to avoid race conditions)
+      let lastError: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: emailToUse,
+          password: defaultPassword,
+        });
+        if (!signInError) {
+          toast.success("Welcome!");
+          lastError = null;
+          break;
+        }
+        lastError = signInError;
+        // small backoff before retry
+        await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
+      }
+      if (lastError) throw lastError;
     } catch (error: any) {
       toast.error(error?.message || "Failed to sign in");
     } finally {
