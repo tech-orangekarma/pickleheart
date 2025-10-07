@@ -12,7 +12,6 @@ import heartIcon from "@/assets/heart-icon.png";
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -56,11 +55,6 @@ const Auth = () => {
     try {
       const parsedEmail = z.string().trim().email().max(255).parse(email);
       const emailToUse = parsedEmail.toLowerCase();
-
-      if (password !== "pickle") {
-        toast.error("Invalid password");
-        return;
-      }
 
       if (isSignUp) {
         // Sign up flow - create user if doesn't exist
@@ -150,22 +144,6 @@ const Auth = () => {
                 required
                 className="mt-1"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="password">password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                enter the password pickle
-              </p>
             </div>
 
             <Button
