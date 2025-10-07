@@ -517,6 +517,7 @@ export type Database = {
           created_at: string
           current_step: string
           id: string
+          selected_purpose: string | null
           updated_at: string
           user_id: string
         }
@@ -532,6 +533,7 @@ export type Database = {
           created_at?: string
           current_step?: string
           id?: string
+          selected_purpose?: string | null
           updated_at?: string
           user_id: string
         }
@@ -547,6 +549,7 @@ export type Database = {
           created_at?: string
           current_step?: string
           id?: string
+          selected_purpose?: string | null
           updated_at?: string
           user_id?: string
         }

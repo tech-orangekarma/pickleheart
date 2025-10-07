@@ -36,6 +36,7 @@ const Purpose = () => {
       await supabase.from("welcome_progress").upsert({
         user_id: userId,
         completed_purpose: true,
+        selected_purpose: purposeValue,
         current_step: "level",
       });
 

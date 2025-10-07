@@ -22,11 +22,26 @@ const Level = () => {
   const [duprRating, setDuprRating] = useState(2.0);
   const [ratingInput, setRatingInput] = useState("2.0");
   const [showAssessment, setShowAssessment] = useState(false);
+  const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) navigate("/auth");
-      else setUserId(session.user.id);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUserId(session.user.id);
+
+      // Fetch the selected purpose
+      const { data: progressData } = await supabase
+        .from("welcome_progress")
+        .select("selected_purpose")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (progressData?.selected_purpose) {
+        setSelectedPurpose(progressData.selected_purpose);
+      }
     });
   }, [navigate]);
 
@@ -100,6 +115,8 @@ const Level = () => {
     );
   }
 
+  const showAssessmentFirst = selectedPurpose === "getting-started" || selectedPurpose === "fun-with-friends";
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -110,6 +127,17 @@ const Level = () => {
             This helps you find matches at your skill level
           </p>
         </div>
+
+        {showAssessmentFirst && (
+          <Button
+            onClick={handleSelfAssessment}
+            variant="outline"
+            className="w-full mb-6 h-12"
+          >
+            <HelpCircle className="w-5 h-5 mr-2" />
+            take quick assessment
+          </Button>
+        )}
 
         <Card className="p-6 mb-6">
           <div className="space-y-6">
@@ -157,16 +185,28 @@ const Level = () => {
           </div>
         </Card>
 
-        <div className="space-y-3">
-          <Button
-            onClick={handleSelfAssessment}
-            variant="outline"
-            className="w-full"
-          >
-            <HelpCircle className="w-4 h-4 mr-2" />
-            take quick assessment
-          </Button>
+        {!showAssessmentFirst && (
+          <div className="space-y-3">
+            <Button
+              onClick={handleSelfAssessment}
+              variant="outline"
+              className="w-full"
+            >
+              <HelpCircle className="w-4 h-4 mr-2" />
+              take quick assessment
+            </Button>
 
+            <Button
+              onClick={handleSkip}
+              variant="ghost"
+              className="w-full"
+            >
+              skip for now
+            </Button>
+          </div>
+        )}
+
+        {showAssessmentFirst && (
           <Button
             onClick={handleSkip}
             variant="ghost"
@@ -174,7 +214,7 @@ const Level = () => {
           >
             skip for now
           </Button>
-        </div>
+        )}
 
         <Button
           variant="ghost"
