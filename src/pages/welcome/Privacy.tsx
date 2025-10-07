@@ -6,6 +6,15 @@ import { Card } from "@/components/ui/card";
 import { MapPin, Users, Eye, EyeOff, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -14,6 +23,7 @@ const Privacy = () => {
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [nameVisibility, setNameVisibility] = useState<"everyone" | "friends" | "none">("friends");
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
+  const [showLocationWarning, setShowLocationWarning] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -26,6 +36,13 @@ const Privacy = () => {
   }, [navigate]);
 
   const handleLocationSelection = async (allowed: boolean) => {
+    if (allowed === false) {
+      // Show warning dialog for "don't allow"
+      setLocationPermission(false);
+      setShowLocationWarning(true);
+      return;
+    }
+
     setLocationPermission(allowed);
 
     // If user wants location, request browser permission
@@ -46,6 +63,11 @@ const Privacy = () => {
     }
     
     // Automatically move to next step
+    setStep(2);
+  };
+
+  const handleLocationWarningContinue = () => {
+    setShowLocationWarning(false);
     setStep(2);
   };
 
@@ -176,10 +198,26 @@ const Privacy = () => {
 
           <div className="mt-4 text-center">
             <p className="text-xs text-muted-foreground">
-              step 6 of 7 (part 1 of 2)
+              step 6 of 7 (part 1 of 2) • you can change this anytime
             </p>
           </div>
         </div>
+
+        <AlertDialog open={showLocationWarning} onOpenChange={setShowLocationWarning}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Location Access Disabled</AlertDialogTitle>
+              <AlertDialogDescription className="text-left space-y-3">
+                We get it, privacy matters. Just keep in mind, without location access, Pickleheart won't automatically check you in. So unless you check in your friends want know you're there. You can update your settings anytime if you change your mind.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={handleLocationWarningContinue}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
