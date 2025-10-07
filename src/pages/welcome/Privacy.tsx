@@ -100,10 +100,10 @@ const Privacy = () => {
 
           <div className="space-y-3 mb-8">
             <Card
-              className={`p-4 cursor-pointer transition-all ${
+              className={`p-4 cursor-pointer transition-all border ${
                 locationPermission === true
-                  ? "border-primary bg-primary/5"
-                  : "hover:border-primary/50"
+                  ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
+                  : "border-border bg-background hover:border-primary/50"
               }`}
               onClick={() => setLocationPermission(true)}
             >
@@ -119,10 +119,10 @@ const Privacy = () => {
             </Card>
 
             <Card
-              className={`p-4 cursor-pointer transition-all ${
+              className={`p-4 cursor-pointer transition-all border ${
                 locationPermission === false
-                  ? "border-primary bg-primary/5"
-                  : "hover:border-primary/50"
+                  ? "border-[hsl(var(--light-butter))] bg-[hsl(var(--light-butter))]"
+                  : "border-border bg-background hover:border-primary/50"
               }`}
               onClick={() => setLocationPermission(false)}
             >
