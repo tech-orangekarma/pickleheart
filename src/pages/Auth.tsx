@@ -53,9 +53,8 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -63,9 +62,9 @@ const Auth = () => {
 
       if (error) throw error;
       
-      toast.success("Welcome! Check your email to confirm your account.");
+      toast.success("Check your email for the magic link to continue!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign up");
+      toast.error(error.message || "Failed to send magic link");
     } finally {
       setLoading(false);
     }
@@ -147,30 +146,13 @@ const Auth = () => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="signup-password">password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    At least 6 characters
-                  </p>
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full"
                   size="lg"
                   disabled={loading}
                 >
-                  {loading ? "creating account..." : "sign up"}
+                  {loading ? "sending magic link..." : "get started"}
                 </Button>
               </form>
 
