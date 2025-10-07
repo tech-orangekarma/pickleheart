@@ -151,16 +151,18 @@ const Level = () => {
                   className="w-24 text-3xl font-bold text-primary text-center border-0 focus-visible:ring-0 p-0"
                 />
               </div>
-              <Slider
-                value={[duprRating]}
-                onValueChange={handleSliderChange}
-                min={2.0}
-                max={5.0}
-                step={0.25}
-                className="mb-2"
-              />
-              <div className="relative text-xs text-muted-foreground mt-2 h-8">
-                <div className="absolute left-0 flex flex-col items-center -translate-x-1/2">
+              <div className="px-2">
+                <Slider
+                  value={[duprRating]}
+                  onValueChange={handleSliderChange}
+                  min={2.0}
+                  max={5.0}
+                  step={0.25}
+                  className="mb-2"
+                />
+              </div>
+              <div className="relative text-xs text-muted-foreground mt-2 h-8 px-2">
+                <div className="absolute left-[2%] flex flex-col items-center">
                   <span className="font-semibold">2.0</span>
                   <span className="text-[10px] whitespace-nowrap">beginner/casual</span>
                 </div>
@@ -172,7 +174,7 @@ const Level = () => {
                   <span className="font-semibold">4.0</span>
                   <span className="text-[10px]">advanced</span>
                 </div>
-                <div className="absolute left-full flex flex-col items-center -translate-x-1/2">
+                <div className="absolute right-[2%] flex flex-col items-center">
                   <span className="font-semibold">5.0+</span>
                   <span className="text-[10px]">expert</span>
                 </div>
