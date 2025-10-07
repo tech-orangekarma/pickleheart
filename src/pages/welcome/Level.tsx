@@ -98,16 +98,13 @@ const Level = () => {
         <Card className="p-6 mb-6">
           <div className="space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-4">
                 <span className="text-sm text-muted-foreground">DUPR Rating</span>
                 <span className="text-3xl font-bold text-primary">
                   {formatDuprRating(duprRating)}
                   {duprRating >= 5.0 && "+"}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                {getSkillLabel(duprRating)}
-              </p>
               <Slider
                 value={[duprRating]}
                 onValueChange={(vals) => setDuprRating(vals[0])}
@@ -117,10 +114,22 @@ const Level = () => {
                 className="mb-2"
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>2.0</span>
-                <span>3.0</span>
-                <span>4.0</span>
-                <span>5.0+</span>
+                <div className="flex flex-col items-center">
+                  <span className="font-semibold">2.0</span>
+                  <span className="text-[10px]">beginner/casual</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="font-semibold">3.0</span>
+                  <span className="text-[10px]">intermediate</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="font-semibold">4.0</span>
+                  <span className="text-[10px]">advanced</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="font-semibold">5.0+</span>
+                  <span className="text-[10px]">expert</span>
+                </div>
               </div>
             </div>
 
