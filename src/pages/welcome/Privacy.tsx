@@ -90,16 +90,6 @@ const Privacy = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/welcome/location")}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            back
-          </Button>
-          
           <div className="text-center mb-8">
             <MapPin className="w-16 h-16 mx-auto mb-4 text-primary" />
             <h1 className="text-3xl font-headline mb-2">location permission</h1>
@@ -152,7 +142,17 @@ const Privacy = () => {
             continue
           </Button>
 
-          <div className="mt-6 text-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/welcome/location")}
+            className="mt-4 w-full"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            back
+          </Button>
+
+          <div className="mt-4 text-center">
             <p className="text-xs text-muted-foreground">
               step 6 of 7 (part 1 of 2)
             </p>
@@ -165,16 +165,6 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setStep(1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          back
-        </Button>
-        
         <div className="text-center mb-8">
           <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">name visibility</h1>
@@ -246,7 +236,17 @@ const Privacy = () => {
           continue
         </Button>
 
-        <div className="mt-6 text-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setStep(1)}
+          className="mt-4 w-full"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          back
+        </Button>
+
+        <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground">
             step 6 of 7 (part 2 of 2) • you can change this anytime
           </p>

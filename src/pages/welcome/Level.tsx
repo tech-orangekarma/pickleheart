@@ -80,16 +80,6 @@ const Level = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/welcome/profile")}
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          back
-        </Button>
-        
         <div className="text-center mb-8">
           <Award className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">what's your level?</h1>
@@ -146,7 +136,17 @@ const Level = () => {
           </Button>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/welcome/profile")}
+          className="mt-4 w-full"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          back
+        </Button>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           step 4 of 7
         </p>
       </div>
