@@ -167,8 +167,17 @@ const Home = () => {
   };
 
   const getQualityMessage = () => {
-    // Temporary sample data
-    return "Yes. It's a great time for you!";
+    const selectedPark = parks.find(p => p.id === selectedParkId);
+    const parkName = selectedPark?.name || "Park";
+    
+    switch (quality) {
+      case "great":
+        return `Yes! Courts are hot right now`;
+      case "good":
+        return `Good time to play at ${parkName}`;
+      case "bad":
+        return `Courts are pretty busy right now`;
+    }
   };
 
   const formatRating = (rating: number) => {
@@ -258,17 +267,19 @@ const Home = () => {
             onClick={() => setShowPlayersDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
-            <div className="text-3xl font-bold mb-1">7</div>
-            <div className="text-xs font-medium">Friends at<br/>the Park</div>
+            <div className="text-3xl font-bold mb-1">{playersCount}</div>
+            <div className="text-xs font-medium">Players at<br/>the Park</div>
           </button>
           
           <button
             onClick={() => setShowSkillDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
-            <div className="text-3xl font-bold mb-1">9</div>
+            <div className="text-3xl font-bold mb-1">{skillPlayersCount}</div>
             <div className="text-xs font-medium">
-              3.0-3.5
+              {skillRange[0] >= 4.5 
+                ? `${formatRating(skillRange[0])}+` 
+                : `${formatRating(skillRange[0])}-${formatRating(skillRange[1])}`}
               <br/>Players at the Park
             </div>
           </button>
@@ -277,7 +288,7 @@ const Home = () => {
             onClick={() => setShowStackDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
-            <div className="text-3xl font-bold mb-1">2</div>
+            <div className="text-3xl font-bold mb-1">—</div>
             <div className="text-xs font-medium">Stack Count</div>
           </button>
         </div>
