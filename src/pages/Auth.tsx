@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { z } from "zod";
 import heartIcon from "@/assets/heart-icon.png";
 
 const Auth = () => {
@@ -52,40 +53,28 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Use a default password for all users (no security as requested)
+      // Validate email input
+      const parsedEmail = z.string().trim().email().max(255).parse(email);
+
+      // Use a default password behind the scenes (no user input)
       const defaultPassword = "pickleheart2024";
-      
-      if (isSignUp) {
-        // Try to sign in first, if that fails create new account
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password: defaultPassword,
-        });
 
-        if (signInError) {
-          const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password: defaultPassword,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-            },
-          });
+      // Ensure the user exists and has the default password set (auto-confirmed)
+      const { error: functionError } = await supabase.functions.invoke("email-login", {
+        body: { email: parsedEmail },
+      });
+      if (functionError) throw functionError;
 
-          if (signUpError) throw signUpError;
-        }
-      } else {
-        // Sign in only
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password: defaultPassword,
-        });
+      // Now sign in silently with the default password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: parsedEmail,
+        password: defaultPassword,
+      });
+      if (signInError) throw signInError;
 
-        if (signInError) throw signInError;
-      }
-      
       toast.success("Welcome!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to authenticate");
+      toast.error(error?.message || "Failed to sign in");
     } finally {
       setLoading(false);
     }
