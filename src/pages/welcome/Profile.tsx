@@ -17,7 +17,7 @@ const profileSchema = z.object({
 
 const generateAgeOptions = () => {
   const ages = [];
-  for (let i = 13; i <= 100; i++) {
+  for (let i = 18; i <= 100; i++) {
     ages.push(i.toString());
   }
   return ages;
