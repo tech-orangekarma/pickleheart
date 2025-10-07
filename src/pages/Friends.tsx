@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, MapPin, Search } from "lucide-react";
+import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 import { FriendOptionsDialog } from "@/components/FriendOptionsDialog";
@@ -505,7 +506,7 @@ const Friends = () => {
             className="flex-col h-auto gap-1"
             onClick={() => navigate("/")}
           >
-            <MapPin className="w-5 h-5" />
+            <img src={heartIcon} alt="home" className="w-5 h-5" />
             <span className="text-xs">home</span>
           </Button>
           <Button
