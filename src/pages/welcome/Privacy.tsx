@@ -157,7 +157,7 @@ const Privacy = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Don't allow location</h3>
                   <p className="text-sm text-muted-foreground">
-                    Limited features available without location
+                    You'll have to manually check-in to help your community
                   </p>
                 </div>
               </div>
