@@ -12,6 +12,8 @@ import heartIcon from "@/assets/heart-icon.png";
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -55,37 +57,40 @@ const Auth = () => {
       const parsedEmail = z.string().trim().email().max(255).parse(email);
       const emailToUse = parsedEmail.toLowerCase();
 
-      // Use a default password behind the scenes (no user input)
-      const defaultPassword = "pickleheart2024";
+      if (password !== "pickle") {
+        toast.error("Invalid password");
+        return;
+      }
 
-      // Call edge function to ensure user exists or create new user
-      const { data, error: functionError } = await supabase.functions.invoke("email-login", {
-        body: { email: emailToUse },
+      if (isSignUp) {
+        // Sign up flow - create user if doesn't exist
+        const { data, error: functionError } = await supabase.functions.invoke("email-login", {
+          body: { email: emailToUse },
+        });
+
+        if (functionError) throw functionError;
+        
+        if (!data?.ok) {
+          throw new Error(data?.error || "Failed to create account");
+        }
+      }
+
+      // Sign in with password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: emailToUse,
+        password: "pickle",
       });
 
-      if (functionError) throw functionError;
-      
-      if (!data?.ok) {
-        throw new Error(data?.error || "Failed to authenticate");
+      if (signInError) {
+        if (signInError.message.includes("Invalid login credentials")) {
+          toast.error(isSignUp ? "Failed to create account" : "No account found with this email");
+        } else {
+          throw signInError;
+        }
+        return;
       }
 
-      // Now sign in silently with the default password (retry to avoid race conditions)
-      let lastError: any = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: emailToUse,
-          password: defaultPassword,
-        });
-        if (!signInError) {
-          toast.success("Welcome!");
-          lastError = null;
-          break;
-        }
-        lastError = signInError;
-        // small backoff before retry
-        await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
-      }
-      if (lastError) throw lastError;
+      toast.success(isSignUp ? "Account created! Welcome!" : "Welcome back!");
     } catch (error: any) {
       toast.error(error?.message || "Failed to sign in");
     } finally {
@@ -103,12 +108,33 @@ const Auth = () => {
         </div>
 
         <Card className="p-8">
+          <div className="flex gap-2 mb-6">
+            <Button
+              type="button"
+              variant={isSignUp ? "default" : "outline"}
+              onClick={() => setIsSignUp(true)}
+              className="flex-1"
+            >
+              sign up
+            </Button>
+            <Button
+              type="button"
+              variant={!isSignUp ? "default" : "outline"}
+              onClick={() => setIsSignUp(false)}
+              className="flex-1"
+            >
+              sign in
+            </Button>
+          </div>
+
           <div className="text-center mb-6">
             <h2 className="text-2xl font-headline mb-2">
-              welcome to pickleheart
+              {isSignUp ? "create account" : "welcome back"}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Enter your email to continue
+              {isSignUp 
+                ? "Join the community and never miss a good game" 
+                : "Sign in to see who's playing"}
             </p>
           </div>
 
@@ -126,13 +152,29 @@ const Auth = () => {
               />
             </div>
 
+            <div>
+              <Label htmlFor="password">password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                enter the password pickle
+              </p>
+            </div>
+
             <Button
               type="submit"
               className="w-full"
               size="lg"
               disabled={loading}
             >
-              {loading ? "continuing..." : "continue"}
+              {loading ? "continuing..." : isSignUp ? "sign up" : "sign in"}
             </Button>
           </form>
         </Card>

@@ -14,7 +14,7 @@ if (!supabaseUrl || !serviceRoleKey) {
 
 const admin = createClient(supabaseUrl!, serviceRoleKey!);
 
-const DEFAULT_PASSWORD = "pickleheart2024";
+const DEFAULT_PASSWORD = "pickle";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
