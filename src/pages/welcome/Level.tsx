@@ -162,7 +162,7 @@ const Level = () => {
                 />
               </div>
               <div className="relative text-xs text-muted-foreground mt-2 h-8 px-2">
-                <div className="absolute left-0 flex flex-col items-start">
+                <div className="absolute left-0 flex flex-col items-center -translate-x-1/2">
                   <span className="font-semibold">2.0</span>
                   <span className="text-[10px] whitespace-nowrap">beginner/casual</span>
                 </div>
@@ -174,7 +174,7 @@ const Level = () => {
                   <span className="font-semibold">4.0</span>
                   <span className="text-[10px]">advanced</span>
                 </div>
-                <div className="absolute right-0 flex flex-col items-end">
+                <div className="absolute left-full flex flex-col items-center -translate-x-1/2">
                   <span className="font-semibold">5.0+</span>
                   <span className="text-[10px]">expert</span>
                 </div>
