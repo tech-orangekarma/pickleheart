@@ -139,7 +139,7 @@ const Level = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/welcome/profile")}
+          onClick={() => navigate("/welcome/purpose")}
           className="mt-4 w-full"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

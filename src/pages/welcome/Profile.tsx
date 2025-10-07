@@ -83,10 +83,10 @@ const Profile = () => {
       await supabase.from("welcome_progress").upsert({
         user_id: userId,
         completed_profile: true,
-        current_step: "level",
+        current_step: "purpose",
       });
 
-      navigate("/welcome/level");
+      navigate("/welcome/purpose");
     } catch (error) {
       console.error("Error saving profile:", error);
       toast.error("Failed to save profile");

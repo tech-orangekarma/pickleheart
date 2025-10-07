@@ -17,6 +17,7 @@ import Privacy from "./pages/welcome/Privacy";
 import Delight from "./pages/welcome/Delight";
 import Promise from "./pages/welcome/Promise";
 import WelcomeProfile from "./pages/welcome/Profile";
+import Purpose from "./pages/welcome/Purpose";
 import Level from "./pages/welcome/Level";
 import Location from "./pages/welcome/Location";
 import Ready from "./pages/welcome/Ready";
@@ -43,6 +44,7 @@ const AppContent = () => {
       <Route path="/welcome/delight" element={<Delight />} />
       <Route path="/welcome/promise" element={<Promise />} />
       <Route path="/welcome/profile" element={<WelcomeProfile />} />
+      <Route path="/welcome/purpose" element={<Purpose />} />
       <Route path="/welcome/level" element={<Level />} />
       <Route path="/welcome/location" element={<Location />} />
       <Route path="/welcome/ready" element={<Ready />} />
