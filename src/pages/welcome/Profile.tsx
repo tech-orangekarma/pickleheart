@@ -15,33 +15,12 @@ const profileSchema = z.object({
   displayName: z.string().trim().min(1, "Display name is required").max(50, "Display name must be less than 50 characters"),
 });
 
-const months = [
-  { value: "01", label: "January" },
-  { value: "02", label: "February" },
-  { value: "03", label: "March" },
-  { value: "04", label: "April" },
-  { value: "05", label: "May" },
-  { value: "06", label: "June" },
-  { value: "07", label: "July" },
-  { value: "08", label: "August" },
-  { value: "09", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
-
-const getDaysInMonth = (month: string, year: string) => {
-  if (!month || !year) return 31;
-  return new Date(parseInt(year), parseInt(month), 0).getDate();
-};
-
-const generateYears = () => {
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let i = currentYear; i >= currentYear - 100; i--) {
-    years.push(i.toString());
+const generateAgeOptions = () => {
+  const ages = [];
+  for (let i = 18; i <= 100; i++) {
+    ages.push(i.toString());
   }
-  return years;
+  return ages;
 };
 
 const Profile = () => {
@@ -51,9 +30,7 @@ const Profile = () => {
   const [lastName, setLastName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [gender, setGender] = useState("");
-  const [birthMonth, setBirthMonth] = useState("");
-  const [birthDay, setBirthDay] = useState("");
-  const [birthYear, setBirthYear] = useState("");
+  const [age, setAge] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -81,10 +58,12 @@ const Profile = () => {
       return;
     }
 
-    // Construct birthday if all parts are present
+    // Calculate birthday from age if provided
     let birthdayString = null;
-    if (birthMonth && birthDay && birthYear) {
-      birthdayString = `${birthYear}-${birthMonth}-${birthDay}`;
+    if (age) {
+      const currentYear = new Date().getFullYear();
+      const birthYear = currentYear - parseInt(age);
+      birthdayString = `${birthYear}-01-01`;
     }
 
     try {
@@ -192,51 +171,22 @@ const Profile = () => {
               </Select>
             </div>
 
-            <div className="col-span-2">
-              <Label className="text-base">birthday (optional)</Label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                <Select value={birthMonth} onValueChange={setBirthMonth}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((month) => (
-                      <SelectItem key={month.value} value={month.value}>
-                        {month.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Select value={birthDay} onValueChange={setBirthDay}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: getDaysInMonth(birthMonth, birthYear) }, (_, i) => {
-                      const day = (i + 1).toString().padStart(2, '0');
-                      return (
-                        <SelectItem key={day} value={day}>
-                          {i + 1}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                
-                <Select value={birthYear} onValueChange={setBirthYear}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateYears().map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="age" className="text-base">
+                how old are you? (optional)
+              </Label>
+              <Select value={age} onValueChange={setAge}>
+                <SelectTrigger id="age" className="mt-2">
+                  <SelectValue placeholder="Select age" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateAgeOptions().map((ageOption) => (
+                    <SelectItem key={ageOption} value={ageOption}>
+                      {ageOption}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
