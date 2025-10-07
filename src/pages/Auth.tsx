@@ -11,8 +11,6 @@ import heartIcon from "@/assets/heart-icon.png";
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -48,66 +46,36 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) throw error;
+      // Use a default password for all users (no security as requested)
+      const defaultPassword = "pickleheart2024";
       
-      toast.success("Check your email for the magic link to continue!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send magic link");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
+      // Try to sign in first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
+        password: defaultPassword,
       });
 
-      if (error) throw error;
+      // If sign in fails, create the account
+      if (signInError) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: defaultPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
+
+        if (signUpError) throw signUpError;
+      }
       
-      toast.success("Check your email for the magic link to sign in!");
+      toast.success("Welcome!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to send magic link");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!email) {
-      toast.error("Please enter your email address");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
-
-      if (error) throw error;
-      toast.success("Password reset email sent!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
+      toast.error(error.message || "Failed to authenticate");
     } finally {
       setLoading(false);
     }
@@ -123,93 +91,36 @@ const Auth = () => {
         </div>
 
         <Card className="p-8">
-          {isSignUp ? (
-            <>
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-headline mb-2">create account</h2>
-                <p className="text-sm text-muted-foreground">
-                  Join the community and never miss a good game
-                </p>
-              </div>
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-headline mb-2">get started</h2>
+            <p className="text-sm text-muted-foreground">
+              Enter your email to continue
+            </p>
+          </div>
 
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div>
-                  <Label htmlFor="signup-email">email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <Label htmlFor="email">email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mt-1"
+              />
+            </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={loading}
-                >
-                  {loading ? "sending magic link..." : "get started"}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center space-y-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsSignUp(false)}
-                  className="text-sm"
-                >
-                  already have an account? <span className="underline ml-1">sign in</span>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-headline mb-2">welcome back</h2>
-                <p className="text-sm text-muted-foreground">
-                  Sign in to see who's playing
-                </p>
-              </div>
-
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div>
-                  <Label htmlFor="signin-email">email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={loading}
-                >
-                  {loading ? "sending magic link..." : "send magic link"}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center">
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsSignUp(true)}
-                  className="text-sm"
-                >
-                  don't have an account? <span className="underline ml-1">sign up</span>
-                </Button>
-              </div>
-            </>
-          )}
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={loading}
+            >
+              {loading ? "continuing..." : "continue"}
+            </Button>
+          </form>
         </Card>
       </div>
     </div>
