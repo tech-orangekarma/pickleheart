@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MapPin, Users, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { MapPin, Users, Eye, EyeOff, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Privacy = () => {
   const [step, setStep] = useState<1 | 2>(1);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [nameVisibility, setNameVisibility] = useState<"everyone" | "friends" | "none">("friends");
+  const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -93,9 +95,33 @@ const Privacy = () => {
           <div className="text-center mb-8">
             <MapPin className="w-16 h-16 mx-auto mb-4 text-primary" />
             <h1 className="text-3xl font-headline mb-2">location permission</h1>
-            <p className="text-muted-foreground">
-              Pickleheart needs your location to be most useful for the community. Pickleheart only cares about your location when you are at the park.
+            <p className="text-muted-foreground mb-4">
+              Pickleheart uses your location only to automatically check you in at supported park. Your location is never stored or tracked.
             </p>
+            
+            <Collapsible open={isMoreInfoOpen} onOpenChange={setIsMoreInfoOpen}>
+              <CollapsibleTrigger className="flex items-center gap-2 mx-auto text-sm text-primary hover:underline">
+                more info
+                {isMoreInfoOpen ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <div className="text-sm text-muted-foreground text-left max-w-md mx-auto space-y-3">
+                  <p>
+                    Pickleheart uses your location to make check-ins easy and automatic. Every few minutes, the app simply checks whether you're at one of our supported parks.
+                  </p>
+                  <p>
+                    If you are, we'll mark you as "checked in" so friends can see who's playing. If you're not at a park, your location is immediately ignored.
+                  </p>
+                  <p>
+                    We don't store, track, or share your location data — ever. Location access is only used in the moment to help you connect with your local pickleball community seamlessly and securely.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           <div className="space-y-3 mb-8">
