@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy, Share2 } from "lucide-react";
-import QRCode from "react-qr-code";
+import { Copy, Share2, QrCode } from "lucide-react";
+import QRCodeReact from "react-qr-code";
 
 interface InviteFriendsDialogProps {
   open: boolean;
@@ -15,6 +15,7 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
   const [inviteLink, setInviteLink] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const { toast } = useToast();
 
   const generateInvite = async () => {
@@ -95,6 +96,13 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
     }
   };
 
+  // Auto-generate invite when dialog opens
+  useEffect(() => {
+    if (open && !inviteLink) {
+      generateInvite();
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -103,24 +111,17 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
         </DialogHeader>
 
         <div className="space-y-6">
-          {!inviteLink ? (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Generate an invite link to share with friends. When they sign up or log in, you'll automatically become friends!
-              </p>
-              <Button 
-                onClick={generateInvite} 
-                disabled={isGenerating}
-                className="w-full"
-              >
-                {isGenerating ? "Generating..." : "Generate Friend Invite"}
-              </Button>
+          {isGenerating ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Generating invite link...</p>
             </div>
-          ) : (
+          ) : inviteLink ? (
             <>
-              <div className="flex justify-center p-6 bg-white rounded-lg">
-                <QRCode value={inviteLink} size={200} />
-              </div>
+              {showQR && (
+                <div className="flex justify-center p-6 bg-white rounded-lg">
+                  <QRCodeReact value={inviteLink} size={200} />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Invite Link</label>
@@ -146,18 +147,31 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
                 </p>
               )}
 
-              <Button 
-                onClick={() => {
-                  setInviteLink("");
-                  setExpiresAt(null);
-                }} 
-                variant="outline"
-                className="w-full"
-              >
-                Generate New Invite
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowQR(!showQR)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <QrCode className="h-4 w-4 mr-2" />
+                  {showQR ? "Hide QR Code" : "Show QR Code"}
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    setInviteLink("");
+                    setExpiresAt(null);
+                    setShowQR(false);
+                    generateInvite();
+                  }} 
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Generate New Invite
+                </Button>
+              </div>
             </>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
