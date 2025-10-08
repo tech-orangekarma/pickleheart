@@ -348,7 +348,7 @@ const Home = () => {
         </div>
 
         {/* Info Cards */}
-        <div className="max-w-md mx-auto grid grid-cols-2 gap-3 w-full px-2">
+        <div className="max-w-md mx-auto grid grid-cols-4 gap-3 w-full px-2">
           <button
             onClick={() => setShowPlayersDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
