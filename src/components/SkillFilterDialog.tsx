@@ -25,6 +25,12 @@ interface PlayerAtPark {
   display_name: string | null;
   avatar_url: string | null;
   dupr_rating: number | null;
+  gender: string | null;
+  birthday: string | null;
+  privacy_settings: {
+    share_name: boolean;
+    share_skill_level: boolean;
+  } | null;
 }
 
 export const SkillFilterDialog = ({
@@ -67,7 +73,15 @@ export const SkillFilterDialog = ({
       // Get profiles for these users filtered by skill range
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, dupr_rating")
+        .select(`
+          id, 
+          display_name, 
+          avatar_url, 
+          dupr_rating,
+          gender,
+          birthday,
+          privacy_settings:privacy_settings(share_name, share_skill_level)
+        `)
         .in("id", userIds)
         .gte("dupr_rating", range[0])
         .lte("dupr_rating", range[1]);
@@ -81,6 +95,28 @@ export const SkillFilterDialog = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateAge = (birthday: string | null): number | null => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const getDisplayName = (player: PlayerAtPark): string => {
+    const shareName = player.privacy_settings?.share_name ?? false;
+    return shareName ? (player.display_name || "Anonymous") : "Anonymous";
+  };
+
+  const getDisplayRating = (player: PlayerAtPark): string => {
+    const shareSkillLevel = player.privacy_settings?.share_skill_level ?? true;
+    return shareSkillLevel ? (player.dupr_rating?.toFixed(2) || "N/A") : "Hidden";
   };
 
   const handleApply = () => {
@@ -144,27 +180,35 @@ export const SkillFilterDialog = ({
               </div>
             ) : (
               <div className="space-y-2">
-                {players.map((player) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={player.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {player.display_name?.[0]?.toUpperCase() || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {player.display_name || "Anonymous"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        DUPR: {player.dupr_rating?.toFixed(2) || "N/A"}
-                      </p>
+                {players.map((player) => {
+                  const age = calculateAge(player.birthday);
+                  const displayName = getDisplayName(player);
+                  const displayRating = getDisplayRating(player);
+                  
+                  return (
+                    <div
+                      key={player.id}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={player.avatar_url || undefined} />
+                        <AvatarFallback>
+                          {displayName[0]?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {displayName}
+                        </p>
+                        <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                          {age !== null && <span>{age}yo</span>}
+                          {player.gender && <span>• {player.gender}</span>}
+                          <span>• DUPR: {displayRating}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </ScrollArea>
