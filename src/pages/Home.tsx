@@ -318,7 +318,7 @@ const Home = () => {
               {skillRange[0] >= 4.5 
                 ? `${formatRating(skillRange[0])}+` 
                 : `${formatRating(skillRange[0])}-${formatRating(skillRange[1])}`}
-              <br/>Friends at the Park
+              <br/>Players at the Park
             </div>
           </button>
           
