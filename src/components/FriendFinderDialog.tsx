@@ -89,7 +89,16 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
 
       if (error) throw error;
 
-      toast.success("Friend Finder settings saved!");
+      // Process friend matches
+      const { error: matchError } = await supabase.functions.invoke('process-friend-finder');
+      
+      if (matchError) {
+        console.error('Error processing matches:', matchError);
+        toast.error("Settings saved but failed to process matches");
+        return;
+      }
+
+      toast.success("Friend Finder settings saved and matches processed!");
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving friend finder settings:", error);
