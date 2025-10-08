@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Award, HelpCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDuprRating } from "@/lib/utils";
@@ -23,6 +25,12 @@ const Level = () => {
   const [ratingInput, setRatingInput] = useState("2.0");
   const [showAssessment, setShowAssessment] = useState(false);
   const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
+  const [assessmentAnswers, setAssessmentAnswers] = useState({
+    q1: "",
+    q2: "",
+    q3: "",
+    q4: "",
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -81,6 +89,39 @@ const Level = () => {
     }
   };
 
+  const calculateDuprFromAssessment = () => {
+    const q1Score = parseInt(assessmentAnswers.q1) || 0;
+    const q2Score = parseInt(assessmentAnswers.q2) || 0;
+    const q3Score = parseInt(assessmentAnswers.q3) || 0;
+    const q4Score = parseInt(assessmentAnswers.q4) || 0;
+
+    const weightedScore = (q1Score * 0.8) + (q2Score * 1.2) + (q3Score * 1.2) + (q4Score * 0.8);
+
+    // Convert weighted score to DUPR
+    if (weightedScore <= 5.40) return 2.0;
+    if (weightedScore <= 6.80) return 2.25;
+    if (weightedScore <= 8.20) return 2.5;
+    if (weightedScore <= 9.60) return 2.75;
+    if (weightedScore <= 11.00) return 3.0;
+    if (weightedScore <= 12.40) return 3.25;
+    if (weightedScore <= 13.80) return 3.5;
+    if (weightedScore <= 15.20) return 3.75;
+    if (weightedScore < 16.80) return 4.0;
+    return 4.0;
+  };
+
+  const handleAssessmentSubmit = async () => {
+    if (!assessmentAnswers.q1 || !assessmentAnswers.q2 || !assessmentAnswers.q3 || !assessmentAnswers.q4) {
+      toast.error("Please answer all questions");
+      return;
+    }
+
+    const calculatedRating = calculateDuprFromAssessment();
+    setDuprRating(calculatedRating);
+    setRatingInput(formatDuprRating(calculatedRating));
+    setShowAssessment(false);
+  };
+
   const handleSelfAssessment = () => {
     setShowAssessment(true);
   };
@@ -100,16 +141,173 @@ const Level = () => {
   if (showAssessment) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-2xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAssessment(false)}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            back
+          </Button>
+
           <h1 className="text-2xl font-headline mb-6 text-center">
             quick skill assessment
           </h1>
-          <p className="text-center text-muted-foreground mb-8">
-            (Self-assessment questionnaire would go here - simplified for MVP)
-          </p>
-          <Button onClick={handleManualEntry} className="w-full">
-            use rating: {formatDuprRating(duprRating)}
-          </Button>
+
+          <div className="space-y-6 mb-6">
+            {/* Question 1: Serve & Return */}
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">1. Serve & Return</h3>
+              <RadioGroup value={assessmentAnswers.q1} onValueChange={(val) => setAssessmentAnswers({...assessmentAnswers, q1: val})}>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="1" id="q1-1" />
+                    <Label htmlFor="q1-1" className="font-normal cursor-pointer">
+                      Serve usually lands; control and pace are still waking up.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="2" id="q1-2" />
+                    <Label htmlFor="q1-2" className="font-normal cursor-pointer">
+                      Depth or angle appears in spots—just not on command yet.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="3" id="q1-3" />
+                    <Label htmlFor="q1-3" className="font-normal cursor-pointer">
+                      I can start points with depth/spin/placement, but the rhythm wobbles.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="4" id="q1-4" />
+                    <Label htmlFor="q1-4" className="font-normal cursor-pointer">
+                      I use serve/return to set the tone and adjust on the fly.
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
+            </Card>
+
+            {/* Question 2: Dinking & Net Play */}
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">2. Dinking & Net Play</h3>
+              <RadioGroup value={assessmentAnswers.q2} onValueChange={(val) => setAssessmentAnswers({...assessmentAnswers, q2: val})}>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="1" id="q2-1" />
+                    <Label htmlFor="q2-1" className="font-normal cursor-pointer">
+                      Dinks are polite; the net still charges a small toll.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="2" id="q2-2" />
+                    <Label htmlFor="q2-2" className="font-normal cursor-pointer">
+                      Short exchanges stay tidy—until someone nudges the volume.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="3" id="q2-3" />
+                    <Label htmlFor="q2-3" className="font-normal cursor-pointer">
+                      I can hang in longer dinks, but sharp/fast ones still jam me; turning defense into pressure isn't automatic yet.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="4" id="q2-4" />
+                    <Label htmlFor="q2-4" className="font-normal cursor-pointer">
+                      I steer the kitchen: absorb heat, reset to neutral, and pick smart attack moments.
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
+            </Card>
+
+            {/* Question 3: Fast Rallies & Point Conversion */}
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">3. Fast Rallies & Point Conversion</h3>
+              <RadioGroup value={assessmentAnswers.q3} onValueChange={(val) => setAssessmentAnswers({...assessmentAnswers, q3: val})}>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="1" id="q3-1" />
+                    <Label htmlFor="q3-1" className="font-normal cursor-pointer">
+                      When rallies speed up, my shots scatter.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="2" id="q3-2" />
+                    <Label htmlFor="q3-2" className="font-normal cursor-pointer">
+                      I can block a few; real resets and counters are still more theory than habit.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="3" id="q3-3" />
+                    <Label htmlFor="q3-3" className="font-normal cursor-pointer">
+                      Blocks, resets, and counters work in stretches, but the wheels wobble under pressure.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="4" id="q3-4" />
+                    <Label htmlFor="q3-4" className="font-normal cursor-pointer">
+                      I shut down speed-ups and finish with counters or precise placement.
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
+            </Card>
+
+            {/* Question 4: Self-Estimate */}
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">4. Self-Estimate (pick the closest)</h3>
+              <RadioGroup value={assessmentAnswers.q4} onValueChange={(val) => setAssessmentAnswers({...assessmentAnswers, q4: val})}>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="1" id="q4-1" />
+                    <Label htmlFor="q4-1" className="font-normal cursor-pointer">
+                      2.0: Still learning the rules—occasional "wait, that's a rule?" cameo.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="2" id="q4-2" />
+                    <Label htmlFor="q4-2" className="font-normal cursor-pointer">
+                      2.5: Rules are in; keeping the ball in is the current boss level.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="3" id="q4-3" />
+                    <Label htmlFor="q4-3" className="font-normal cursor-pointer">
+                      3.0: I can rally; I'm learning when and how to play certain shots.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="4" id="q4-4" />
+                    <Label htmlFor="q4-4" className="font-normal cursor-pointer">
+                      3.5: I've got the shots; sometimes I choose the wrong one—or the right one misfires.
+                    </Label>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="5" id="q4-5" />
+                    <Label htmlFor="q4-5" className="font-normal cursor-pointer">
+                      4.0+: I make good choices under pressure and control pace and placement.
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
+            </Card>
+          </div>
+
+          <div className="space-y-3">
+            <Button onClick={handleAssessmentSubmit} className="w-full">
+              calculate my rating
+            </Button>
+            <Button
+              onClick={() => setShowAssessment(false)}
+              variant="outline"
+              className="w-full"
+            >
+              cancel
+            </Button>
+          </div>
         </div>
       </div>
     );
