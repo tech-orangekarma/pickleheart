@@ -281,7 +281,12 @@ const Home = () => {
         <div className="max-w-md mx-auto flex items-center justify-between">
           <img src={pickleheartLogo} alt="pickleheart" className="h-20" />
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium">Hey {displayName}!</span>
+            <button 
+              onClick={() => navigate("/profile")}
+              className="text-sm font-medium hover:underline"
+            >
+              Hey {displayName}!
+            </button>
             <button 
               className="relative"
               onClick={() => setShowNotificationsDialog(true)}
