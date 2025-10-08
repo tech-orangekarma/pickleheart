@@ -327,7 +327,7 @@ const Home = () => {
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
             <div className="text-3xl font-bold mb-1">—</div>
-            <div className="text-xs font-medium">Stack Count</div>
+            <div className="text-xs font-medium">Stack Count<br/>report the stack count</div>
           </button>
         </div>
       </main>
