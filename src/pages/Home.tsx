@@ -401,6 +401,15 @@ const Home = () => {
             variant="ghost"
             size="sm"
             className="flex-col h-auto gap-1"
+            onClick={() => setShowStackDialog(true)}
+          >
+            <div className="text-xs font-medium">court conditions</div>
+            <div className="text-xs font-medium">report</div>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-col h-auto gap-1"
             onClick={() => navigate("/friends")}
           >
             <Users className="w-5 h-5" />
