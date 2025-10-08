@@ -83,7 +83,9 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
 
       const { error } = await supabase
         .from("friend_finder_settings")
-        .upsert(settings);
+        .upsert(settings, {
+          onConflict: 'user_id'
+        });
 
       if (error) throw error;
 
