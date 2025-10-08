@@ -160,10 +160,10 @@ const Parks = () => {
           hours: "Sunrise to Sunset",
           lights: "No",
           surface: "Hard court",
-          nets: "Permanent net + 1 portable",
-          lines: "Permanent lines",
-          spacing: "Standard, 1 makeshift court",
-          additional: "5 courts with permanent setup plus one additional makeshift court"
+          nets: "Permanent",
+          lines: "Permanent",
+          spacing: "Normal except one court is tight",
+          additional: "There is a sixth court with lines and a provided portable net on asphalt"
         };
       default:
         return {
