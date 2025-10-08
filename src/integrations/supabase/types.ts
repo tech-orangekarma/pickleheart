@@ -353,6 +353,8 @@ export type Database = {
           mode: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time: boolean
           share_name: boolean
+          share_name_with: Database["public"]["Enums"]["privacy_level"] | null
+          share_photo_with: Database["public"]["Enums"]["privacy_level"] | null
           share_skill_level: boolean
           updated_at: string
           user_id: string
@@ -365,6 +367,8 @@ export type Database = {
           mode?: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time?: boolean
           share_name?: boolean
+          share_name_with?: Database["public"]["Enums"]["privacy_level"] | null
+          share_photo_with?: Database["public"]["Enums"]["privacy_level"] | null
           share_skill_level?: boolean
           updated_at?: string
           user_id: string
@@ -377,6 +381,8 @@ export type Database = {
           mode?: Database["public"]["Enums"]["privacy_mode"]
           share_arrival_time?: boolean
           share_name?: boolean
+          share_name_with?: Database["public"]["Enums"]["privacy_level"] | null
+          share_photo_with?: Database["public"]["Enums"]["privacy_level"] | null
           share_skill_level?: boolean
           updated_at?: string
           user_id?: string
@@ -2548,6 +2554,7 @@ export type Database = {
     Enums: {
       dupr_source: "linked" | "manual" | "self_assessment"
       friendship_status: "pending" | "accepted" | "declined"
+      privacy_level: "everyone" | "friends" | "no_one"
       privacy_mode: "basic" | "standard" | "custom"
     }
     CompositeTypes: {
@@ -2686,6 +2693,7 @@ export const Constants = {
     Enums: {
       dupr_source: ["linked", "manual", "self_assessment"],
       friendship_status: ["pending", "accepted", "declined"],
+      privacy_level: ["everyone", "friends", "no_one"],
       privacy_mode: ["basic", "standard", "custom"],
     },
   },

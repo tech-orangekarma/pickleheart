@@ -7,6 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Navigation, Bell, Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -18,18 +25,16 @@ interface SettingsDialogProps {
 }
 
 interface PrivacySettings {
-  share_name: boolean;
-  share_skill_level: boolean;
-  share_arrival_time: boolean;
+  share_name_with: 'everyone' | 'friends' | 'no_one';
+  share_photo_with: 'everyone' | 'friends' | 'no_one';
   do_not_share_at_all: boolean;
   location_permission_granted: boolean | null;
 }
 
 export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
-    share_name: false,
-    share_skill_level: true,
-    share_arrival_time: true,
+    share_name_with: 'everyone',
+    share_photo_with: 'everyone',
     do_not_share_at_all: false,
     location_permission_granted: null,
   });
@@ -56,9 +61,8 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
       if (data) {
         setPrivacySettings({
-          share_name: data.share_name,
-          share_skill_level: data.share_skill_level,
-          share_arrival_time: data.share_arrival_time,
+          share_name_with: data.share_name_with || 'everyone',
+          share_photo_with: data.share_photo_with || 'everyone',
           do_not_share_at_all: data.do_not_share_at_all,
           location_permission_granted: data.location_permission_granted,
         });
@@ -69,14 +73,14 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
     }
   };
 
-  const updateSetting = async (key: keyof PrivacySettings, value: boolean) => {
+  const updateSetting = async (key: keyof PrivacySettings, value: any) => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // If enabling location, request browser permission first
-      if (key === "location_permission_granted" && value) {
+      if (key === "location_permission_granted" && value === true) {
         try {
           await new Promise<void>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
@@ -127,46 +131,46 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 <h3 className="font-semibold">Privacy Settings</h3>
               </div>
               <div className="space-y-4 ml-7">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">Share Name</p>
-                    <p className="text-xs text-muted-foreground">
-                      Show your display name to other players
-                    </p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.share_name}
-                    onCheckedChange={(value) => updateSetting("share_name", value)}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Share Name</label>
+                  <Select
+                    value={privacySettings.share_name_with}
+                    onValueChange={(value: 'everyone' | 'friends' | 'no_one') => updateSetting("share_name_with", value)}
                     disabled={loading || privacySettings.do_not_share_at_all}
-                  />
+                  >
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="Select visibility" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border border-border z-50">
+                      <SelectItem value="everyone">Everyone</SelectItem>
+                      <SelectItem value="friends">Friends Only</SelectItem>
+                      <SelectItem value="no_one">No One</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Who can see your display name
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">Share Skill Level</p>
-                    <p className="text-xs text-muted-foreground">
-                      Show your DUPR rating to others
-                    </p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.share_skill_level}
-                    onCheckedChange={(value) => updateSetting("share_skill_level", value)}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Share Photo</label>
+                  <Select
+                    value={privacySettings.share_photo_with}
+                    onValueChange={(value: 'everyone' | 'friends' | 'no_one') => updateSetting("share_photo_with", value)}
                     disabled={loading || privacySettings.do_not_share_at_all}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">Share Arrival Time</p>
-                    <p className="text-xs text-muted-foreground">
-                      Show when you arrived at the park
-                    </p>
-                  </div>
-                  <Switch
-                    checked={privacySettings.share_arrival_time}
-                    onCheckedChange={(value) => updateSetting("share_arrival_time", value)}
-                    disabled={loading || privacySettings.do_not_share_at_all}
-                  />
+                  >
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="Select visibility" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border border-border z-50">
+                      <SelectItem value="everyone">Everyone</SelectItem>
+                      <SelectItem value="friends">Friends Only</SelectItem>
+                      <SelectItem value="no_one">No One</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Who can see your profile photo
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t">
