@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      court_conditions: {
+        Row: {
+          condition: string
+          created_at: string
+          id: string
+          park_id: string
+          reported_at: string
+          user_id: string
+        }
+        Insert: {
+          condition: string
+          created_at?: string
+          id?: string
+          park_id: string
+          reported_at?: string
+          user_id: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          id?: string
+          park_id?: string
+          reported_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dupr_links: {
         Row: {
           created_at: string

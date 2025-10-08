@@ -523,6 +523,14 @@ const Home = () => {
         parkId={selectedParkId}
         parkName={selectedPark?.name || ""}
       />
+
+      {/* Court Conditions Dialog */}
+      <CourtConditionsDialog
+        isOpen={showCourtConditionsDialog}
+        onClose={() => setShowCourtConditionsDialog(false)}
+        parkId={selectedParkId}
+        parkName={selectedPark?.name || ""}
+      />
     </div>
   );
 };
