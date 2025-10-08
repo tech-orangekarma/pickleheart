@@ -59,17 +59,7 @@ const Promise = () => {
           i'm in
         </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/welcome/delight")}
-          className="mt-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          back
-        </Button>
-
-        <p className="mt-4 text-xs text-muted-foreground">step 2 of 7</p>
+        <p className="mt-4 text-xs text-muted-foreground">step 1 of 6</p>
       </div>
     </div>
   );

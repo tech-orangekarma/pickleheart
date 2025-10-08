@@ -49,7 +49,7 @@ const Auth = () => {
             } else {
               // Profile doesn't exist, send through welcome process
               console.log('[Auth] No profile, navigating to welcome');
-              navigate("/welcome/delight");
+              navigate("/welcome/promise");
             }
           })();
         }, 0);

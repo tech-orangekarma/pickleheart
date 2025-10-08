@@ -14,7 +14,7 @@ import ResetPasswords from "./pages/ResetPasswords";
 import DeleteUsers from "./pages/DeleteUsers";
 import InviteAccept from "./pages/InviteAccept";
 import Privacy from "./pages/welcome/Privacy";
-import Delight from "./pages/welcome/Delight";
+
 import Promise from "./pages/welcome/Promise";
 import WelcomeProfile from "./pages/welcome/Profile";
 import Purpose from "./pages/welcome/Purpose";
@@ -42,7 +42,7 @@ const AppContent = () => {
       <Route path="/delete-users" element={<DeleteUsers />} />
       <Route path="/invite/:code" element={<InviteAccept />} />
       <Route path="/welcome/privacy" element={<Privacy />} />
-      <Route path="/welcome/delight" element={<Delight />} />
+      
       <Route path="/welcome/promise" element={<Promise />} />
       <Route path="/welcome/profile" element={<WelcomeProfile />} />
       <Route path="/welcome/purpose" element={<Purpose />} />
