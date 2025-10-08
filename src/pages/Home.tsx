@@ -6,6 +6,7 @@ import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import heartIcon from "@/assets/heart-icon.png";
 import pickleheartLogo from "@/assets/pickleheart-logo.png";
+import arrowIcon from "@/assets/arrow-icon.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatDuprRating } from "@/lib/utils";
@@ -245,6 +246,24 @@ const Home = () => {
         <h2 className="font-headline text-2xl mb-8">Good time to play?</h2>
         
         <div className="relative w-80 h-80 flex items-center justify-center mb-12">
+          {/* Left Arrow */}
+          <button
+            onClick={() => {
+              const currentIndex = parks.findIndex(p => p.id === selectedParkId);
+              if (currentIndex > 0) {
+                setSelectedParkId(parks[currentIndex - 1].id);
+              }
+            }}
+            disabled={parks.findIndex(p => p.id === selectedParkId) === 0}
+            className="absolute left-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
+          >
+            <img 
+              src={arrowIcon} 
+              alt="previous court" 
+              className="w-8 h-8 rotate-180" 
+            />
+          </button>
+
           {/* Decorative Circle */}
           <div className={`absolute inset-8 rounded-full opacity-40 border-4 border-dashed border-foreground/20 ${
             quality === 'great' ? 'bg-status-great' : 
@@ -260,6 +279,24 @@ const Home = () => {
             </p>
             <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3" />
           </div>
+
+          {/* Right Arrow */}
+          <button
+            onClick={() => {
+              const currentIndex = parks.findIndex(p => p.id === selectedParkId);
+              if (currentIndex < parks.length - 1) {
+                setSelectedParkId(parks[currentIndex + 1].id);
+              }
+            }}
+            disabled={parks.findIndex(p => p.id === selectedParkId) === parks.length - 1}
+            className="absolute right-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
+          >
+            <img 
+              src={arrowIcon} 
+              alt="next court" 
+              className="w-8 h-8" 
+            />
+          </button>
         </div>
 
         {/* Info Cards */}
