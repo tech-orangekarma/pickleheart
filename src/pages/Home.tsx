@@ -361,7 +361,7 @@ const Home = () => {
           >
             <p className="text-xs text-muted-foreground mb-2">{selectedPark?.name}</p>
             <p className="font-headline text-2xl text-center leading-tight">
-              Yes. It's a great time for you!
+              {getQualityMessage()}
             </p>
             <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3" />
           </button>
@@ -391,7 +391,7 @@ const Home = () => {
             onClick={() => setShowPlayersDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">8</div>
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{playersCount}</div>
             <div className="text-xs font-medium text-center">Friends at<br/>the Park</div>
           </button>
           
@@ -399,9 +399,11 @@ const Home = () => {
             onClick={() => setShowSkillDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">6</div>
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{skillPlayersCount}</div>
             <div className="text-xs font-medium text-center">
-              3.0-3.5
+              {skillRange[0] >= 4.5 
+                ? `${formatRating(skillRange[0])}+` 
+                : `${formatRating(skillRange[0])}-${formatRating(skillRange[1])}`}
               <br/>Players at the Park
             </div>
           </button>
@@ -410,7 +412,7 @@ const Home = () => {
             onClick={() => setShowStackDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">2</div>
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{latestStackCount ?? "—"}</div>
             <div className="text-xs font-medium text-center">Stack Count</div>
             <div className="text-xs font-medium mt-1 text-center">report the stack count</div>
           </button>
@@ -419,7 +421,7 @@ const Home = () => {
             onClick={() => setShowCourtConditionsDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-2xl font-bold mb-1 capitalize min-h-[2.25rem] flex items-center">Dry</div>
+            <div className="text-2xl font-bold mb-1 capitalize min-h-[2.25rem] flex items-center">{latestCourtCondition ?? "—"}</div>
             <div className="text-xs font-medium text-center">court conditions</div>
             <div className="text-xs font-medium mt-1 text-center">report</div>
           </button>
