@@ -143,7 +143,7 @@ const Parks = () => {
           nets: "Permanent nets",
           lines: "Permanent lines",
           spacing: "Lots of space",
-          additional: "Three courts available"
+          additional: "In a shared space with skateboarders and kids playing other sports"
         };
       case "Central Park":
         return {
