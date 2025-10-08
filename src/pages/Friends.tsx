@@ -8,7 +8,6 @@ import { Users, MapPin, Search } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
-import { FriendOptionsDialog } from "@/components/FriendOptionsDialog";
 import { UserSearchDialog } from "@/components/UserSearchDialog";
 import { formatDuprRating } from "@/lib/utils";
 
@@ -53,7 +52,6 @@ const Friends = () => {
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkIndex, setSelectedParkIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
@@ -466,25 +464,28 @@ const Friends = () => {
           )}
         </div>
 
-        {/* Add Friends Button */}
-        <div className="pt-4">
+        {/* Add Friends Buttons */}
+        <div className="pt-4 space-y-3">
           <Button
-            onClick={() => setOptionsDialogOpen(true)}
+            onClick={() => setSearchDialogOpen(true)}
             className="w-full py-6 text-lg font-semibold"
             size="lg"
           >
+            <Search className="w-5 h-5 mr-2" />
+            Find friends on the app
+          </Button>
+          
+          <Button
+            onClick={() => setInviteDialogOpen(true)}
+            className="w-full py-6 text-lg font-semibold"
+            size="lg"
+            variant="outline"
+          >
             <Users className="w-5 h-5 mr-2" />
-            Add or Invite Friends
+            Invite friends to join
           </Button>
         </div>
       </main>
-
-      <FriendOptionsDialog
-        open={optionsDialogOpen}
-        onOpenChange={setOptionsDialogOpen}
-        onSearchUsers={() => setSearchDialogOpen(true)}
-        onQRInvite={() => setInviteDialogOpen(true)}
-      />
 
       <UserSearchDialog
         open={searchDialogOpen}
