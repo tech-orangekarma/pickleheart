@@ -54,6 +54,11 @@ export const ParkMediaDialog = ({ isOpen, onClose, parkId, parkName }: ParkMedia
     }
   };
 
+  const getBucketName = (parkName: string): string => {
+    const normalizedName = parkName.toLowerCase().replace(/\s+/g, '-');
+    return `${normalizedName}-media`;
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -76,19 +81,22 @@ export const ParkMediaDialog = ({ isOpen, onClose, parkId, parkName }: ParkMedia
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
+      // Determine bucket based on park name
+      const bucketName = getBucketName(parkName);
+
       // Upload to storage
       const fileExt = file.name.split(".").pop();
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError, data: uploadData } = await supabase.storage
-        .from("park-media")
+        .from(bucketName)
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from("park-media")
+        .from(bucketName)
         .getPublicUrl(fileName);
 
       // Save to database
@@ -134,31 +142,7 @@ export const ParkMediaDialog = ({ isOpen, onClose, parkId, parkName }: ParkMedia
           </button>
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="media-upload">
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors">
-              {uploading ? (
-                <div className="text-muted-foreground">Uploading...</div>
-              ) : (
-                <>
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm font-medium">Upload Photo or Video</p>
-                  <p className="text-xs text-muted-foreground mt-1">Click to select a file</p>
-                </>
-              )}
-            </div>
-            <input
-              id="media-upload"
-              type="file"
-              accept="image/*,video/*"
-              className="hidden"
-              onChange={handleFileUpload}
-              disabled={uploading}
-            />
-          </label>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto mb-4">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : media.length === 0 ? (
@@ -188,6 +172,30 @@ export const ParkMediaDialog = ({ isOpen, onClose, parkId, parkName }: ParkMedia
               ))}
             </div>
           )}
+        </div>
+
+        <div>
+          <label htmlFor="media-upload">
+            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors">
+              {uploading ? (
+                <div className="text-muted-foreground">Uploading...</div>
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm font-medium">Upload Photo or Video</p>
+                  <p className="text-xs text-muted-foreground mt-1">Click to select a file</p>
+                </>
+              )}
+            </div>
+            <input
+              id="media-upload"
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+          </label>
         </div>
 
         <Button className="w-full mt-4" onClick={onClose}>Close</Button>
