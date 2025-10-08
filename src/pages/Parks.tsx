@@ -149,11 +149,11 @@ const Parks = () => {
         return {
           hours: "Sunrise to Sunset",
           lights: "No",
-          surface: "Hard court",
-          nets: "Bring your own net",
-          lines: "Permanent lines",
-          spacing: "Standard",
-          additional: "3 courts available"
+          surface: "Concrete",
+          nets: "Provided portable",
+          lines: "Permanent",
+          spacing: "Tight",
+          additional: "Some cracks on court"
         };
       case "Riverside Park":
         return {
