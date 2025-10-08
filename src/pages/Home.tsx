@@ -51,6 +51,8 @@ const Home = () => {
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
+  const [latestStackCount, setLatestStackCount] = useState<number | null>(null);
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -59,6 +61,7 @@ const Home = () => {
   useEffect(() => {
     if (selectedParkId) {
       loadParkData();
+      loadLatestReports();
     }
   }, [selectedParkId, skillRange]);
 
@@ -185,6 +188,34 @@ const Home = () => {
       }
     } catch (error) {
       console.error("Error loading park data:", error);
+    }
+  };
+
+  const loadLatestReports = async () => {
+    try {
+      // Get latest stack report
+      const { data: stackData } = await supabase
+        .from("stack_reports")
+        .select("stack_count")
+        .eq("park_id", selectedParkId)
+        .order("reported_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setLatestStackCount(stackData?.stack_count ?? null);
+
+      // Get latest court condition
+      const { data: conditionData } = await supabase
+        .from("court_conditions")
+        .select("condition")
+        .eq("park_id", selectedParkId)
+        .order("reported_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setLatestCourtCondition(conditionData?.condition ?? null);
+    } catch (error) {
+      console.error("Error loading latest reports:", error);
     }
   };
 
@@ -376,7 +407,7 @@ const Home = () => {
             onClick={() => setShowStackDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
-            <div className="text-3xl font-bold mb-1">—</div>
+            <div className="text-3xl font-bold mb-1">{latestStackCount ?? "—"}</div>
             <div className="text-xs font-medium">Stack Count</div>
             <div className="text-xs font-medium mt-1">report the stack count</div>
           </button>
@@ -385,6 +416,7 @@ const Home = () => {
             onClick={() => setShowCourtConditionsDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
+            <div className="text-xs font-medium mb-1">{latestCourtCondition ? latestCourtCondition : "—"}</div>
             <div className="text-xs font-medium">court conditions</div>
             <div className="text-xs font-medium mt-1">report</div>
           </button>
@@ -444,7 +476,10 @@ const Home = () => {
         isOpen={showStackDialog}
         onClose={() => setShowStackDialog(false)}
         parkId={selectedParkId}
-        onReported={() => loadParkData()}
+        onReported={() => {
+          loadParkData();
+          loadLatestReports();
+        }}
         isInGeofence={true}
       />
 
@@ -527,7 +562,10 @@ const Home = () => {
       {/* Court Conditions Dialog */}
       <CourtConditionsDialog
         isOpen={showCourtConditionsDialog}
-        onClose={() => setShowCourtConditionsDialog(false)}
+        onClose={() => {
+          setShowCourtConditionsDialog(false);
+          loadLatestReports();
+        }}
         parkId={selectedParkId}
         parkName={selectedPark?.name || ""}
       />
