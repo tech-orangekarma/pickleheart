@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload } from "lucide-react";
+import { Upload, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -43,6 +44,7 @@ export const EditProfileDialog = ({
   profile,
   onProfileUpdated,
 }: EditProfileDialogProps) => {
+  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile.display_name || "");
   const [duprRating, setDuprRating] = useState(
     profile.dupr_rating?.toString() || ""
@@ -218,7 +220,22 @@ export const EditProfileDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dupr-rating">DUPR Rating</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="dupr-rating">DUPR Rating</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+                onClick={() => {
+                  onOpenChange(false);
+                  navigate("/welcome/level");
+                }}
+              >
+                <GraduationCap className="w-3 h-3 mr-1" />
+                retake assessment
+              </Button>
+            </div>
             <Input
               id="dupr-rating"
               type="number"
