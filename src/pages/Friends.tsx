@@ -9,7 +9,7 @@ import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 import { UserSearchDialog } from "@/components/UserSearchDialog";
-import { SkillFilterDialog } from "@/components/SkillFilterDialog";
+import { FriendFinderDialog } from "@/components/FriendFinderDialog";
 import { formatDuprRating } from "@/lib/utils";
 
 interface Park {
@@ -55,8 +55,7 @@ const Friends = () => {
   const [loading, setLoading] = useState(true);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  const [skillFilterOpen, setSkillFilterOpen] = useState(false);
-  const [skillRange, setSkillRange] = useState<[number, number]>([2.0, 5.0]);
+  const [friendFinderOpen, setFriendFinderOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -488,7 +487,7 @@ const Friends = () => {
           </Button>
 
           <Button
-            onClick={() => setSkillFilterOpen(true)}
+            onClick={() => setFriendFinderOpen(true)}
             className="w-full py-6 text-lg font-semibold"
             size="lg"
           >
@@ -509,15 +508,10 @@ const Friends = () => {
         onOpenChange={setInviteDialogOpen}
       />
 
-      {selectedPark && (
-        <SkillFilterDialog
-          isOpen={skillFilterOpen}
-          onClose={() => setSkillFilterOpen(false)}
-          onApply={(range) => setSkillRange(range)}
-          currentRange={skillRange}
-          parkId={selectedPark.id}
-        />
-      )}
+      <FriendFinderDialog
+        open={friendFinderOpen}
+        onOpenChange={setFriendFinderOpen}
+      />
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">

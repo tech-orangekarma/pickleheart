@@ -83,6 +83,45 @@ export type Database = {
           },
         ]
       }
+      friend_finder_settings: {
+        Row: {
+          created_at: string
+          gender_filter: string | null
+          id: string
+          max_age: number | null
+          max_rating: number | null
+          min_age: number | null
+          min_rating: number | null
+          mode: Database["public"]["Enums"]["friend_finder_mode"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gender_filter?: string | null
+          id?: string
+          max_age?: number | null
+          max_rating?: number | null
+          min_age?: number | null
+          min_rating?: number | null
+          mode?: Database["public"]["Enums"]["friend_finder_mode"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gender_filter?: string | null
+          id?: string
+          max_age?: number | null
+          max_rating?: number | null
+          min_age?: number | null
+          min_rating?: number | null
+          mode?: Database["public"]["Enums"]["friend_finder_mode"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -2553,6 +2592,11 @@ export type Database = {
     }
     Enums: {
       dupr_source: "linked" | "manual" | "self_assessment"
+      friend_finder_mode:
+        | "everyone"
+        | "auto_friends"
+        | "auto_requests"
+        | "manual"
       friendship_status: "pending" | "accepted" | "declined"
       privacy_level: "everyone" | "friends" | "no_one"
       privacy_mode: "basic" | "standard" | "custom"
@@ -2692,6 +2736,12 @@ export const Constants = {
   public: {
     Enums: {
       dupr_source: ["linked", "manual", "self_assessment"],
+      friend_finder_mode: [
+        "everyone",
+        "auto_friends",
+        "auto_requests",
+        "manual",
+      ],
       friendship_status: ["pending", "accepted", "declined"],
       privacy_level: ["everyone", "friends", "no_one"],
       privacy_mode: ["basic", "standard", "custom"],
