@@ -51,7 +51,7 @@ const Promise = () => {
           
           {/* Hover box for bottom options */}
           <div className="absolute top-[74%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity max-w-[240px] text-center">
-            See if your friends are there, players at your skill level, and the stack count
+            see your friends, players at your skill level, stack count, and court conditions
           </div>
         </div>
 
