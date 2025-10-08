@@ -31,6 +31,8 @@ const Level = () => {
     q3: "",
     q4: "",
   });
+  const [showAssessmentResult, setShowAssessmentResult] = useState(false);
+  const [assessmentResult, setAssessmentResult] = useState<number>(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -117,9 +119,16 @@ const Level = () => {
     }
 
     const calculatedRating = calculateDuprFromAssessment();
-    setDuprRating(calculatedRating);
-    setRatingInput(formatDuprRating(calculatedRating));
+    setAssessmentResult(calculatedRating);
+    setShowAssessmentResult(true);
+  };
+
+  const handleUseAssessmentResult = () => {
+    setDuprRating(assessmentResult);
+    setRatingInput(formatDuprRating(assessmentResult));
     setShowAssessment(false);
+    setShowAssessmentResult(false);
+    toast.success(`Rating set to ${formatDuprRating(assessmentResult)}`);
   };
 
   const handleSelfAssessment = () => {
@@ -137,6 +146,38 @@ const Level = () => {
 
     navigate("/welcome/location");
   };
+
+  if (showAssessmentResult) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md text-center">
+          <Award className="w-20 h-20 mx-auto mb-6 text-primary" />
+          <h1 className="text-3xl font-headline mb-4">your estimated rating</h1>
+          <div className="text-6xl font-bold text-primary mb-8">
+            {formatDuprRating(assessmentResult)}
+          </div>
+          <p className="text-muted-foreground mb-8">
+            Based on your assessment, we estimate your DUPR rating is {formatDuprRating(assessmentResult)}
+          </p>
+          <div className="space-y-3">
+            <Button onClick={handleUseAssessmentResult} className="w-full" size="lg">
+              use this rating
+            </Button>
+            <Button
+              onClick={() => {
+                setShowAssessmentResult(false);
+                setAssessmentAnswers({ q1: "", q2: "", q3: "", q4: "" });
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              retake assessment
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showAssessment) {
     return (
