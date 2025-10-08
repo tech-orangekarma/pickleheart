@@ -133,16 +133,48 @@ const Parks = () => {
 
   const selectedPark = parks.find(p => p.id === selectedParkId);
 
-  const getCourtDetails = () => {
+  const getCourtInfo = () => {
     switch (selectedPark?.name) {
       case "Carl Schurz Park":
-        return "Three courts with permanent lines and permanent nets.";
+        return {
+          hours: "Sunrise to Sunset",
+          lights: "No",
+          surface: "Hard court",
+          nets: "Permanent nets",
+          lines: "Permanent lines",
+          spacing: "Standard",
+          additional: "Three courts available"
+        };
       case "Central Park":
-        return "3 courts with permanent lines and bring your own net.";
+        return {
+          hours: "Sunrise to Sunset",
+          lights: "No",
+          surface: "Hard court",
+          nets: "Bring your own net",
+          lines: "Permanent lines",
+          spacing: "Standard",
+          additional: "3 courts available"
+        };
       case "Riverside Park":
-        return "5 courts with permanent lines and permanent net, with one additional makeshift court with permanent lines and a portable net.";
+        return {
+          hours: "Sunrise to Sunset",
+          lights: "No",
+          surface: "Hard court",
+          nets: "Permanent net + 1 portable",
+          lines: "Permanent lines",
+          spacing: "Standard, 1 makeshift court",
+          additional: "5 courts with permanent setup plus one additional makeshift court"
+        };
       default:
-        return "Court information not available.";
+        return {
+          hours: "N/A",
+          lights: "N/A",
+          surface: "N/A",
+          nets: "N/A",
+          lines: "N/A",
+          spacing: "N/A",
+          additional: "Court information not available"
+        };
     }
   };
 
@@ -302,10 +334,44 @@ const Parks = () => {
       <Dialog open={courtsDialogOpen} onOpenChange={setCourtsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Courts Available at {selectedPark?.name}</DialogTitle>
+            <DialogTitle>Court Information - {selectedPark?.name}</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-foreground">{getCourtDetails()}</p>
+          <div className="py-4 space-y-3">
+            {(() => {
+              const info = getCourtInfo();
+              return (
+                <>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Hours:</span>
+                    <span className="text-foreground text-right">{info.hours}</span>
+                  </div>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Lights:</span>
+                    <span className="text-foreground text-right">{info.lights}</span>
+                  </div>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Surface:</span>
+                    <span className="text-foreground text-right">{info.surface}</span>
+                  </div>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Nets:</span>
+                    <span className="text-foreground text-right">{info.nets}</span>
+                  </div>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Lines:</span>
+                    <span className="text-foreground text-right">{info.lines}</span>
+                  </div>
+                  <div className="flex justify-between items-start border-b border-border pb-2">
+                    <span className="font-medium text-muted-foreground">Spacing:</span>
+                    <span className="text-foreground text-right">{info.spacing}</span>
+                  </div>
+                  <div className="flex justify-between items-start pt-2">
+                    <span className="font-medium text-muted-foreground">Additional Info:</span>
+                    <span className="text-foreground text-right max-w-[60%]">{info.additional}</span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </DialogContent>
       </Dialog>
