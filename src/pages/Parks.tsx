@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, ChevronLeft, Info, Sun } from "lucide-react";
+import { MapPin, Users, ChevronLeft, Plus } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import heartIcon from "@/assets/heart-icon.png";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import carlSchurzParkImage from "@/assets/carl-schurz-park.png";
 import centralParkImage from "@/assets/central-park.png";
 import riversideParkImage from "@/assets/riverside-park.png";
@@ -26,6 +28,8 @@ const Parks = () => {
   const [playersCount, setPlayersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [courtsDialogOpen, setCourtsDialogOpen] = useState(false);
+  const [suggestParkDialogOpen, setSuggestParkDialogOpen] = useState(false);
+  const [newParkName, setNewParkName] = useState("");
 
   useEffect(() => {
     // Check auth and get session
@@ -122,6 +126,35 @@ const Parks = () => {
     setPlayersCount(count || 0);
   };
 
+  const handleSuggestPark = async () => {
+    if (!newParkName.trim()) {
+      toast.error("Please enter a park name");
+      return;
+    }
+
+    if (!user) {
+      toast.error("You must be logged in to suggest a park");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("park_suggestions")
+      .insert({
+        user_id: user.id,
+        park_name: newParkName.trim()
+      });
+
+    if (error) {
+      console.error("Error suggesting park:", error);
+      toast.error("Failed to submit suggestion");
+      return;
+    }
+
+    toast.success("Thank you for your park suggestion!");
+    setNewParkName("");
+    setSuggestParkDialogOpen(false);
+  };
+
 
   if (loading) {
     return (
@@ -201,8 +234,8 @@ const Parks = () => {
               <ChevronLeft className="w-6 h-6" />
             </button>
             <h1 className="font-headline text-xl">{selectedPark?.name}</h1>
-            <button>
-              <Info className="w-6 h-6" />
+            <button onClick={() => setSuggestParkDialogOpen(true)}>
+              <Plus className="w-6 h-6" />
             </button>
           </div>
 
@@ -373,6 +406,41 @@ const Parks = () => {
               );
             })()}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suggest New Park Dialog */}
+      <Dialog open={suggestParkDialogOpen} onOpenChange={setSuggestParkDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Suggest a New Park</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter park name"
+              value={newParkName}
+              onChange={(e) => setNewParkName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSuggestPark();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSuggestParkDialogOpen(false);
+                setNewParkName("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSuggestPark}>
+              Submit Suggestion
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
