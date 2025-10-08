@@ -6,7 +6,7 @@ import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import heartIcon from "@/assets/heart-icon.png";
 import pickleheartLogo from "@/assets/pickleheart-logo.png";
-import arrowIcon from "@/assets/arrow-icon.png";
+import arrowNav from "@/assets/arrow-nav.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
 import { CourtConditionsDialog } from "@/components/CourtConditionsDialog";
@@ -341,9 +341,9 @@ const Home = () => {
             className="absolute left-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
           >
             <img 
-              src={arrowIcon} 
+              src={arrowNav} 
               alt="previous court" 
-              className="w-8 h-8 rotate-180" 
+              className="w-12 h-12 rotate-180" 
             />
           </button>
 
@@ -378,9 +378,9 @@ const Home = () => {
             className="absolute right-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
           >
             <img 
-              src={arrowIcon} 
+              src={arrowNav} 
               alt="next court" 
-              className="w-8 h-8" 
+              className="w-12 h-12" 
             />
           </button>
         </div>
