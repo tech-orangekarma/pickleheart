@@ -416,7 +416,7 @@ const Home = () => {
             onClick={() => setShowCourtConditionsDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1 capitalize min-h-[2.25rem] flex items-center">{latestCourtCondition ?? "—"}</div>
+            <div className="text-2xl font-bold mb-1 capitalize min-h-[2.25rem] flex items-center">{latestCourtCondition ?? "—"}</div>
             <div className="text-xs font-medium text-center">court conditions</div>
             <div className="text-xs font-medium mt-1 text-center">report</div>
           </button>
