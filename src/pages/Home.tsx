@@ -205,7 +205,7 @@ const Home = () => {
       {/* Header */}
       <header className="p-4">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <img src={pickleheartLogo} alt="pickleheart" className="h-16" />
+          <img src={pickleheartLogo} alt="pickleheart" className="h-20" />
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">Hey {displayName}!</span>
             <button 
