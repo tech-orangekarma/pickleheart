@@ -229,7 +229,12 @@ const Home = () => {
       {/* Park Selector */}
       <div className="px-4 mb-6">
         <div className="max-w-md mx-auto">
-          <ToggleGroup type="single" value={selectedParkId} onValueChange={(value) => value && setSelectedParkId(value)} className="grid grid-cols-3 gap-2 w-full">
+          <ToggleGroup type="single" value={selectedParkId} onValueChange={(value) => {
+            if (value) {
+              setSelectedParkId(value);
+              setShowMediaDialog(true);
+            }
+          }} className="grid grid-cols-3 gap-2 w-full">
             {parks.map((park) => (
               <ToggleGroupItem 
                 key={park.id} 
