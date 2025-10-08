@@ -8,6 +8,7 @@ import heartIcon from "@/assets/heart-icon.png";
 import pickleheartLogo from "@/assets/pickleheart-logo.png";
 import arrowIcon from "@/assets/arrow-icon.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
+import { ParkMediaDialog } from "@/components/ParkMediaDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatDuprRating } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ const Home = () => {
   const [displayName, setDisplayName] = useState<string>("Friend");
   const [friendRequestsCount, setFriendRequestsCount] = useState(0);
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
+  const [showMediaDialog, setShowMediaDialog] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -272,13 +274,16 @@ const Home = () => {
           }`} />
           
           {/* Central Message */}
-          <div className="relative z-10 bg-card rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-2 border-dashed border-foreground/20">
+          <button
+            onClick={() => setShowMediaDialog(true)}
+            className="relative z-10 bg-card rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors cursor-pointer"
+          >
             <p className="text-xs text-muted-foreground mb-2">{selectedPark?.name}</p>
             <p className="font-headline text-2xl text-center leading-tight">
               {getQualityMessage()}
             </p>
             <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3" />
-          </div>
+          </button>
 
           {/* Right Arrow */}
           <button
@@ -438,6 +443,14 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* Park Media Dialog */}
+      <ParkMediaDialog
+        isOpen={showMediaDialog}
+        onClose={() => setShowMediaDialog(false)}
+        parkId={selectedParkId}
+        parkName={selectedPark?.name || ""}
+      />
     </div>
   );
 };

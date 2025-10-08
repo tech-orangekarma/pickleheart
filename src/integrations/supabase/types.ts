@@ -171,6 +171,39 @@ export type Database = {
           },
         ]
       }
+      park_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: string
+          media_url: string
+          park_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type: string
+          media_url: string
+          park_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+          park_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       park_suggestions: {
         Row: {
           created_at: string
