@@ -9,6 +9,7 @@ import pickleheartLogo from "@/assets/pickleheart-logo.png";
 import arrowIcon from "@/assets/arrow-icon.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
+import { CourtConditionsDialog } from "@/components/CourtConditionsDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDuprRating } from "@/lib/utils";
@@ -49,6 +50,7 @@ const Home = () => {
   const [friendRequestsCount, setFriendRequestsCount] = useState(0);
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
+  const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -380,7 +382,7 @@ const Home = () => {
           </button>
 
           <button
-            onClick={() => setShowStackDialog(true)}
+            onClick={() => setShowCourtConditionsDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
             <div className="text-xs font-medium">court conditions</div>
