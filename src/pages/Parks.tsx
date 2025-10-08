@@ -240,19 +240,19 @@ const Parks = () => {
           >
             <div className="text-4xl mb-2">🎾</div>
             <div className="text-3xl font-bold mb-1">{selectedPark?.court_count || 0}</div>
-            <div className="text-xs text-center font-medium">Courts<br/>Available</div>
+            <div className="text-xs text-center font-medium">Courts</div>
           </button>
 
-          {/* Norms Card */}
+          {/* Rules and Norms Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
             <div className="text-4xl mb-2">📋</div>
-            <div className="text-xs text-center font-medium mt-2">Norms<br/>and Rules</div>
+            <div className="text-xs text-center font-medium mt-2">Rules and<br/>Norms</div>
           </div>
 
-          {/* Hours Card */}
+          {/* Volunteer Info Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
-            <Sun className="w-8 h-8 mb-2 text-yellow-500" />
-            <div className="text-xs text-center font-medium">Sun up to<br/>Sundown</div>
+            <div className="text-4xl mb-2">🙋</div>
+            <div className="text-xs text-center font-medium mt-2">Volunteer<br/>Info</div>
           </div>
         </div>
       </div>
