@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
 import heartIcon from "@/assets/heart-icon.png";
+import pickleheartLogo from "@/assets/pickleheart-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -155,7 +156,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img src={heartIcon} alt="heart" className="w-16 h-16 mx-auto mb-4" />
-          <h1 className="text-4xl font-headline mb-2">pickleheart</h1>
+          <img src={pickleheartLogo} alt="pickleheart" className="h-12 mx-auto mb-2" />
           <p className="text-muted-foreground">find your people at the park</p>
         </div>
 

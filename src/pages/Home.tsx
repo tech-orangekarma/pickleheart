@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import heartIcon from "@/assets/heart-icon.png";
+import pickleheartLogo from "@/assets/pickleheart-logo.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatDuprRating } from "@/lib/utils";
@@ -204,7 +205,7 @@ const Home = () => {
       {/* Header */}
       <header className="p-4">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="font-headline text-2xl">pickleheart</h1>
+          <img src={pickleheartLogo} alt="pickleheart" className="h-8" />
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">Hey {displayName}!</span>
             <button 
