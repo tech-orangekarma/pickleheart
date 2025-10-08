@@ -22,6 +22,7 @@ import Level from "./pages/welcome/Level";
 import Location from "./pages/welcome/Location";
 import Ready from "./pages/welcome/Ready";
 import NotFound from "./pages/NotFound";
+import { BackgroundRemovalTool } from "./components/BackgroundRemovalTool";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const AppContent = () => {
       <Route path="/welcome/level" element={<Level />} />
       <Route path="/welcome/location" element={<Location />} />
       <Route path="/welcome/ready" element={<Ready />} />
+      <Route path="/bg-removal-tool" element={<BackgroundRemovalTool />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
