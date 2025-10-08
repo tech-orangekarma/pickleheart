@@ -384,18 +384,18 @@ const Home = () => {
         <div className="max-w-md mx-auto grid grid-cols-4 gap-3 w-full px-2">
           <button
             onClick={() => setShowPlayersDialog(true)}
-            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1">{playersCount}</div>
-            <div className="text-xs font-medium">Friends at<br/>the Park</div>
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{playersCount}</div>
+            <div className="text-xs font-medium text-center">Friends at<br/>the Park</div>
           </button>
           
           <button
             onClick={() => setShowSkillDialog(true)}
-            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1">{skillPlayersCount}</div>
-            <div className="text-xs font-medium">
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{skillPlayersCount}</div>
+            <div className="text-xs font-medium text-center">
               {skillRange[0] >= 4.5 
                 ? `${formatRating(skillRange[0])}+` 
                 : `${formatRating(skillRange[0])}-${formatRating(skillRange[1])}`}
@@ -405,20 +405,20 @@ const Home = () => {
           
           <button
             onClick={() => setShowStackDialog(true)}
-            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1">{latestStackCount ?? "—"}</div>
-            <div className="text-xs font-medium">Stack Count</div>
-            <div className="text-xs font-medium mt-1">report the stack count</div>
+            <div className="text-3xl font-bold mb-1 min-h-[2.25rem] flex items-center">{latestStackCount ?? "—"}</div>
+            <div className="text-xs font-medium text-center">Stack Count</div>
+            <div className="text-xs font-medium mt-1 text-center">report the stack count</div>
           </button>
 
           <button
             onClick={() => setShowCourtConditionsDialog(true)}
-            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors flex flex-col items-center"
           >
-            <div className="text-3xl font-bold mb-1 capitalize">{latestCourtCondition ?? "—"}</div>
-            <div className="text-xs font-medium">court conditions</div>
-            <div className="text-xs font-medium mt-1">report</div>
+            <div className="text-3xl font-bold mb-1 capitalize min-h-[2.25rem] flex items-center">{latestCourtCondition ?? "—"}</div>
+            <div className="text-xs font-medium text-center">court conditions</div>
+            <div className="text-xs font-medium mt-1 text-center">report</div>
           </button>
         </div>
       </main>
