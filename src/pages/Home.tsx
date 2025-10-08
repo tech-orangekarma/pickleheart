@@ -338,7 +338,7 @@ const Home = () => {
               }
             }}
             disabled={parks.findIndex(p => p.id === selectedParkId) === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
+            className="absolute -left-4 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
           >
             <img 
               src={arrowNav} 
@@ -375,7 +375,7 @@ const Home = () => {
               }
             }}
             disabled={parks.findIndex(p => p.id === selectedParkId) === parks.length - 1}
-            className="absolute right-0 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 transition-transform"
           >
             <img 
               src={arrowNav} 
