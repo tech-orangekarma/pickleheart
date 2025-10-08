@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { formatDuprRating } from "@/lib/utils";
 
 interface Profile {
@@ -33,6 +34,7 @@ const Profile = () => {
   const [homePark, setHomePark] = useState<Park | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [updatingLocation, setUpdatingLocation] = useState(false);
 
@@ -230,7 +232,7 @@ const Profile = () => {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => toast.info("Settings coming soon")}
+            onClick={() => setSettingsDialogOpen(true)}
           >
             <Settings className="h-4 w-4" />
             Settings
@@ -238,12 +240,19 @@ const Profile = () => {
         </div>
 
         {profile && (
-          <EditProfileDialog
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            profile={profile}
-            onProfileUpdated={loadProfile}
-          />
+          <>
+            <EditProfileDialog
+              open={editDialogOpen}
+              onOpenChange={setEditDialogOpen}
+              profile={profile}
+              onProfileUpdated={loadProfile}
+            />
+            
+            <SettingsDialog
+              isOpen={settingsDialogOpen}
+              onClose={() => setSettingsDialogOpen(false)}
+            />
+          </>
         )}
 
         <Card className="mb-6">
