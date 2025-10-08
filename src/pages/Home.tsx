@@ -384,6 +384,7 @@ const Home = () => {
           setShowSkillDialog(false);
         }}
         currentRange={skillRange}
+        parkId={selectedParkId}
       />
 
       <StackReportDialog

@@ -516,6 +516,7 @@ const ParkDetail = () => {
           toast.success("Filter applied");
         }}
         currentRange={skillRange}
+        parkId={parkId!}
       />
     </div>
   );
