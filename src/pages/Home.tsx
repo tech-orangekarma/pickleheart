@@ -306,7 +306,7 @@ const Home = () => {
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
           >
             <div className="text-3xl font-bold mb-1">{playersCount}</div>
-            <div className="text-xs font-medium">Players at<br/>the Park</div>
+            <div className="text-xs font-medium">Friends at<br/>the Park</div>
           </button>
           
           <button
@@ -318,7 +318,7 @@ const Home = () => {
               {skillRange[0] >= 4.5 
                 ? `${formatRating(skillRange[0])}+` 
                 : `${formatRating(skillRange[0])}-${formatRating(skillRange[1])}`}
-              <br/>Players at the Park
+              <br/>Friends at the Park
             </div>
           </button>
           
