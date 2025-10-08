@@ -146,6 +146,19 @@ const Parks = () => {
     }
   };
 
+  const getParkAddress = () => {
+    switch (selectedPark?.name) {
+      case "Riverside Park":
+        return "Riverside Park on 110th street (best to enter at 108th)";
+      case "Central Park":
+        return "North Meadow Handball Courts in the middle of Central Park at 97th Street";
+      case "Carl Schurz Park":
+        return "84th Street at Carl Schurz Park right by the East River";
+      default:
+        return selectedPark?.address || "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header with park selector */}
@@ -214,7 +227,7 @@ const Parks = () => {
           <MapPin className="w-6 h-6 flex-shrink-0 mt-1" />
           <div>
             <span className="font-medium">Address: </span>
-            <span className="text-muted-foreground">{selectedPark?.address}</span>
+            <span className="text-muted-foreground">{getParkAddress()}</span>
           </div>
         </div>
 
