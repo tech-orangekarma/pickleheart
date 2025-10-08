@@ -10,6 +10,7 @@ import arrowIcon from "@/assets/arrow-icon.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDuprRating } from "@/lib/utils";
 
 interface Park {
@@ -22,6 +23,13 @@ interface PlayerAtPark {
   id: string;
   display_name: string | null;
   dupr_rating: number | null;
+  avatar_url: string | null;
+  gender: string | null;
+  birthday: string | null;
+  privacy_settings: {
+    share_name: boolean;
+    share_skill_level: boolean;
+  } | null;
 }
 
 const Home = () => {
@@ -142,7 +150,15 @@ const Home = () => {
         .from("presence")
         .select(`
           user_id,
-          profiles(id, display_name, dupr_rating)
+          profiles(
+            id, 
+            display_name, 
+            dupr_rating, 
+            avatar_url, 
+            gender, 
+            birthday,
+            privacy_settings:privacy_settings(share_name, share_skill_level)
+          )
         `)
         .eq("park_id", selectedParkId)
         .is("checked_out_at", null);
@@ -182,6 +198,28 @@ const Home = () => {
       case "bad":
         return `Courts are pretty busy right now`;
     }
+  };
+
+  const calculateAge = (birthday: string | null): number | null => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const getDisplayName = (player: PlayerAtPark): string => {
+    const shareName = player.privacy_settings?.share_name ?? false;
+    return shareName ? (player.display_name || "Anonymous") : "Anonymous";
+  };
+
+  const getDisplayRating = (player: PlayerAtPark): string => {
+    const shareSkillLevel = player.privacy_settings?.share_skill_level ?? true;
+    return shareSkillLevel ? (player.dupr_rating ? formatDuprRating(player.dupr_rating) : "—") : "Hidden";
   };
 
   const formatRating = (rating: number) => {
@@ -403,20 +441,38 @@ const Home = () => {
       {/* Players List Dialog */}
       {showPlayersDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowPlayersDialog(false)}>
-          <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold mb-4">Players at Park</h2>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-3 overflow-y-auto flex-1">
               {playersAtPark.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4">No players currently at this park</p>
               ) : (
-                playersAtPark.map((player) => (
-                  <div key={player.id} className="flex items-center justify-between p-3 bg-background rounded-lg">
-                    <span className="font-medium">{player.display_name || "Anonymous"}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {player.dupr_rating ? formatDuprRating(player.dupr_rating) : "—"}
-                    </span>
-                  </div>
-                ))
+                playersAtPark.map((player) => {
+                  const age = calculateAge(player.birthday);
+                  const displayName = getDisplayName(player);
+                  const displayRating = getDisplayRating(player);
+                  
+                  return (
+                    <div key={player.id} className="flex items-center gap-3 p-3 bg-background rounded-lg">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={player.avatar_url || undefined} />
+                        <AvatarFallback>
+                          {displayName[0]?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {displayName}
+                        </p>
+                        <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                          {age !== null && <span>{age}yo</span>}
+                          {player.gender && <span>• {player.gender}</span>}
+                          <span>• DUPR: {displayRating}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
             <Button className="w-full mt-4" onClick={() => setShowPlayersDialog(false)}>Close</Button>
