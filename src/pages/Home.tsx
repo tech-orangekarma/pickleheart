@@ -348,7 +348,7 @@ const Home = () => {
         </div>
 
         {/* Info Cards */}
-        <div className="max-w-md mx-auto grid grid-cols-3 gap-3 w-full px-2">
+        <div className="max-w-md mx-auto grid grid-cols-2 gap-3 w-full px-2">
           <button
             onClick={() => setShowPlayersDialog(true)}
             className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
@@ -378,6 +378,14 @@ const Home = () => {
             <div className="text-xs font-medium">Stack Count</div>
             <div className="text-xs font-medium mt-1">report the stack count</div>
           </button>
+
+          <button
+            onClick={() => setShowStackDialog(true)}
+            className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors"
+          >
+            <div className="text-xs font-medium">court conditions</div>
+            <div className="text-xs font-medium mt-1">report</div>
+          </button>
         </div>
       </main>
 
@@ -396,15 +404,6 @@ const Home = () => {
           >
             <MapPin className="w-5 h-5" />
             <span className="text-xs">Parks</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-col h-auto gap-1"
-            onClick={() => setShowStackDialog(true)}
-          >
-            <div className="text-xs font-medium">court conditions</div>
-            <div className="text-xs font-medium">report</div>
           </Button>
           <Button
             variant="ghost"
