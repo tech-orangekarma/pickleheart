@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -206,32 +208,58 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
 
                 {/* Gender Filter */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">
-                    Gender (select up to 2)
-                  </Label>
-                  <div className="space-y-2">
-                    {['male', 'female', 'non-binary'].map((gender) => (
-                      <div key={gender} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={gender}
-                          checked={genderFilter.includes(gender)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              if (genderFilter.length < 2) {
-                                setGenderFilter([...genderFilter, gender]);
+                  <Label className="text-base font-semibold">Gender</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        <span>
+                          {genderFilter.length === 0
+                            ? "All Genders"
+                            : genderFilter.map(g => g.charAt(0).toUpperCase() + g.slice(1)).join(", ")}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-3 bg-background border border-border z-50">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 p-2 hover:bg-accent rounded">
+                          <Checkbox
+                            id="all-genders"
+                            checked={genderFilter.length === 0}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setGenderFilter([]);
                               }
-                            } else {
-                              setGenderFilter(genderFilter.filter(g => g !== gender));
-                            }
-                          }}
-                          disabled={!genderFilter.includes(gender) && genderFilter.length >= 2}
-                        />
-                        <Label htmlFor={gender} className="cursor-pointer capitalize">
-                          {gender}
-                        </Label>
+                            }}
+                          />
+                          <Label htmlFor="all-genders" className="cursor-pointer flex-1">
+                            All Genders
+                          </Label>
+                        </div>
+                        {['male', 'female', 'non-binary'].map((gender) => (
+                          <div key={gender} className="flex items-center space-x-2 p-2 hover:bg-accent rounded">
+                            <Checkbox
+                              id={gender}
+                              checked={genderFilter.includes(gender)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setGenderFilter([...genderFilter, gender]);
+                                } else {
+                                  setGenderFilter(genderFilter.filter(g => g !== gender));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={gender} className="cursor-pointer flex-1 capitalize">
+                              {gender}
+                            </Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Rating Range */}
