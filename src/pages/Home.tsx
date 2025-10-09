@@ -13,6 +13,7 @@ import { CourtConditionsDialog } from "@/components/CourtConditionsDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDuprRating } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Park {
   id: string;
@@ -264,6 +265,48 @@ const Home = () => {
     return formatted;
   };
 
+  const handleCheckIn = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to check in");
+        return;
+      }
+
+      // Check if already checked in at this park
+      const { data: existingPresence } = await supabase
+        .from("presence")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("park_id", selectedParkId)
+        .is("checked_out_at", null)
+        .maybeSingle();
+
+      if (existingPresence) {
+        toast.info("You're already checked in at this park");
+        return;
+      }
+
+      // Create new presence record
+      const { error } = await supabase
+        .from("presence")
+        .insert({
+          user_id: session.user.id,
+          park_id: selectedParkId,
+          auto_checked_in: false,
+          arrived_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      toast.success(`Checked in at ${selectedPark?.name || "park"}`);
+      loadParkData(); // Refresh player count
+    } catch (error) {
+      console.error("Error checking in:", error);
+      toast.error("Failed to check in");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -383,6 +426,18 @@ const Home = () => {
               className="w-12 h-12" 
             />
           </button>
+        </div>
+
+        {/* Check-in Button */}
+        <div className="max-w-md mx-auto w-full px-2 mb-4">
+          <Button
+            onClick={handleCheckIn}
+            size="sm"
+            variant="outline"
+            className="w-full"
+          >
+            check in at {selectedPark?.name || "park"}
+          </Button>
         </div>
 
         {/* Info Cards */}
