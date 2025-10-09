@@ -294,7 +294,10 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                 className="flex-1"
                 disabled={loading}
               >
-                {loading ? "Saving..." : "Save Settings"}
+                {loading ? "Saving..." : 
+                  (mode === "everyone" || mode === "auto_friends" || mode === "auto_requests") 
+                    ? "Save settings and send requests" 
+                    : "Save Settings"}
               </Button>
             </div>
           </div>
