@@ -16,14 +16,8 @@ const Ready = () => {
     });
   }, [navigate]);
 
-  const handleGetStarted = async () => {
-    if (!userId) return;
-
-    await supabase.from("welcome_progress").update({
-      completed_ready: true,
-    }).eq("user_id", userId);
-
-    navigate("/");
+  const handleGetStarted = () => {
+    navigate("/welcome/friends");
   };
 
   return (
