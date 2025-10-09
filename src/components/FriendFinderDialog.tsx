@@ -13,7 +13,7 @@ interface FriendFinderDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type FriendFinderMode = "everyone" | "auto_friends" | "auto_requests" | "manual";
+type FriendFinderMode = "everyone" | "auto_friends" | "auto_requests" | "receive_all" | "manual";
 
 export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogProps) {
   const [mode, setMode] = useState<FriendFinderMode>("auto_requests");
@@ -160,13 +160,25 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                 </div>
 
                 <div className="flex items-start space-x-2 p-3 rounded-lg hover:bg-accent">
+                  <RadioGroupItem value="receive_all" id="receive_all" />
+                  <div className="space-y-1">
+                    <Label htmlFor="receive_all" className="cursor-pointer font-medium">
+                      Receive Requests from Everyone
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Receive friend requests from all users
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2 p-3 rounded-lg hover:bg-accent">
                   <RadioGroupItem value="manual" id="manual" />
                   <div className="space-y-1">
                     <Label htmlFor="manual" className="cursor-pointer font-medium">
-                      Manual Only
+                      Closed
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Only connect with people you manually select
+                      Don't send or receive requests from anyone
                     </p>
                   </div>
                 </div>

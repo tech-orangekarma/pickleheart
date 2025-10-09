@@ -7,7 +7,7 @@ const corsHeaders = {
 
 interface FriendFinderSettings {
   user_id: string;
-  mode: 'everyone' | 'auto_friends' | 'auto_requests' | 'manual';
+  mode: 'everyone' | 'auto_friends' | 'auto_requests' | 'receive_all' | 'manual';
   min_age: number | null;
   max_age: number | null;
   gender_filter: string | null;
@@ -159,6 +159,12 @@ Deno.serve(async (req) => {
       } else if ((myMode === 'auto_friends' && theirMode === 'auto_requests') || (myMode === 'auto_requests' && theirMode === 'auto_friends')) {
         requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
       } else if (myMode === 'auto_requests' && theirMode === 'auto_requests') {
+        requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+      } else if (myMode === 'receive_all' && theirMode !== 'manual') {
+        // User receives requests from everyone (except manual users)
+        requestsToCreate.push({ requester_id: otherSettings.user_id, addressee_id: user.id, status: 'pending' });
+      } else if (theirMode === 'receive_all' && myMode !== 'manual') {
+        // Other user receives requests from everyone (except manual users)
         requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
       }
     }

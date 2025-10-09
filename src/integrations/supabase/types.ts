@@ -2597,6 +2597,7 @@ export type Database = {
         | "auto_friends"
         | "auto_requests"
         | "manual"
+        | "receive_all"
       friendship_status: "pending" | "accepted" | "declined"
       privacy_level: "everyone" | "friends" | "no_one"
       privacy_mode: "basic" | "standard" | "custom"
@@ -2741,6 +2742,7 @@ export const Constants = {
         "auto_friends",
         "auto_requests",
         "manual",
+        "receive_all",
       ],
       friendship_status: ["pending", "accepted", "declined"],
       privacy_level: ["everyone", "friends", "no_one"],
