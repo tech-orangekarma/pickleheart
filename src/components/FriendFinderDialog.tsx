@@ -268,7 +268,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                     DUPR Rating: {ratingRange[0].toFixed(1)} - {ratingRange[1].toFixed(1)}
                   </Label>
                   <Slider
-                    min={1.0}
+                    min={2.0}
                     max={5.0}
                     step={0.1}
                     value={ratingRange}
