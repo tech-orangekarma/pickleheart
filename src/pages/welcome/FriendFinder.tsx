@@ -288,12 +288,16 @@ const FriendFinder = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/welcome/location")}
+          onClick={() => navigate("/welcome/privacy")}
           className="mt-4 w-full"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           back
         </Button>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          step 7 of 8
+        </p>
         </div>
       )}
     </div>
