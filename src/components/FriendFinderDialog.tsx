@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,7 +18,7 @@ type FriendFinderMode = "everyone" | "auto_friends" | "auto_requests" | "receive
 export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogProps) {
   const [mode, setMode] = useState<FriendFinderMode>("auto_requests");
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
-  const [genderFilter, setGenderFilter] = useState<string>("all");
+  const [genderFilter, setGenderFilter] = useState<string[]>([]);
   const [ratingRange, setRatingRange] = useState<[number, number]>([2.0, 5.0]);
   const [loading, setLoading] = useState(false);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
@@ -46,10 +46,12 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
       if (data) {
         setMode(data.mode as FriendFinderMode);
         if (data.min_age && data.max_age) {
-          setAgeRange([data.min_age, data.max_age]);
+        setAgeRange([data.min_age, data.max_age]);
         }
         if (data.gender_filter) {
-          setGenderFilter(data.gender_filter);
+          // Parse gender_filter from comma-separated string to array
+          const genders = data.gender_filter === 'all' ? [] : data.gender_filter.split(',').filter(Boolean);
+          setGenderFilter(genders);
         }
         if (data.min_rating && data.max_rating) {
           setRatingRange([data.min_rating, data.max_rating]);
@@ -76,7 +78,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
         mode,
         min_age: ageRange[0],
         max_age: ageRange[1],
-        gender_filter: genderFilter,
+        gender_filter: genderFilter.length === 0 ? 'all' : genderFilter.join(','),
         min_rating: ratingRange[0],
         max_rating: ratingRange[1],
       };
@@ -204,18 +206,32 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
 
                 {/* Gender Filter */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Gender</Label>
-                  <Select value={genderFilter} onValueChange={setGenderFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender preference" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Genders</SelectItem>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="non-binary">Non-binary</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-base font-semibold">
+                    Gender (select up to 2)
+                  </Label>
+                  <div className="space-y-2">
+                    {['male', 'female', 'non-binary'].map((gender) => (
+                      <div key={gender} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={gender}
+                          checked={genderFilter.includes(gender)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if (genderFilter.length < 2) {
+                                setGenderFilter([...genderFilter, gender]);
+                              }
+                            } else {
+                              setGenderFilter(genderFilter.filter(g => g !== gender));
+                            }
+                          }}
+                          disabled={!genderFilter.includes(gender) && genderFilter.length >= 2}
+                        />
+                        <Label htmlFor={gender} className="cursor-pointer capitalize">
+                          {gender}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Rating Range */}
