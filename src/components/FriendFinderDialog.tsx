@@ -127,7 +127,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                   <RadioGroupItem value="everyone" id="everyone" />
                   <div className="space-y-1">
                     <Label htmlFor="everyone" className="cursor-pointer font-medium">
-                      Everyone
+                      Auto-Friend (Everyone)
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Automatically be friends with all users
@@ -139,7 +139,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                   <RadioGroupItem value="auto_friends" id="auto_friends" />
                   <div className="space-y-1">
                     <Label htmlFor="auto_friends" className="cursor-pointer font-medium">
-                      Auto-Accept in Range
+                      Auto-Friend (Range)
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Automatically be friends with people matching your filters
@@ -151,7 +151,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                   <RadioGroupItem value="auto_requests" id="auto_requests" />
                   <div className="space-y-1">
                     <Label htmlFor="auto_requests" className="cursor-pointer font-medium">
-                      Auto-Send Requests
+                      Auto-Request (Range)
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Send/receive friend requests from people in your range
@@ -163,7 +163,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
                   <RadioGroupItem value="receive_all" id="receive_all" />
                   <div className="space-y-1">
                     <Label htmlFor="receive_all" className="cursor-pointer font-medium">
-                      Receive Requests from Everyone
+                      Receive All
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Receive friend requests from all users
