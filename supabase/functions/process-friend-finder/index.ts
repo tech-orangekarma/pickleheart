@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
       profile: Profile
     ): boolean => {
       if (settings.mode === 'everyone') return true;
-      if (settings.mode === 'manual') return false;
+      if (settings.mode === 'manual' || settings.mode === 'receive_all') return false;
 
       // Check age
       if (settings.min_age !== null || settings.max_age !== null) {
@@ -106,9 +106,10 @@ Deno.serve(async (req) => {
         if (settings.max_age !== null && age > settings.max_age) return false;
       }
 
-      // Check gender
+      // Check gender - support comma-separated values
       if (settings.gender_filter && settings.gender_filter !== 'all') {
-        if (profile.gender !== settings.gender_filter) return false;
+        const allowedGenders = settings.gender_filter.split(',').map(g => g.trim());
+        if (!profile.gender || !allowedGenders.includes(profile.gender)) return false;
       }
 
       // Check rating
@@ -137,36 +138,59 @@ Deno.serve(async (req) => {
 
       if (existingFriendship) continue;
 
-      const iMatchThem = matchesCriteria(otherSettings, myProfile!);
-      const theyMatchMe = matchesCriteria(mySettings, otherProfile);
-
-      if (!iMatchThem || !theyMatchMe) continue;
-
       const myMode = mySettings.mode;
       const theirMode = otherSettings.mode;
 
-      // Determine action based on mode combination
-      if (myMode === 'everyone' || theirMode === 'everyone') {
-        if (myMode === 'everyone' && theirMode === 'everyone') {
+      // Skip if either is in manual/closed mode
+      if (myMode === 'manual' || theirMode === 'manual') continue;
+
+      // Check range matching
+      const bInARange = matchesCriteria(mySettings, otherProfile);
+      const aInBRange = matchesCriteria(otherSettings, myProfile!);
+
+      // Implement logic matrix
+      // Auto-Friend (Everyone) sends to everyone
+      if (myMode === 'everyone') {
+        if (theirMode === 'everyone' && bInARange && aInBRange) {
           friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
-        } else if ((myMode === 'everyone' && theirMode === 'auto_friends') || (myMode === 'auto_friends' && theirMode === 'everyone')) {
+        } else if (theirMode === 'auto_friends' && bInARange && aInBRange) {
           friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
-        } else {
+        } else if (theirMode === 'auto_friends' && bInARange && !aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'auto_requests' && !bInARange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'auto_requests' && bInARange && aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'receive_all' && bInARange && aInBRange) {
           requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
         }
-      } else if (myMode === 'auto_friends' && theirMode === 'auto_friends') {
-        friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
-      } else if ((myMode === 'auto_friends' && theirMode === 'auto_requests') || (myMode === 'auto_requests' && theirMode === 'auto_friends')) {
-        requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
-      } else if (myMode === 'auto_requests' && theirMode === 'auto_requests') {
-        requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
-      } else if (myMode === 'receive_all' && theirMode !== 'manual') {
-        // User receives requests from everyone (except manual users)
-        requestsToCreate.push({ requester_id: otherSettings.user_id, addressee_id: user.id, status: 'pending' });
-      } else if (theirMode === 'receive_all' && myMode !== 'manual') {
-        // Other user receives requests from everyone (except manual users)
-        requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
       }
+      // Auto-Friend (Range) only sends if B is in A's range
+      else if (myMode === 'auto_friends' && bInARange) {
+        if (theirMode === 'everyone' && aInBRange) {
+          friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
+        } else if (theirMode === 'auto_requests' && aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'auto_requests' && !aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'receive_all' && aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        }
+      }
+      // Auto-Request (Range) only sends if B is in A's range
+      else if (myMode === 'auto_requests' && bInARange) {
+        if (theirMode === 'everyone' && aInBRange) {
+          friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
+        } else if (theirMode === 'auto_friends' && aInBRange) {
+          friendshipsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'accepted' });
+        } else if (theirMode === 'auto_friends' && !aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        } else if (theirMode === 'receive_all' && aInBRange) {
+          requestsToCreate.push({ requester_id: user.id, addressee_id: otherSettings.user_id, status: 'pending' });
+        }
+      }
+      // Receive All doesn't send, only receives
+      // Note: Other modes will create requests TO this user
     }
 
     // Create friendships

@@ -1,0 +1,28 @@
+Test,Sender (A),Receiver (B),B in A Range,A in B Range,Friend Request Sent,Auto Request Accept/Reject,Outcome
+1,Auto-Friend (Everyone),Auto-Friend (Everyone),Yes,Yes,Yes,Accept,Friends
+2,Auto-Friend (Everyone),Auto-Friend (Range),Yes,Yes,Yes,Accept,Friends
+3,Auto-Friend (Everyone),Auto-Friend (Range),Yes,No,Yes,Reject,Not Friends
+4,Auto-Friend (Everyone),Auto-Request (Range),Yes,No,Yes,Reject,Not Friends
+5,Auto-Friend (Everyone),Auto-Request (Range),Yes,Yes,Yes,N/A,Pending (Received)
+6,Auto-Friend (Everyone),Receive All,Yes,Yes,Yes,N/A,Pending (Received)
+7,Auto-Friend (Everyone),Closed,Yes,No,Yes,Reject,Not Friends
+8,Auto-Friend (Range),Auto-Friend (Everyone),No,Yes,No,N/A,Not Friends
+9,Auto-Friend (Range),Auto-Friend (Everyone),Yes,Yes,Yes,Accept,Friends
+10,Auto-Friend (Range),Auto-Request (Range),Yes,Yes,Yes,N/A,Pending (Received)
+11,Auto-Friend (Range),Auto-Request (Range),No,No,No,N/A,Not Friends
+12,Auto-Friend (Range),Auto-Request (Range),No,Yes,No,N/A,Not Friends
+13,Auto-Friend (Range),Auto-Request (Range),Yes,No,Yes,Reject,Not Friends
+14,Auto-Friend (Range),Receive All,Yes,Yes,Yes,N/A,Pending (Received)
+15,Auto-Friend (Range),Receive All,No,Yes,No,N/A,Not Friends
+16,Auto-Friend (Range),Closed,No,No,No,N/A,Not Friends
+17,Auto-Friend (Range),Closed,Yes,No,Yes,Reject,Not Friends
+18,Auto-Request (Range),Auto-Friend (Everyone),No,Yes,No,N/A,Not Friends
+19,Auto-Request (Range),Auto-Friend (Everyone),Yes,Yes,Yes,Accept,Friends
+20,Auto-Request (Range),Auto-Friend (Range),Yes,Yes,Yes,Accept,Friends
+21,Auto-Request (Range),Auto-Friend (Range),Yes,No,Yes,Reject,Not Friends
+22,Auto-Request (Range),Auto-Friend (Range),No,Yes,No,N/A,Not Friends
+23,Auto-Request (Range),Auto-Friend (Range),No,No,No,N/A,Not Friends
+24,Auto-Request (Range),Receive All,No,Yes,No,N/A,Not Friends
+25,Auto-Request (Range),Receive All,Yes,Yes,Yes,N/A,Pending (Received)
+26,Auto-Request (Range),Closed,Yes,No,Yes,Reject,Not Friends
+27,Auto-Request (Range),Closed,No,No,No,N/A,Not Friends
