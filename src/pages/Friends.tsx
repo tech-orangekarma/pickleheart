@@ -357,6 +357,29 @@ const Friends = () => {
       )}
 
       <main className="max-w-md mx-auto p-6 pb-24 space-y-6">
+        {/* Friend Requests Summary */}
+        {pendingRequests.length > 0 && (
+          <Card className="p-6 border-2 border-dashed bg-accent/50">
+            <div className="text-center space-y-4">
+              <h2 className="text-lg font-headline">
+                {pendingRequests.length} {pendingRequests.length === 1 ? 'person wants' : 'people want'} to be your friend
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Choose how you want to proceed:
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFriendFinderOpen(true)}
+                className="w-full"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Configure Friend Settings
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Friends at Selected Park - Horizontal */}
         <div>
           <p className="text-sm text-muted-foreground mb-4 text-center">
