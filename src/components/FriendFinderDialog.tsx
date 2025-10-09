@@ -19,7 +19,7 @@ type FriendFinderMode = "everyone" | "auto_friends" | "auto_requests" | "receive
 
 export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogProps) {
   const [mode, setMode] = useState<FriendFinderMode>("receive_all");
-  const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([18, 100]);
   const [genderFilter, setGenderFilter] = useState<string[]>([]);
   const [ratingRange, setRatingRange] = useState<[number, number]>([2.0, 5.0]);
   const [loading, setLoading] = useState(false);
