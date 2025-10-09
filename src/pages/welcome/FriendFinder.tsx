@@ -31,7 +31,15 @@ const FriendFinder = () => {
       }
       setUserId(session.user.id);
       
-      // Load pending friend requests
+      // First, process friend finder to generate matches based on user's profile
+      setLoading(true);
+      try {
+        await supabase.functions.invoke('process-friend-finder');
+      } catch (error) {
+        console.error("Error processing friend finder:", error);
+      }
+      
+      // Then load pending friend requests
       const { data: requests } = await supabase
         .from("friendships")
         .select(`
@@ -48,6 +56,7 @@ const FriendFinder = () => {
         .eq("status", "pending");
       
       setPendingRequests(requests || []);
+      setLoading(false);
     };
 
     init();
@@ -76,9 +85,6 @@ const FriendFinder = () => {
 
       if (settingsError) throw settingsError;
 
-      // Process friend matches
-      await supabase.functions.invoke('process-friend-finder');
-
       // Mark welcome as complete
       await supabase.from("welcome_progress").update({
         completed_ready: true,
@@ -96,7 +102,13 @@ const FriendFinder = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      {loading ? (
+        <div className="text-center">
+          <Users className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">Finding your people...</p>
+        </div>
+      ) : (
+        <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Users className="w-16 h-16 text-primary" />
@@ -282,7 +294,8 @@ const FriendFinder = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           back
         </Button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
