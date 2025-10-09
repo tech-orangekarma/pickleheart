@@ -45,11 +45,21 @@ interface PendingRequest {
   created_at: string;
 }
 
+interface SentRequest {
+  id: string;
+  addressee_id: string;
+  display_name: string;
+  dupr_rating: number | null;
+  avatar_url: string | null;
+  created_at: string;
+}
+
 const Friends = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<FriendWithPresence[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkIndex, setSelectedParkIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -158,6 +168,34 @@ const Friends = () => {
         setPendingRequests(requests);
       }
 
+      // Load pending requests where current user is the requester (sent requests)
+      const { data: sentData, error: sentError} = await supabase
+        .from("friendships")
+        .select("id, addressee_id, created_at")
+        .eq("status", "pending")
+        .eq("requester_id", uid);
+
+      if (!sentError && sentData) {
+        // Load profiles for sent requests using secure function
+        const sent: SentRequest[] = await Promise.all(
+          sentData.map(async (req) => {
+            const { data: profileData } = await supabase
+              .rpc("get_public_profile", { profile_id: req.addressee_id })
+              .single();
+            
+            return {
+              id: req.id,
+              addressee_id: req.addressee_id,
+              display_name: profileData?.display_name || "Unknown User",
+              dupr_rating: profileData?.dupr_rating || null,
+              avatar_url: profileData?.avatar_url || null,
+              created_at: req.created_at,
+            };
+          })
+        );
+        setSentRequests(sent);
+      }
+
       const friendsWithPresence = await Promise.all(
         (acceptedData || []).map(async (friendship) => {
           const friendId =
@@ -233,6 +271,22 @@ const Friends = () => {
     }
 
     toast.success("Friend request rejected");
+    if (userId) loadFriends(userId);
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from("friendships")
+      .delete()
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error canceling request:", error);
+      toast.error("Failed to cancel friend request");
+      return;
+    }
+
+    toast.success("Friend request canceled");
     if (userId) loadFriends(userId);
   };
 
@@ -381,11 +435,51 @@ const Friends = () => {
                   </div>
                 </Card>
               ))}
-              {friends.length > 0 && <h2 className="text-lg font-semibold mt-6">Friends</h2>}
             </>
           )}
 
-          {friends.length === 0 && pendingRequests.length === 0 ? (
+          {/* Sent Friend Requests */}
+          {sentRequests.length > 0 && (
+            <>
+              <h2 className="text-lg font-semibold mt-4">Pending Requests You've Sent</h2>
+              {sentRequests.map((request) => (
+                <Card key={request.id} className="p-4 border-2 border-dashed bg-muted/30">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <Avatar className="flex-shrink-0">
+                        <AvatarImage src={request.avatar_url || undefined} />
+                        <AvatarFallback>{getInitials(request.display_name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{request.display_name}</p>
+                        {request.dupr_rating && (
+                          <p className="text-sm text-muted-foreground">
+                            DUPR: {formatDuprRating(request.dupr_rating)}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">Pending</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCancelRequest(request.id)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {(pendingRequests.length > 0 || sentRequests.length > 0) && friends.length > 0 && (
+            <h2 className="text-lg font-semibold mt-6">Friends</h2>
+          )}
+
+          {friends.length === 0 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
             <Card className="p-8 text-center">
               <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
