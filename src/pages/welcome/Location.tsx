@@ -80,10 +80,10 @@ const Location = () => {
       await supabase.from("welcome_progress").upsert({
         user_id: userId,
         completed_location: true,
-        current_step: "privacy",
+        current_step: "friends",
       });
 
-      navigate("/welcome/privacy");
+      navigate("/welcome/friends");
     } catch (error) {
       console.error("Error saving location:", error);
       toast.error("Failed to save location");
@@ -96,10 +96,10 @@ const Location = () => {
     await supabase.from("welcome_progress").upsert({
       user_id: userId,
       completed_location: true,
-      current_step: "privacy",
+      current_step: "friends",
     });
 
-    navigate("/welcome/privacy");
+    navigate("/welcome/friends");
   };
 
   const handleSuggestPark = async () => {

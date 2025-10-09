@@ -286,7 +286,7 @@ const FriendFinder = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/welcome/ready")}
+          onClick={() => navigate("/welcome/location")}
           className="mt-4 w-full"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
