@@ -101,34 +101,24 @@ const FriendFinder = () => {
           <div className="flex justify-center mb-4">
             <Users className="w-16 h-16 text-primary" />
           </div>
-          <h1 className="text-4xl font-headline mb-2">find your people</h1>
-          <p className="text-muted-foreground">
-            Choose how you want to connect with other players
-          </p>
+          {pendingRequests.length > 0 ? (
+            <>
+              <h1 className="text-4xl font-headline mb-4">
+                {pendingRequests.length} {pendingRequests.length === 1 ? 'person wants' : 'people want'} to be friends with you
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                Choose how you want to proceed
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-4xl font-headline mb-2">find your people</h1>
+              <p className="text-muted-foreground">
+                Choose how you want to connect with other players
+              </p>
+            </>
+          )}
         </div>
-
-        {pendingRequests.length > 0 && (
-          <div className="bg-card p-4 rounded-2xl mb-6">
-            <h3 className="font-headline mb-3">
-              {pendingRequests.length} {pendingRequests.length === 1 ? 'person wants' : 'people want'} to be friends with you
-            </h3>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {pendingRequests.map((request) => (
-                <div key={request.id} className="flex items-center gap-2 text-sm">
-                  {request.profiles?.avatar_url && (
-                    <img src={request.profiles.avatar_url} alt="" className="w-8 h-8 rounded-full" />
-                  )}
-                  <span>{request.profiles?.display_name || 'Someone'}</span>
-                  {request.profiles?.dupr_rating && (
-                    <span className="text-muted-foreground text-xs">
-                      ({request.profiles.dupr_rating})
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="bg-card p-6 rounded-2xl space-y-6">
           <div className="space-y-3">
