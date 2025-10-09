@@ -185,7 +185,7 @@ export function FriendFinderDialog({ open, onOpenChange }: FriendFinderDialogPro
               </RadioGroup>
             </div>
 
-            {mode !== "manual" && (
+            {(mode === "auto_friends" || mode === "auto_requests") && (
               <>
                 {/* Age Range */}
                 <div className="space-y-3">
