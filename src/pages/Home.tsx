@@ -351,7 +351,6 @@ const Home = () => {
           <ToggleGroup type="single" value={selectedParkId} onValueChange={(value) => {
             if (value) {
               setSelectedParkId(value);
-              setShowMediaDialog(true);
             }
           }} className="grid grid-cols-3 gap-2 w-full">
             {parks.map((park) => (
