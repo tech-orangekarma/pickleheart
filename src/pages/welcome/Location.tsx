@@ -154,7 +154,7 @@ const Location = () => {
           <MapPin className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-headline mb-2">where do you play?</h1>
           <p className="text-muted-foreground">
-            Select parks you play at and favorite your home park
+            select parks you play at and heart your home park
           </p>
         </div>
 
