@@ -346,7 +346,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "planned_visits_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "park_live_stats"
+            referencedColumns: ["park_id"]
+          },
+          {
+            foreignKeyName: "planned_visits_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       presence: {
         Row: {

@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation, Calendar } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { PlannedVisitDialog } from "@/components/PlannedVisitDialog";
 import { formatDuprRating } from "@/lib/utils";
 
 interface Profile {
@@ -35,11 +37,14 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [plannedVisitDialogOpen, setPlannedVisitDialogOpen] = useState(false);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [updatingLocation, setUpdatingLocation] = useState(false);
+  const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
   useEffect(() => {
     loadProfile();
+    loadPlannedVisit();
   }, []);
 
   const loadProfile = async () => {
@@ -96,6 +101,33 @@ const Profile = () => {
       toast.error("Failed to load profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPlannedVisit = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("planned_visits")
+        .select(`
+          planned_at,
+          parks (name)
+        `)
+        .eq("user_id", user.id)
+        .order("planned_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setPlannedVisit({
+          park_name: (data.parks as any)?.name || "Unknown Park",
+          planned_at: data.planned_at
+        });
+      }
+    } catch (error) {
+      console.error("Error loading planned visit:", error);
     }
   };
 
@@ -314,8 +346,52 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Next Planned Visit</p>
+              {plannedVisit ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-lg">{plannedVisit.park_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(plannedVisit.planned_at), "MMM d 'at' h:mm a")}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPlannedVisitDialogOpen(true)}
+                  >
+                    Change
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => setPlannedVisitDialogOpen(true)}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Plan your next visit
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
+
+        {profile && (
+          <PlannedVisitDialog
+            open={plannedVisitDialogOpen}
+            onOpenChange={(open) => {
+              setPlannedVisitDialogOpen(open);
+              if (!open) loadPlannedVisit();
+            }}
+            currentParkId={profile.home_park_id || undefined}
+          />
+        )}
 
         <Button
           onClick={handleSignOut}
