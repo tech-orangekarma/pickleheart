@@ -155,7 +155,6 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={pickleheartLogo} alt="pickleheart" className="h-32 mx-auto mb-6" />
           <p className="text-muted-foreground">find your people at the park</p>
         </div>
 

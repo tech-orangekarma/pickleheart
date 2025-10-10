@@ -356,7 +356,6 @@ const Home = () => {
       {/* Header */}
       <header className="p-4">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <img src={pickleheartLogo} alt="pickleheart" className="h-20" />
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate("/profile")}
