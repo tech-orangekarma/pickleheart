@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 import { UserSearchDialog } from "@/components/UserSearchDialog";
 import { FriendFinderDialog } from "@/components/FriendFinderDialog";
+import { FriendDetailDialog } from "@/components/FriendDetailDialog";
 import { formatDuprRating } from "@/lib/utils";
 import { formatPlannedVisitDate } from "@/utils/dateFormat";
 import { format } from "date-fns";
@@ -72,6 +73,8 @@ const Friends = () => {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [friendFinderOpen, setFriendFinderOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<FriendWithPresence | null>(null);
+  const [friendDetailOpen, setFriendDetailOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -312,6 +315,30 @@ const Friends = () => {
     if (userId) loadFriends(userId);
   };
 
+  const handleRemoveFriend = async () => {
+    if (!selectedFriend || !userId) return;
+
+    const { error } = await supabase
+      .from("friendships")
+      .delete()
+      .or(`and(requester_id.eq.${userId},addressee_id.eq.${selectedFriend.friendId}),and(requester_id.eq.${selectedFriend.friendId},addressee_id.eq.${userId})`);
+
+    if (error) {
+      console.error("Error removing friend:", error);
+      toast.error("Failed to remove friend");
+      return;
+    }
+
+    toast.success("Friend removed");
+    setSelectedFriend(null);
+    if (userId) loadFriends(userId);
+  };
+
+  const handleFriendClick = (friend: FriendWithPresence) => {
+    setSelectedFriend(friend);
+    setFriendDetailOpen(true);
+  };
+
   const getInitials = (name: string | null) => {
     if (!name) return "?";
     return name
@@ -534,7 +561,10 @@ const Friends = () => {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg mb-2">
+                      <h3 
+                        className="font-semibold text-lg mb-2 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleFriendClick(friend)}
+                      >
                         {friend.profile.display_name || "Anonymous"}
                       </h3>
                       
@@ -637,6 +667,20 @@ const Friends = () => {
         open={friendFinderOpen}
         onOpenChange={setFriendFinderOpen}
       />
+
+      {selectedFriend && (
+        <FriendDetailDialog
+          open={friendDetailOpen}
+          onOpenChange={setFriendDetailOpen}
+          friendId={selectedFriend.friendId}
+          friendName={selectedFriend.profile.display_name}
+          friendAvatar={selectedFriend.profile.avatar_url}
+          friendAge={selectedFriend.profile.age}
+          friendGender={selectedFriend.profile.gender}
+          friendRating={selectedFriend.profile.dupr_rating}
+          onRemoveFriend={handleRemoveFriend}
+        />
+      )}
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
