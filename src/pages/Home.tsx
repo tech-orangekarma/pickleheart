@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { formatPlannedVisitDate } from "@/utils/dateFormat";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
@@ -61,17 +62,17 @@ const Home = () => {
 
   useEffect(() => {
     loadData();
-    loadPlannedVisit();
   }, []);
 
   useEffect(() => {
     if (selectedParkId) {
       loadParkData();
       loadLatestReports();
+      loadPlannedVisit(selectedParkId);
     }
   }, [selectedParkId, skillRange]);
 
-  const loadPlannedVisit = async () => {
+  const loadPlannedVisit = async (parkId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
@@ -83,8 +84,7 @@ const Home = () => {
           parks (name)
         `)
         .eq("user_id", session.user.id)
-        .order("planned_at", { ascending: true })
-        .limit(1)
+        .eq("park_id", parkId)
         .maybeSingle();
 
       if (data) {
@@ -92,6 +92,8 @@ const Home = () => {
           park_name: (data.parks as any)?.name || "Unknown Park",
           planned_at: data.planned_at
         });
+      } else {
+        setPlannedVisit(null);
       }
     } catch (error) {
       console.error("Error loading planned visit:", error);
@@ -522,7 +524,7 @@ const Home = () => {
             className="w-full"
           >
             {plannedVisit 
-              ? `Next planned visit at ${plannedVisit.park_name} on ${format(new Date(plannedVisit.planned_at), "MMM d 'at' h:mm a")}`
+              ? `Next planned visit ${formatPlannedVisitDate(new Date(plannedVisit.planned_at))} at ${format(new Date(plannedVisit.planned_at), "h:mm a")}`
               : "Plan your next visit"}
           </Button>
         </div>
@@ -681,7 +683,7 @@ const Home = () => {
         onOpenChange={(open) => {
           setShowPlannedVisitDialog(open);
           if (!open) {
-            loadPlannedVisit();
+            loadPlannedVisit(selectedParkId);
           }
         }}
         currentParkId={selectedParkId}
