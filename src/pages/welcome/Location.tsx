@@ -181,10 +181,10 @@ const Location = () => {
                         e.stopPropagation();
                         toggleFavorite(park.id);
                       }}
-                      className="p-1 hover:scale-110 transition-transform"
+                      className="ml-3 p-1 hover:scale-110 transition-transform"
                     >
                       <Heart
-                        className={`w-5 h-5 ${
+                        className={`w-7 h-7 ${
                           isFavorite
                             ? "fill-primary text-primary"
                             : "text-muted-foreground"
