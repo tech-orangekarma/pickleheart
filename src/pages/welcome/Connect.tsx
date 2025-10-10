@@ -89,22 +89,62 @@ const FriendFinder = () => {
 
       if (settingsError) throw settingsError;
 
-      // If manual mode, auto-deny all pending friend requests
-      if (mode === "manual" && pendingRequests.length > 0) {
-        const requestIds = pendingRequests.map(req => req.id);
-        await supabase
-          .from("friendships")
-          .delete()
-          .in("id", requestIds);
-      }
+      // Helper function to check if a profile matches criteria
+      const matchesCriteria = (profile: any) => {
+        if (!profile) return false;
+        
+        // Check age
+        if (profile.birthday) {
+          const age = new Date().getFullYear() - new Date(profile.birthday).getFullYear();
+          if (age < ageRange[0] || age > ageRange[1]) return false;
+        }
+        
+        // Check gender
+        if (genderFilter.length > 0 && profile.gender) {
+          if (!genderFilter.includes(profile.gender)) return false;
+        }
+        
+        // Check rating
+        if (profile.dupr_rating !== null && profile.dupr_rating !== undefined) {
+          if (profile.dupr_rating < ratingRange[0] || profile.dupr_rating > ratingRange[1]) return false;
+        }
+        
+        return true;
+      };
 
-      // Mark welcome as complete
-      await supabase.from("welcome_progress").update({
-        completed_ready: true,
-      }).eq("user_id", userId);
-
-      // For auto-friend modes, fetch accepted friendships
-      if (mode === "everyone" || mode === "auto_friends") {
+      if (mode === "manual") {
+        // Reject all pending friend requests
+        if (pendingRequests.length > 0) {
+          const requestIds = pendingRequests.map(req => req.id);
+          await supabase
+            .from("friendships")
+            .delete()
+            .in("id", requestIds);
+        }
+        
+        // Mark welcome as complete and go to home
+        await supabase.from("welcome_progress").update({
+          completed_ready: true,
+        }).eq("user_id", userId);
+        
+        toast({ description: "Friend settings saved!" });
+        navigate("/");
+      } else if (mode === "everyone") {
+        // Accept ALL pending friend requests
+        if (pendingRequests.length > 0) {
+          const requestIds = pendingRequests.map(req => req.id);
+          await supabase
+            .from("friendships")
+            .update({ status: "accepted" })
+            .in("id", requestIds);
+        }
+        
+        // Mark welcome as complete
+        await supabase.from("welcome_progress").update({
+          completed_ready: true,
+        }).eq("user_id", userId);
+        
+        // Fetch newly accepted friends
         const { data: friends } = await supabase
           .from("friendships")
           .select(`
@@ -125,7 +165,6 @@ const FriendFinder = () => {
           .eq("status", "accepted")
           .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
 
-        // Map to get the other person's profile
         const mappedFriends = friends?.map(f => {
           const isRequester = f.requester_id === userId;
           return {
@@ -136,13 +175,74 @@ const FriendFinder = () => {
 
         setNewFriends(mappedFriends);
         setShowResultsDialog(true);
-      } else if (mode === "auto_requests" || mode === "receive_all") {
-        // Show pending requests
+      } else if (mode === "auto_friends") {
+        // Accept only requests that match criteria
+        const matchingRequests = pendingRequests.filter(req => matchesCriteria(req.profiles));
+        
+        if (matchingRequests.length > 0) {
+          const requestIds = matchingRequests.map(req => req.id);
+          await supabase
+            .from("friendships")
+            .update({ status: "accepted" })
+            .in("id", requestIds);
+        }
+        
+        // Mark welcome as complete
+        await supabase.from("welcome_progress").update({
+          completed_ready: true,
+        }).eq("user_id", userId);
+        
+        // Fetch newly accepted friends
+        const { data: friends } = await supabase
+          .from("friendships")
+          .select(`
+            id,
+            requester_id,
+            addressee_id,
+            requester:profiles!friendships_requester_id_fkey (
+              display_name,
+              avatar_url,
+              dupr_rating,
+              birthday
+            ),
+            addressee:profiles!friendships_addressee_id_fkey (
+              display_name,
+              avatar_url,
+              dupr_rating,
+              birthday
+            )
+          `)
+          .eq("status", "accepted")
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+        const mappedFriends = friends?.map(f => {
+          const isRequester = f.requester_id === userId;
+          return {
+            id: f.id,
+            profile: isRequester ? f.addressee : f.requester
+          };
+        }) || [];
+
+        setNewFriends(mappedFriends);
         setShowResultsDialog(true);
-      } else {
-        // Manual mode - go straight to home
-        toast({ description: "Friend settings saved!" });
-        navigate("/");
+      } else if (mode === "auto_requests") {
+        // Show only requests that match criteria
+        const matchingRequests = pendingRequests.filter(req => matchesCriteria(req.profiles));
+        setPendingRequests(matchingRequests);
+        
+        // Mark welcome as complete
+        await supabase.from("welcome_progress").update({
+          completed_ready: true,
+        }).eq("user_id", userId);
+        
+        setShowResultsDialog(true);
+      } else if (mode === "receive_all") {
+        // Show all pending requests
+        await supabase.from("welcome_progress").update({
+          completed_ready: true,
+        }).eq("user_id", userId);
+        
+        setShowResultsDialog(true);
       }
     } catch (error) {
       console.error("Error saving friend finder settings:", error);
