@@ -13,11 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDuprRating } from "@/lib/utils";
 import { formatPlannedVisitDate } from "@/utils/dateFormat";
 import { format } from "date-fns";
-import { UserX, MapPin, Calendar } from "lucide-react";
+import { UserX, MapPin, Calendar, Star } from "lucide-react";
 
 interface Park {
   id: string;
   name: string;
+}
+
+interface FriendParks {
+  favorite: Park | null;
+  park2: Park | null;
+  park3: Park | null;
 }
 
 interface PlannedVisit {
@@ -48,7 +54,11 @@ export function FriendDetailDialog({
   friendRating,
   onRemoveFriend,
 }: FriendDetailDialogProps) {
-  const [homePark, setHomePark] = useState<Park | null>(null);
+  const [friendParks, setFriendParks] = useState<FriendParks>({
+    favorite: null,
+    park2: null,
+    park3: null,
+  });
   const [plannedVisits, setPlannedVisits] = useState<PlannedVisit[]>([]);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -62,22 +72,50 @@ export function FriendDetailDialog({
   const loadFriendDetails = async () => {
     setLoading(true);
     try {
-      // Get friend's profile for home park
-      const { data: profileData } = await supabase
-        .rpc("get_public_profile", { profile_id: friendId })
-        .single();
+      // Get friend's parks from user_parks table
+      const { data: userParksData } = await supabase
+        .from("user_parks")
+        .select("favorite_park_id, park2_id, park3_id")
+        .eq("user_id", friendId)
+        .maybeSingle();
 
-      if (profileData?.home_park_id) {
-        const { data: parkData } = await supabase
-          .from("parks")
-          .select("id, name")
-          .eq("id", profileData.home_park_id)
-          .single();
-        
-        setHomePark(parkData);
-      } else {
-        setHomePark(null);
+      const parks: FriendParks = {
+        favorite: null,
+        park2: null,
+        park3: null,
+      };
+
+      if (userParksData) {
+        // Fetch park details for each park ID
+        const parkIds = [
+          userParksData.favorite_park_id,
+          userParksData.park2_id,
+          userParksData.park3_id,
+        ].filter(Boolean);
+
+        if (parkIds.length > 0) {
+          const { data: parksData } = await supabase
+            .from("parks")
+            .select("id, name")
+            .in("id", parkIds);
+
+          if (parksData) {
+            const parkMap = new Map(parksData.map((p) => [p.id, p]));
+            
+            if (userParksData.favorite_park_id) {
+              parks.favorite = parkMap.get(userParksData.favorite_park_id) || null;
+            }
+            if (userParksData.park2_id) {
+              parks.park2 = parkMap.get(userParksData.park2_id) || null;
+            }
+            if (userParksData.park3_id) {
+              parks.park3 = parkMap.get(userParksData.park3_id) || null;
+            }
+          }
+        }
       }
+
+      setFriendParks(parks);
 
       // Get all planned visits
       const { data: visitsData } = await supabase
@@ -176,16 +214,35 @@ export function FriendDetailDialog({
                 </div>
               )}
 
-              {/* Favorite Park */}
-              {homePark && (
+              {/* Friend's Parks */}
+              {(friendParks.favorite || friendParks.park2 || friendParks.park3) && (
                 <div className="bg-muted/50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-3">
                     <MapPin className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      Favorite Park
+                      Parks
                     </span>
                   </div>
-                  <p className="font-medium ml-6">{homePark.name}</p>
+                  <div className="space-y-2 ml-6">
+                    {friendParks.favorite && (
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 fill-primary text-primary" />
+                        <p className="font-medium">{friendParks.favorite.name}</p>
+                      </div>
+                    )}
+                    {friendParks.park2 && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <p className="font-medium">{friendParks.park2.name}</p>
+                      </div>
+                    )}
+                    {friendParks.park3 && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <p className="font-medium">{friendParks.park3.name}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
