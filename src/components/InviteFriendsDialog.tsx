@@ -117,12 +117,6 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
             </div>
           ) : inviteLink ? (
             <>
-              {showQR && (
-                <div className="flex justify-center p-6 bg-white rounded-lg">
-                  <QRCodeReact value={inviteLink} size={200} />
-                </div>
-              )}
-
               <div className="space-y-2">
                 <label className="text-sm font-medium">Invite Link</label>
                 <div className="flex gap-2">
@@ -145,6 +139,12 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
                 <p className="text-sm text-muted-foreground text-center">
                   Expires on {expiresAt.toLocaleDateString()} at {expiresAt.toLocaleTimeString()}
                 </p>
+              )}
+
+              {showQR && (
+                <div className="flex justify-center p-6 bg-white rounded-lg">
+                  <QRCodeReact value={inviteLink} size={200} />
+                </div>
               )}
 
               <Button 
