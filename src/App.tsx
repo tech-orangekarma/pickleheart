@@ -20,7 +20,7 @@ import WelcomeProfile from "./pages/welcome/Profile";
 import Purpose from "./pages/welcome/Purpose";
 import Level from "./pages/welcome/Level";
 import Location from "./pages/welcome/Location";
-import FriendFinder from "./pages/welcome/FriendFinder";
+import Connect from "./pages/welcome/Connect";
 import NotFound from "./pages/NotFound";
 import { BackgroundRemovalTool } from "./components/BackgroundRemovalTool";
 
@@ -48,7 +48,7 @@ const AppContent = () => {
       <Route path="/welcome/purpose" element={<Purpose />} />
       <Route path="/welcome/level" element={<Level />} />
       <Route path="/welcome/location" element={<Location />} />
-      <Route path="/welcome/friends" element={<FriendFinder />} />
+      <Route path="/welcome/connect" element={<Connect />} />
       <Route path="/bg-removal-tool" element={<BackgroundRemovalTool />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />

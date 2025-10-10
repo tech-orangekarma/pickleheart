@@ -98,12 +98,12 @@ const Privacy = () => {
         .upsert({
           user_id: userId,
           completed_privacy: true,
-          current_step: "friends",
+          current_step: "connect",
         }, { onConflict: 'user_id' });
 
       if (progressError) throw progressError;
 
-      navigate("/welcome/friends");
+      navigate("/welcome/connect");
     } catch (error) {
       console.error("Error saving privacy:", error);
       toast.error("Failed to save settings");
