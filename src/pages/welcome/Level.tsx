@@ -123,12 +123,26 @@ const Level = () => {
     setShowAssessmentResult(true);
   };
 
-  const handleUseAssessmentResult = () => {
-    setDuprRating(assessmentResult);
-    setRatingInput(formatDuprRating(assessmentResult));
-    setShowAssessment(false);
-    setShowAssessmentResult(false);
-    toast.success(`Rating set to ${formatDuprRating(assessmentResult)}`);
+  const handleUseAssessmentResult = async () => {
+    if (!userId) return;
+
+    try {
+      await supabase.from("profiles").update({
+        dupr_rating: assessmentResult,
+        dupr_source: "self_assessment",
+      }).eq("id", userId);
+
+      await supabase.from("welcome_progress").upsert({
+        user_id: userId,
+        completed_level: true,
+        current_step: "location",
+      });
+
+      navigate("/welcome/location");
+    } catch (error) {
+      console.error("Error saving assessment result:", error);
+      toast.error("Failed to save skill level");
+    }
   };
 
   const handleSelfAssessment = () => {
