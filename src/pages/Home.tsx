@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
@@ -10,6 +11,7 @@ import arrowNav from "@/assets/arrow-nav.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
 import { CourtConditionsDialog } from "@/components/CourtConditionsDialog";
+import { PlannedVisitDialog } from "@/components/PlannedVisitDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDuprRating } from "@/lib/utils";
@@ -54,9 +56,12 @@ const Home = () => {
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
   const [latestStackCount, setLatestStackCount] = useState<number | null>(null);
   const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
+  const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
+  const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
   useEffect(() => {
     loadData();
+    loadPlannedVisit();
   }, []);
 
   useEffect(() => {
@@ -65,6 +70,33 @@ const Home = () => {
       loadLatestReports();
     }
   }, [selectedParkId, skillRange]);
+
+  const loadPlannedVisit = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data } = await supabase
+        .from("planned_visits")
+        .select(`
+          planned_at,
+          parks (name)
+        `)
+        .eq("user_id", session.user.id)
+        .order("planned_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setPlannedVisit({
+          park_name: (data.parks as any)?.name || "Unknown Park",
+          planned_at: data.planned_at
+        });
+      }
+    } catch (error) {
+      console.error("Error loading planned visit:", error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -428,7 +460,7 @@ const Home = () => {
         </div>
 
         {/* Check-in Button */}
-        <div className="max-w-md mx-auto w-full px-2 mb-4">
+        <div className="max-w-md mx-auto w-full px-2 mb-2">
           <Button
             onClick={handleCheckIn}
             size="sm"
@@ -436,6 +468,20 @@ const Home = () => {
             className="w-full"
           >
             check in at {selectedPark?.name || "park"}
+          </Button>
+        </div>
+
+        {/* Planned Visit Button */}
+        <div className="max-w-md mx-auto w-full px-2 mb-4">
+          <Button
+            onClick={() => setShowPlannedVisitDialog(true)}
+            size="sm"
+            variant="outline"
+            className="w-full"
+          >
+            {plannedVisit 
+              ? `Next planned visit at ${plannedVisit.park_name} on ${format(new Date(plannedVisit.planned_at), "MMM d 'at' h:mm a")}`
+              : "Plan your next visit"}
           </Button>
         </div>
 
@@ -627,6 +673,18 @@ const Home = () => {
         }}
         parkId={selectedParkId}
         parkName={selectedPark?.name || ""}
+      />
+
+      {/* Planned Visit Dialog */}
+      <PlannedVisitDialog
+        open={showPlannedVisitDialog}
+        onOpenChange={(open) => {
+          setShowPlannedVisitDialog(open);
+          if (!open) {
+            loadPlannedVisit();
+          }
+        }}
+        currentParkId={selectedParkId}
       />
     </div>
   );
