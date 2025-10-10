@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation, Calendar, X } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation, Calendar, X, Star } from "lucide-react";
 import { formatPlannedVisitDate } from "@/utils/dateFormat";
 import { Switch } from "@/components/ui/switch";
 import heartIcon from "@/assets/heart-icon.png";
@@ -372,10 +372,11 @@ const Profile = () => {
 
             {homePark && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Home Park</p>
-                <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground mb-1">My Parks</p>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
                   <MapPin className="h-4 w-4 text-primary" />
-                  <p className="text-lg">{homePark.name}</p>
+                  <p className="text-lg flex-1">{homePark.name}</p>
+                  <Star className="h-4 w-4 text-primary fill-primary" />
                 </div>
               </div>
             )}
