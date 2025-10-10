@@ -184,7 +184,7 @@ const Location = () => {
                       className="ml-3 p-1 hover:scale-110 transition-transform"
                     >
                       <Heart
-                        className={`w-7 h-7 ${
+                        className={`w-9 h-9 ${
                           isFavorite
                             ? "fill-primary text-primary"
                             : "text-muted-foreground"
