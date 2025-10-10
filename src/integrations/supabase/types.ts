@@ -616,6 +616,42 @@ export type Database = {
           },
         ]
       }
+      user_parks: {
+        Row: {
+          created_at: string
+          id: string
+          park_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          park_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          park_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_parks_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "park_live_stats"
+            referencedColumns: ["park_id"]
+          },
+          {
+            foreignKeyName: "user_parks_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visits: {
         Row: {
           created_at: string

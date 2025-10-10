@@ -31,10 +31,14 @@ interface Park {
   name: string;
 }
 
+interface UserPark extends Park {
+  isHome: boolean;
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [homePark, setHomePark] = useState<Park | null>(null);
+  const [userParks, setUserParks] = useState<UserPark[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
@@ -84,14 +88,36 @@ const Profile = () => {
       if (error) throw error;
       setProfile(data);
 
-      // Load home park if set
-      if (data?.home_park_id) {
-        const { data: parkData } = await supabase
-          .from("parks")
-          .select("id, name")
-          .eq("id", data.home_park_id)
-          .maybeSingle();
-        if (parkData) setHomePark(parkData);
+      // Load user's parks
+      if (data) {
+        const { data: userParksData } = await supabase
+          .from("user_parks")
+          .select(`
+            park_id,
+            parks (
+              id,
+              name
+            )
+          `)
+          .eq("user_id", user.id);
+
+        if (userParksData) {
+          const parks: UserPark[] = userParksData
+            .filter(up => up.parks)
+            .map(up => ({
+              id: (up.parks as any).id,
+              name: (up.parks as any).name,
+              isHome: (up.parks as any).id === data.home_park_id
+            }))
+            .sort((a, b) => {
+              // Sort home park first
+              if (a.isHome) return -1;
+              if (b.isHome) return 1;
+              return a.name.localeCompare(b.name);
+            });
+          
+          setUserParks(parks);
+        }
       }
 
       // Load location permission
@@ -370,13 +396,24 @@ const Profile = () => {
               </div>
             )}
 
-            {homePark && (
+            {userParks.length > 0 && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">My Parks</p>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <p className="text-lg flex-1">{homePark.name}</p>
-                  <Star className="h-4 w-4 text-primary fill-primary" />
+                <p className="text-sm text-muted-foreground mb-2">My Parks</p>
+                <div className="space-y-2">
+                  {userParks.map(park => (
+                    <div 
+                      key={park.id}
+                      className={`flex items-center gap-2 p-3 rounded-lg ${
+                        park.isHome 
+                          ? 'bg-primary/10 border border-primary/20' 
+                          : 'bg-muted/50'
+                      }`}
+                    >
+                      <MapPin className={`h-4 w-4 ${park.isHome ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <p className="text-base flex-1">{park.name}</p>
+                      {park.isHome && <Star className="h-4 w-4 text-primary fill-primary" />}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

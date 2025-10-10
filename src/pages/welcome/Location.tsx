@@ -70,11 +70,31 @@ const Location = () => {
     if (!userId) return;
 
     try {
+      // Save favorite park as home park
       if (favoritePark) {
         await supabase
           .from("profiles")
           .update({ home_park_id: favoritePark })
           .eq("id", userId);
+      }
+
+      // Delete existing user_parks and insert selected ones
+      if (selectedParks.length > 0) {
+        // First delete existing entries
+        await supabase
+          .from("user_parks")
+          .delete()
+          .eq("user_id", userId);
+
+        // Then insert selected parks
+        const userParksData = selectedParks.map(parkId => ({
+          user_id: userId,
+          park_id: parkId
+        }));
+
+        await supabase
+          .from("user_parks")
+          .insert(userParksData);
       }
 
       await supabase.from("welcome_progress").upsert({
