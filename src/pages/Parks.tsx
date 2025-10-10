@@ -126,13 +126,18 @@ const Parks = () => {
 
     setPlayersCount(count || 0);
 
-    // Count total members who have selected this park
-    const { count: membersCount } = await supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("home_park_id", selectedParkId);
+    // Count total players who have selected this park as favorite, park2, or park3
+    const { data: userParksData } = await supabase
+      .from("user_parks")
+      .select("favorite_park_id, park2_id, park3_id");
 
-    setMembersCount(membersCount || 0);
+    const totalPlayers = userParksData?.filter(up => 
+      up.favorite_park_id === selectedParkId || 
+      up.park2_id === selectedParkId || 
+      up.park3_id === selectedParkId
+    ).length || 0;
+
+    setMembersCount(totalPlayers);
   };
 
   const handleSuggestPark = async () => {
@@ -323,11 +328,11 @@ const Parks = () => {
             <div className="text-xs text-center font-medium mt-2">Guidelines<br/>& Volunteers</div>
           </div>
 
-          {/* Total Members Card */}
+          {/* Total Players Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
             <div className="text-4xl mb-2">👥</div>
             <div className="text-3xl font-bold mb-1">{membersCount}</div>
-            <div className="text-xs text-center font-medium">Total<br/>Members</div>
+            <div className="text-xs text-center font-medium">Total<br/>Players</div>
           </div>
         </div>
       </div>
