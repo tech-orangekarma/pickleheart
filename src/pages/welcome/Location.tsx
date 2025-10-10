@@ -55,11 +55,21 @@ const Location = () => {
   };
 
   const toggleParkSelection = (parkId: string) => {
-    setSelectedParks(prev => 
-      prev.includes(parkId) 
-        ? prev.filter(id => id !== parkId)
-        : [...prev, parkId]
-    );
+    setSelectedParks(prev => {
+      if (prev.includes(parkId)) {
+        // If deselecting, also clear favorite if it was the favorite park
+        if (favoritePark === parkId) {
+          setFavoritePark(null);
+        }
+        return prev.filter(id => id !== parkId);
+      }
+      // Only allow selecting up to 3 parks total
+      if (prev.length >= 3) {
+        toast.error("You can only select up to 3 parks");
+        return prev;
+      }
+      return [...prev, parkId];
+    });
   };
 
   const toggleFavorite = (parkId: string) => {
