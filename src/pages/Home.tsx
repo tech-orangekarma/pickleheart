@@ -66,9 +66,8 @@ const Home = () => {
 
   useEffect(() => {
     if (selectedParkId) {
-      // Temporarily disabled for mock data
-      // loadParkData();
-      // loadLatestReports();
+      loadParkData();
+      loadLatestReports();
       loadPlannedVisit(selectedParkId);
     }
   }, [selectedParkId, skillRange]);
@@ -134,18 +133,17 @@ const Home = () => {
         setDisplayName(profileData.display_name);
       }
 
-      // Temporarily disabled for mock data - using fixed range
       // Set skill range based on user's rating
-      // if (profileData?.dupr_rating) {
-      //   const rating = profileData.dupr_rating;
-      //   if (rating > 4.75) {
-      //     setSkillRange([4.5, 5.0]);
-      //   } else {
-      //     const lower = Math.max(0, rating - 0.25);
-      //     const upper = Math.min(5.0, rating + 0.25);
-      //     setSkillRange([lower, upper]);
-      //   }
-      // }
+      if (profileData?.dupr_rating) {
+        const rating = profileData.dupr_rating;
+        if (rating > 4.75) {
+          setSkillRange([4.5, 5.0]);
+        } else {
+          const lower = Math.max(0, rating - 0.25);
+          const upper = Math.min(5.0, rating + 0.25);
+          setSkillRange([lower, upper]);
+        }
+      }
 
       // Load parks
       const { data: parksData } = await supabase
