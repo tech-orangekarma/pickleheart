@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, addDays, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { getMaxPlanningDate } from "@/utils/dateFormat";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -73,30 +74,42 @@ export function PlannedVisitDialog({ open, onOpenChange, currentParkId }: Planne
         return;
       }
 
+      // Check if user already has 3 planned visits
+      const { data: existingVisits, error: countError } = await supabase
+        .from("planned_visits")
+        .select("id, park_id")
+        .eq("user_id", session.user.id);
+
+      if (countError) throw countError;
+
+      // If not updating existing visit at this park and already have 3 visits
+      const isUpdatingExisting = existingVisits?.some(v => v.park_id === selectedParkId);
+      if (!isUpdatingExisting && existingVisits && existingVisits.length >= 3) {
+        toast.error("You can only have up to 3 planned visits");
+        setLoading(false);
+        return;
+      }
+
       // Combine date and time
       const [hours, minutes] = time.split(':');
       const plannedDateTime = new Date(date);
       plannedDateTime.setHours(parseInt(hours), parseInt(minutes));
 
-      // Delete any existing planned visit for this user (one at a time)
-      await supabase
-        .from("planned_visits")
-        .delete()
-        .eq("user_id", session.user.id);
-
-      // Insert new planned visit
+      // Upsert the planned visit (insert or update if exists for this user+park)
       const { error } = await supabase
         .from("planned_visits")
-        .insert({
+        .upsert({
           user_id: session.user.id,
           park_id: selectedParkId,
           planned_at: plannedDateTime.toISOString(),
+        }, {
+          onConflict: 'user_id,park_id'
         });
 
       if (error) throw error;
 
       const selectedPark = parks.find(p => p.id === selectedParkId);
-      toast.success(`Visit planned at ${selectedPark?.name || "park"} on ${format(plannedDateTime, "PPP 'at' p")}`);
+      toast.success(`Visit planned at ${selectedPark?.name || "park"}`);
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving planned visit:", error);
@@ -150,7 +163,11 @@ export function PlannedVisitDialog({ open, onOpenChange, currentParkId }: Planne
                   mode="single"
                   selected={date}
                   onSelect={setDate}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  disabled={(date) => {
+                    const today = startOfDay(new Date());
+                    const maxDate = getMaxPlanningDate();
+                    return date < today || date > maxDate;
+                  }}
                   initialFocus
                   className="pointer-events-auto"
                 />

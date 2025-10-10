@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Settings, Edit, Users, Navigation, Calendar, X } from "lucide-react";
+import { formatPlannedVisitDate } from "@/utils/dateFormat";
 import { Switch } from "@/components/ui/switch";
 import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
@@ -40,11 +41,16 @@ const Profile = () => {
   const [plannedVisitDialogOpen, setPlannedVisitDialogOpen] = useState(false);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [updatingLocation, setUpdatingLocation] = useState(false);
-  const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
+  const [plannedVisits, setPlannedVisits] = useState<Array<{
+    id: string;
+    park_id: string;
+    park_name: string;
+    planned_at: string;
+  }>>([]);
 
   useEffect(() => {
     loadProfile();
-    loadPlannedVisit();
+    loadPlannedVisits();
   }, []);
 
   const loadProfile = async () => {
@@ -104,30 +110,40 @@ const Profile = () => {
     }
   };
 
-  const loadPlannedVisit = async () => {
+  const loadPlannedVisits = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("planned_visits")
         .select(`
+          id,
+          park_id,
           planned_at,
-          parks (name)
+          parks (
+            name
+          )
         `)
         .eq("user_id", user.id)
-        .order("planned_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .order("planned_at", { ascending: true });
+
+      if (error) {
+        console.error("Error loading planned visits:", error);
+        setPlannedVisits([]);
+        return;
+      }
 
       if (data) {
-        setPlannedVisit({
-          park_name: (data.parks as any)?.name || "Unknown Park",
-          planned_at: data.planned_at
-        });
+        setPlannedVisits(data.map(visit => ({
+          id: visit.id,
+          park_id: visit.park_id,
+          park_name: (visit.parks as any)?.name || "Unknown",
+          planned_at: visit.planned_at,
+        })));
       }
     } catch (error) {
-      console.error("Error loading planned visit:", error);
+      console.error("Error loading planned visits:", error);
     }
   };
 
@@ -201,19 +217,16 @@ const Profile = () => {
     }
   };
 
-  const handleRemovePlannedVisit = async () => {
+  const handleRemovePlannedVisit = async (visitId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { error } = await supabase
         .from("planned_visits")
         .delete()
-        .eq("user_id", user.id);
+        .eq("id", visitId);
 
       if (error) throw error;
 
-      setPlannedVisit(null);
+      setPlannedVisits(prev => prev.filter(v => v.id !== visitId));
       toast.success("Planned visit removed");
     } catch (error) {
       console.error("Error removing planned visit:", error);
@@ -368,39 +381,44 @@ const Profile = () => {
             )}
 
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Next Planned Visit</p>
-              {plannedVisit ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <div>
-                      <p className="text-lg">{plannedVisit.park_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(plannedVisit.planned_at), "MMM d 'at' h:mm a")}
-                      </p>
+              <p className="text-sm text-muted-foreground mb-2">Planned Visits ({plannedVisits.length}/3)</p>
+              {plannedVisits.length > 0 ? (
+                <div className="space-y-2">
+                  {plannedVisits.map(visit => (
+                    <div key={visit.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <div>
+                          <p className="font-medium">{visit.park_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatPlannedVisitDate(new Date(visit.planned_at))} at {format(new Date(visit.planned_at), "h:mm a")}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemovePlannedVisit(visit.id)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
+                  ))}
+                  {plannedVisits.length < 3 && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => setPlannedVisitDialogOpen(true)}
+                      className="w-full"
                     >
-                      Change
+                      Add another visit
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRemovePlannedVisit}
-                    >
-                      Remove
-                    </Button>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <Button
                   variant="outline"
-                  className="w-full mt-2"
+                  className="w-full"
                   onClick={() => setPlannedVisitDialogOpen(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
@@ -414,10 +432,10 @@ const Profile = () => {
         {profile && (
           <PlannedVisitDialog
             open={plannedVisitDialogOpen}
-            onOpenChange={(open) => {
-              setPlannedVisitDialogOpen(open);
-              if (!open) loadPlannedVisit();
-            }}
+        onOpenChange={(open) => {
+          setPlannedVisitDialogOpen(open);
+          if (!open) loadPlannedVisits();
+        }}
             currentParkId={profile.home_park_id || undefined}
           />
         )}
