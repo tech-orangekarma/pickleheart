@@ -55,8 +55,8 @@ const Home = () => {
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
-  const [latestStackCount, setLatestStackCount] = useState<number | null>(3);
-  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("Sunny and Dry");
+  const [latestStackCount, setLatestStackCount] = useState<number | null>(2);
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("sunny and dry");
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
@@ -255,7 +255,7 @@ const Home = () => {
   };
 
   const getQualityMessage = () => {
-    return "Yes, the courts are perfect for you!";
+    return "The courts are perfect for you!";
   };
 
   const calculateAge = (birthday: string | null): number | null => {
