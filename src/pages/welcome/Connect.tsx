@@ -246,8 +246,19 @@ const FriendFinder = () => {
         setNewFriends(mappedFriends);
         setShowResultsDialog(true);
       } else if (mode === "auto_requests") {
-        // Show only requests that match criteria
+        // Filter requests that match criteria
         const matchingRequests = pendingRequests.filter(req => matchesCriteria(req.profiles));
+        const nonMatchingRequests = pendingRequests.filter(req => !matchesCriteria(req.profiles));
+        
+        // Deny all non-matching requests
+        if (nonMatchingRequests.length > 0) {
+          const nonMatchingIds = nonMatchingRequests.map(req => req.id);
+          await supabase
+            .from("friendships")
+            .delete()
+            .in("id", nonMatchingIds);
+        }
+        
         setPendingRequests(matchingRequests);
         
         // Mark welcome as complete
