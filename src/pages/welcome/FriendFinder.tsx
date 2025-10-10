@@ -102,13 +102,7 @@ const FriendFinder = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {loading ? (
-        <div className="text-center">
-          <Users className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Finding your people...</p>
-        </div>
-      ) : (
-        <div className="w-full max-w-md">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Users className="w-16 h-16 text-primary" />
@@ -298,8 +292,7 @@ const FriendFinder = () => {
         <p className="mt-4 text-center text-xs text-muted-foreground">
           step 7 of 8
         </p>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
