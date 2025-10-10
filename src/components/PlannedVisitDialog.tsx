@@ -31,11 +31,14 @@ export function PlannedVisitDialog({ open, onOpenChange, currentParkId }: Planne
   useEffect(() => {
     if (open) {
       loadParks();
-      if (currentParkId) {
-        setSelectedParkId(currentParkId);
-      }
     }
-  }, [open, currentParkId]);
+  }, [open]);
+
+  useEffect(() => {
+    if (currentParkId) {
+      setSelectedParkId(currentParkId);
+    }
+  }, [currentParkId]);
 
   const loadParks = async () => {
     try {
@@ -46,7 +49,8 @@ export function PlannedVisitDialog({ open, onOpenChange, currentParkId }: Planne
       
       if (data) {
         setParks(data);
-        if (!selectedParkId && data.length > 0) {
+        // Only set default if no currentParkId is provided
+        if (!currentParkId && !selectedParkId && data.length > 0) {
           setSelectedParkId(data[0].id);
         }
       }
