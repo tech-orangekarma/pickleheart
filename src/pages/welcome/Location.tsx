@@ -78,24 +78,17 @@ const Location = () => {
           .eq("id", userId);
       }
 
-      // Delete existing user_parks and insert selected ones
-      if (selectedParks.length > 0) {
-        // First delete existing entries
-        await supabase
-          .from("user_parks")
-          .delete()
-          .eq("user_id", userId);
-
-        // Then insert selected parks
-        const userParksData = selectedParks.map(parkId => ({
+      // Save parks to user_parks table with new structure
+      const otherParks = selectedParks.filter(id => id !== favoritePark);
+      
+      await supabase
+        .from("user_parks")
+        .upsert({
           user_id: userId,
-          park_id: parkId
-        }));
-
-        await supabase
-          .from("user_parks")
-          .insert(userParksData);
-      }
+          favorite_park_id: favoritePark || null,
+          park2_id: otherParks[0] || null,
+          park3_id: otherParks[1] || null,
+        });
 
       await supabase.from("welcome_progress").upsert({
         user_id: userId,

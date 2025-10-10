@@ -93,30 +93,43 @@ const Profile = () => {
         const { data: userParksData } = await supabase
           .from("user_parks")
           .select(`
-            park_id,
-            parks (
-              id,
-              name
-            )
+            favorite_park_id,
+            park2_id,
+            park3_id
           `)
-          .eq("user_id", user.id);
+          .eq("user_id", user.id)
+          .maybeSingle();
 
         if (userParksData) {
-          const parks: UserPark[] = userParksData
-            .filter(up => up.parks)
-            .map(up => ({
-              id: (up.parks as any).id,
-              name: (up.parks as any).name,
-              isHome: (up.parks as any).id === data.home_park_id
-            }))
-            .sort((a, b) => {
-              // Sort home park first
-              if (a.isHome) return -1;
-              if (b.isHome) return 1;
-              return a.name.localeCompare(b.name);
-            });
-          
-          setUserParks(parks);
+          const parkIds = [
+            userParksData.favorite_park_id,
+            userParksData.park2_id,
+            userParksData.park3_id
+          ].filter(Boolean);
+
+          if (parkIds.length > 0) {
+            const { data: parksData } = await supabase
+              .from("parks")
+              .select("id, name")
+              .in("id", parkIds);
+
+            if (parksData) {
+              const parks: UserPark[] = parksData
+                .map(park => ({
+                  id: park.id,
+                  name: park.name,
+                  isHome: park.id === data.home_park_id
+                }))
+                .sort((a, b) => {
+                  // Sort home park first
+                  if (a.isHome) return -1;
+                  if (b.isHome) return 1;
+                  return a.name.localeCompare(b.name);
+                });
+              
+              setUserParks(parks);
+            }
+          }
         }
       }
 

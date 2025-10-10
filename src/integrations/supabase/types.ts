@@ -619,33 +619,67 @@ export type Database = {
       user_parks: {
         Row: {
           created_at: string
-          id: string
-          park_id: string
+          favorite_park_id: string | null
+          park2_id: string | null
+          park3_id: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          park_id: string
+          favorite_park_id?: string | null
+          park2_id?: string | null
+          park3_id?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          id?: string
-          park_id?: string
+          favorite_park_id?: string | null
+          park2_id?: string | null
+          park3_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_parks_park_id_fkey"
-            columns: ["park_id"]
+            foreignKeyName: "user_parks_favorite_park_id_fkey"
+            columns: ["favorite_park_id"]
             isOneToOne: false
             referencedRelation: "park_live_stats"
             referencedColumns: ["park_id"]
           },
           {
-            foreignKeyName: "user_parks_park_id_fkey"
-            columns: ["park_id"]
+            foreignKeyName: "user_parks_favorite_park_id_fkey"
+            columns: ["favorite_park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_parks_park2_id_fkey"
+            columns: ["park2_id"]
+            isOneToOne: false
+            referencedRelation: "park_live_stats"
+            referencedColumns: ["park_id"]
+          },
+          {
+            foreignKeyName: "user_parks_park2_id_fkey"
+            columns: ["park2_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_parks_park3_id_fkey"
+            columns: ["park3_id"]
+            isOneToOne: false
+            referencedRelation: "park_live_stats"
+            referencedColumns: ["park_id"]
+          },
+          {
+            foreignKeyName: "user_parks_park3_id_fkey"
+            columns: ["park3_id"]
             isOneToOne: false
             referencedRelation: "parks"
             referencedColumns: ["id"]
