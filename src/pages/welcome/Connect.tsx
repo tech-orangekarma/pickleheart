@@ -38,6 +38,26 @@ const FriendFinder = () => {
         }
         setUserId(session.user.id);
         
+        // Load existing friend finder settings
+        const { data: existingSettings } = await supabase
+          .from("friend_finder_settings")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        
+        if (existingSettings) {
+          setMode(existingSettings.mode);
+          if (existingSettings.min_age && existingSettings.max_age) {
+            setAgeRange([existingSettings.min_age, existingSettings.max_age]);
+          }
+          if (existingSettings.gender_filter && existingSettings.gender_filter !== 'all') {
+            setGenderFilter(existingSettings.gender_filter.split(','));
+          }
+          if (existingSettings.min_rating && existingSettings.max_rating) {
+            setRatingRange([existingSettings.min_rating, existingSettings.max_rating]);
+          }
+        }
+        
         // Load pending friend requests (already created by database trigger)
         const { data: requests } = await supabase
           .from("friendships")
