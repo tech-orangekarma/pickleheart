@@ -201,6 +201,26 @@ const Profile = () => {
     }
   };
 
+  const handleRemovePlannedVisit = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("planned_visits")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setPlannedVisit(null);
+      toast.success("Planned visit removed");
+    } catch (error) {
+      console.error("Error removing planned visit:", error);
+      toast.error("Failed to remove planned visit");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -360,13 +380,22 @@ const Profile = () => {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPlannedVisitDialogOpen(true)}
-                  >
-                    Change
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPlannedVisitDialogOpen(true)}
+                    >
+                      Change
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemovePlannedVisit}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button
