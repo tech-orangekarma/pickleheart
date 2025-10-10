@@ -126,21 +126,11 @@ const Parks = () => {
 
     setPlayersCount(count || 0);
 
-    // Count unique users who have selected this park as favorite, park2, or park3
-    const { data: userParksData } = await supabase
-      .from("user_parks")
-      .select("user_id, favorite_park_id, park2_id, park3_id");
+    // Count all unique users who have selected this park using the database function
+    const { data: playerCount } = await supabase
+      .rpc("count_park_players", { park_uuid: selectedParkId });
 
-    const uniqueUsers = new Set<string>();
-    userParksData?.forEach(up => {
-      if (up.favorite_park_id === selectedParkId || 
-          up.park2_id === selectedParkId || 
-          up.park3_id === selectedParkId) {
-        uniqueUsers.add(up.user_id);
-      }
-    });
-
-    setMembersCount(uniqueUsers.size);
+    setMembersCount(playerCount || 0);
   };
 
   const handleSuggestPark = async () => {

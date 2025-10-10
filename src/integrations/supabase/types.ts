@@ -1098,6 +1098,10 @@ export type Database = {
         Args: { birthday: string }
         Returns: number
       }
+      count_park_players: {
+        Args: { park_uuid: string }
+        Returns: number
+      }
       disablelongtransactions: {
         Args: Record<PropertyKey, never>
         Returns: string
