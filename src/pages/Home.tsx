@@ -41,10 +41,10 @@ const Home = () => {
   const navigate = useNavigate();
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkId, setSelectedParkId] = useState<string>("");
-  const [playersCount, setPlayersCount] = useState(0);
-  const [skillRange, setSkillRange] = useState<[number, number]>([3.0, 4.0]);
-  const [skillPlayersCount, setSkillPlayersCount] = useState(0);
-  const [quality, setQuality] = useState<"bad" | "good" | "great">("good");
+  const [playersCount, setPlayersCount] = useState(10);
+  const [skillRange, setSkillRange] = useState<[number, number]>([2.93, 3.43]);
+  const [skillPlayersCount, setSkillPlayersCount] = useState(7);
+  const [quality, setQuality] = useState<"bad" | "good" | "great">("great");
   const [loading, setLoading] = useState(true);
   const [showSkillDialog, setShowSkillDialog] = useState(false);
   const [showStackDialog, setShowStackDialog] = useState(false);
@@ -55,8 +55,8 @@ const Home = () => {
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
-  const [latestStackCount, setLatestStackCount] = useState<number | null>(null);
-  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
+  const [latestStackCount, setLatestStackCount] = useState<number | null>(3);
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("Sunny and Dry");
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
@@ -255,17 +255,7 @@ const Home = () => {
   };
 
   const getQualityMessage = () => {
-    const selectedPark = parks.find(p => p.id === selectedParkId);
-    const parkName = selectedPark?.name || "Park";
-    
-    switch (quality) {
-      case "great":
-        return `Yes! Courts are hot right now`;
-      case "good":
-        return `Good time to play at ${parkName}`;
-      case "bad":
-        return `Courts are pretty busy right now`;
-    }
+    return "Yes, the courts are perfect for you!";
   };
 
   const calculateAge = (birthday: string | null): number | null => {
