@@ -336,47 +336,6 @@ const FriendFinder = () => {
         </div>
 
         <div className="bg-card p-6 rounded-2xl space-y-6">
-          {pendingRequests.length > 0 && (
-            <div className="space-y-3 pb-6 border-b">
-              <Label className="text-base font-semibold">Pending Friend Requests</Label>
-              <div className="space-y-2">
-                {pendingRequests.map((request) => (
-                  <div key={request.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={request.profiles?.avatar_url} />
-                      <AvatarFallback>{request.profiles?.display_name?.[0] || "?"}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-semibold">{request.profiles?.display_name || "Unknown"}</p>
-                      {request.profiles?.dupr_rating && (
-                        <p className="text-sm text-muted-foreground">
-                          DUPR: {request.profiles.dupr_rating}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAcceptRequest(request.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDenyRequest(request.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
           <div className="space-y-3">
             <Label className="text-base font-semibold">How do you want to connect?</Label>
             <RadioGroup value={mode} onValueChange={(value) => setMode(value as FriendFinderMode)}>
