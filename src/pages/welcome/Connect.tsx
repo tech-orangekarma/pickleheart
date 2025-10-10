@@ -590,7 +590,7 @@ const FriendFinder = () => {
           </div>
 
           <Button onClick={handleCloseResults} className="w-full">
-            Go to Home
+            continue
           </Button>
         </DialogContent>
       </Dialog>
