@@ -202,7 +202,18 @@ const FriendFinder = () => {
       } else if (mode === "auto_friends") {
         // Accept only requests that match criteria
         const matchingRequests = pendingRequests.filter(req => matchesCriteria(req.profiles));
+        const nonMatchingRequests = pendingRequests.filter(req => !matchesCriteria(req.profiles));
         
+        // Deny all non-matching requests
+        if (nonMatchingRequests.length > 0) {
+          const nonMatchingIds = nonMatchingRequests.map(req => req.id);
+          await supabase
+            .from("friendships")
+            .delete()
+            .in("id", nonMatchingIds);
+        }
+        
+        // Accept matching requests
         if (matchingRequests.length > 0) {
           const requestIds = matchingRequests.map(req => req.id);
           await supabase
