@@ -34,10 +34,7 @@ const FriendFinder = () => {
         }
         setUserId(session.user.id);
         
-        // First, process friend finder to generate matches based on user's profile
-        await supabase.functions.invoke('process-friend-finder');
-        
-        // Then load pending friend requests (after friend finder completes)
+        // Load pending friend requests (already created by database trigger)
         const { data: requests } = await supabase
           .from("friendships")
           .select(`
