@@ -38,6 +38,8 @@ const Purpose = () => {
         completed_purpose: true,
         selected_purpose: purposeValue,
         current_step: "level",
+      }, {
+        onConflict: 'user_id'
       });
 
       // Auto-navigate after a brief delay
