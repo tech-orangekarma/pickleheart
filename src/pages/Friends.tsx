@@ -629,7 +629,7 @@ const Friends = () => {
             size="lg"
           >
             <Search className="w-5 h-5 mr-2" />
-            Find friends on the app
+            Add friends on the app
           </Button>
           
           <Button
