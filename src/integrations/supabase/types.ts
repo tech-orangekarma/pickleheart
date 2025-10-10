@@ -1241,6 +1241,17 @@ export type Database = {
         Args: { "": string }
         Returns: unknown
       }
+      get_friend_profiles: {
+        Args: { user_ids: string[] }
+        Returns: {
+          age: number
+          avatar_url: string
+          display_name: string
+          dupr_rating: number
+          gender: string
+          id: string
+        }[]
+      }
       get_parks_with_coordinates: {
         Args: Record<PropertyKey, never>
         Returns: {

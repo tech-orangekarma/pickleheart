@@ -41,20 +41,26 @@ const FriendFinder = () => {
         // Load pending friend requests (already created by database trigger)
         const { data: requests } = await supabase
           .from("friendships")
-          .select(`
-            id,
-            requester_id,
-            created_at,
-            profiles!friendships_requester_id_fkey (
-              display_name,
-              avatar_url,
-              dupr_rating
-            )
-          `)
+          .select("id, requester_id, created_at")
           .eq("addressee_id", session.user.id)
           .eq("status", "pending");
-        
-        setPendingRequests(requests || []);
+
+        // Fetch profiles using the secure function
+        if (requests && requests.length > 0) {
+          const requesterIds = requests.map(r => r.requester_id);
+          const { data: profiles } = await supabase
+            .rpc('get_friend_profiles', { user_ids: requesterIds });
+          
+          // Merge the data
+          const requestsWithProfiles = requests.map(req => ({
+            ...req,
+            profiles: profiles?.find(p => p.id === req.requester_id)
+          }));
+          
+          setPendingRequests(requestsWithProfiles);
+        } else {
+          setPendingRequests([]);
+        }
       } catch (error) {
         console.error("Error during initialization:", error);
         toast({ description: "Failed to load friend requests", variant: "destructive" });
@@ -147,31 +153,29 @@ const FriendFinder = () => {
         // Fetch newly accepted friends
         const { data: friends } = await supabase
           .from("friendships")
-          .select(`
-            id,
-            requester_id,
-            addressee_id,
-            requester:profiles!friendships_requester_id_fkey (
-              display_name,
-              avatar_url,
-              dupr_rating
-            ),
-            addressee:profiles!friendships_addressee_id_fkey (
-              display_name,
-              avatar_url,
-              dupr_rating
-            )
-          `)
+          .select("id, requester_id, addressee_id")
           .eq("status", "accepted")
           .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
 
-        const mappedFriends = friends?.map(f => {
-          const isRequester = f.requester_id === userId;
-          return {
-            id: f.id,
-            profile: isRequester ? f.addressee : f.requester
-          };
-        }) || [];
+        // Get all friend IDs
+        const friendIds = friends?.map(f => 
+          f.requester_id === userId ? f.addressee_id : f.requester_id
+        ) || [];
+
+        // Fetch profiles using the secure function
+        let mappedFriends: any[] = [];
+        if (friendIds.length > 0) {
+          const { data: profiles } = await supabase
+            .rpc('get_friend_profiles', { user_ids: friendIds });
+          
+          mappedFriends = friends?.map(f => {
+            const friendId = f.requester_id === userId ? f.addressee_id : f.requester_id;
+            return {
+              id: f.id,
+              profile: profiles?.find(p => p.id === friendId)
+            };
+          }) || [];
+        }
 
         setNewFriends(mappedFriends);
         setShowResultsDialog(true);
@@ -195,33 +199,29 @@ const FriendFinder = () => {
         // Fetch newly accepted friends
         const { data: friends } = await supabase
           .from("friendships")
-          .select(`
-            id,
-            requester_id,
-            addressee_id,
-            requester:profiles!friendships_requester_id_fkey (
-              display_name,
-              avatar_url,
-              dupr_rating,
-              birthday
-            ),
-            addressee:profiles!friendships_addressee_id_fkey (
-              display_name,
-              avatar_url,
-              dupr_rating,
-              birthday
-            )
-          `)
+          .select("id, requester_id, addressee_id")
           .eq("status", "accepted")
           .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
 
-        const mappedFriends = friends?.map(f => {
-          const isRequester = f.requester_id === userId;
-          return {
-            id: f.id,
-            profile: isRequester ? f.addressee : f.requester
-          };
-        }) || [];
+        // Get all friend IDs
+        const friendIds = friends?.map(f => 
+          f.requester_id === userId ? f.addressee_id : f.requester_id
+        ) || [];
+
+        // Fetch profiles using the secure function
+        let mappedFriends: any[] = [];
+        if (friendIds.length > 0) {
+          const { data: profiles } = await supabase
+            .rpc('get_friend_profiles', { user_ids: friendIds });
+          
+          mappedFriends = friends?.map(f => {
+            const friendId = f.requester_id === userId ? f.addressee_id : f.requester_id;
+            return {
+              id: f.id,
+              profile: profiles?.find(p => p.id === friendId)
+            };
+          }) || [];
+        }
 
         setNewFriends(mappedFriends);
         setShowResultsDialog(true);
