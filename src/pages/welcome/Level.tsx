@@ -381,92 +381,141 @@ const Level = () => {
           </p>
         </div>
 
-        {showAssessmentFirst && (
-          <Button
-            onClick={handleSelfAssessment}
-            variant="outline"
-            className="w-full mb-6 h-12"
-          >
-            <HelpCircle className="w-5 h-5 mr-2" />
-            take quick assessment
-          </Button>
-        )}
-
-        <Card className="p-6 mb-6">
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-muted-foreground">DUPR Rating</span>
-                <Input
-                  type="text"
-                  value={ratingInput}
-                  onChange={(e) => handleRatingInputChange(e.target.value)}
-                  className="w-24 text-3xl font-bold text-primary text-center border-0 focus-visible:ring-0 p-0"
-                />
-              </div>
-              <Slider
-                value={[duprRating]}
-                onValueChange={handleSliderChange}
-                min={2.0}
-                max={5.0}
-                step={0.25}
-                className="mb-2"
-              />
-              <div className="relative text-xs text-muted-foreground mt-2 h-8">
-                <div className="absolute left-0 flex flex-col items-start">
-                  <span className="font-semibold">2.0</span>
-                  <span className="text-[10px] whitespace-nowrap">beginner/casual</span>
-                </div>
-                <div className="absolute left-[33.33%] flex flex-col items-center -translate-x-1/2">
-                  <span className="font-semibold">3.0</span>
-                  <span className="text-[10px]">intermediate</span>
-                </div>
-                <div className="absolute left-[66.67%] flex flex-col items-center -translate-x-1/2">
-                  <span className="font-semibold">4.0</span>
-                  <span className="text-[10px]">advanced</span>
-                </div>
-                <div className="absolute right-0 flex flex-col items-end">
-                  <span className="font-semibold">5.0+</span>
-                  <span className="text-[10px]">expert</span>
-                </div>
-              </div>
-            </div>
-
-            <Button onClick={handleManualEntry} className="w-full">
-              set my rating
-            </Button>
-          </div>
-        </Card>
-
-        {!showAssessmentFirst && (
-          <div className="space-y-3">
+        {showAssessmentFirst ? (
+          // Option 1: For beginners/casual players
+          <>
             <Button
               onClick={handleSelfAssessment}
-              variant="outline"
-              className="w-full"
+              variant="default"
+              size="lg"
+              className="w-full mb-4 h-16 text-lg"
             >
-              <HelpCircle className="w-4 h-4 mr-2" />
+              <HelpCircle className="w-6 h-6 mr-2" />
               take quick assessment
             </Button>
 
             <Button
               onClick={handleSkip}
               variant="ghost"
-              className="w-full"
+              className="w-full mb-6"
             >
               skip for now
             </Button>
-          </div>
-        )}
 
-        {showAssessmentFirst && (
-          <Button
-            onClick={handleSkip}
-            variant="ghost"
-            className="w-full"
-          >
-            skip for now
-          </Button>
+            <Card className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-muted-foreground">DUPR Rating</span>
+                    <Input
+                      type="text"
+                      value={ratingInput}
+                      onChange={(e) => handleRatingInputChange(e.target.value)}
+                      className="w-24 text-3xl font-bold text-primary text-center border-0 focus-visible:ring-0 p-0"
+                    />
+                  </div>
+                  <Slider
+                    value={[duprRating]}
+                    onValueChange={handleSliderChange}
+                    min={2.0}
+                    max={5.0}
+                    step={0.25}
+                    className="mb-2"
+                  />
+                  <div className="relative text-xs text-muted-foreground mt-2 h-8">
+                    <div className="absolute left-0 flex flex-col items-start">
+                      <span className="font-semibold">2.0</span>
+                      <span className="text-[10px] whitespace-nowrap">beginner/casual</span>
+                    </div>
+                    <div className="absolute left-[33.33%] flex flex-col items-center -translate-x-1/2">
+                      <span className="font-semibold">3.0</span>
+                      <span className="text-[10px]">intermediate</span>
+                    </div>
+                    <div className="absolute left-[66.67%] flex flex-col items-center -translate-x-1/2">
+                      <span className="font-semibold">4.0</span>
+                      <span className="text-[10px]">advanced</span>
+                    </div>
+                    <div className="absolute right-0 flex flex-col items-end">
+                      <span className="font-semibold">5.0+</span>
+                      <span className="text-[10px]">expert</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Button onClick={handleManualEntry} className="w-full">
+                  set my rating
+                </Button>
+              </div>
+            </Card>
+          </>
+        ) : (
+          // Option 2: For competitive players
+          <>
+            <Card className="p-6 mb-6">
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-muted-foreground">DUPR Rating</span>
+                    <Input
+                      type="text"
+                      value={ratingInput}
+                      onChange={(e) => handleRatingInputChange(e.target.value)}
+                      className="w-24 text-3xl font-bold text-primary text-center border-0 focus-visible:ring-0 p-0"
+                    />
+                  </div>
+                  <Slider
+                    value={[duprRating]}
+                    onValueChange={handleSliderChange}
+                    min={2.0}
+                    max={5.0}
+                    step={0.25}
+                    className="mb-2"
+                  />
+                  <div className="relative text-xs text-muted-foreground mt-2 h-8">
+                    <div className="absolute left-0 flex flex-col items-start">
+                      <span className="font-semibold">2.0</span>
+                      <span className="text-[10px] whitespace-nowrap">beginner/casual</span>
+                    </div>
+                    <div className="absolute left-[33.33%] flex flex-col items-center -translate-x-1/2">
+                      <span className="font-semibold">3.0</span>
+                      <span className="text-[10px]">intermediate</span>
+                    </div>
+                    <div className="absolute left-[66.67%] flex flex-col items-center -translate-x-1/2">
+                      <span className="font-semibold">4.0</span>
+                      <span className="text-[10px]">advanced</span>
+                    </div>
+                    <div className="absolute right-0 flex flex-col items-end">
+                      <span className="font-semibold">5.0+</span>
+                      <span className="text-[10px]">expert</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Button onClick={handleManualEntry} className="w-full">
+                  set my rating
+                </Button>
+              </div>
+            </Card>
+
+            <div className="space-y-3">
+              <Button
+                onClick={handleSelfAssessment}
+                variant="outline"
+                className="w-full"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                take quick assessment
+              </Button>
+
+              <Button
+                onClick={handleSkip}
+                variant="ghost"
+                className="w-full"
+              >
+                skip for now
+              </Button>
+            </div>
+          </>
         )}
 
         <Button
