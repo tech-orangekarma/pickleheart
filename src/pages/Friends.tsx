@@ -11,6 +11,8 @@ import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
 import { UserSearchDialog } from "@/components/UserSearchDialog";
 import { FriendFinderDialog } from "@/components/FriendFinderDialog";
 import { formatDuprRating } from "@/lib/utils";
+import { formatPlannedVisitDate } from "@/utils/dateFormat";
+import { format } from "date-fns";
 
 interface Park {
   id: string;
@@ -33,6 +35,10 @@ interface FriendWithPresence {
     park_id: string;
     arrived_at: string;
     parks: { name: string };
+  } | null;
+  plannedVisit?: {
+    park_name: string;
+    planned_at: string;
   } | null;
 }
 
@@ -219,6 +225,18 @@ const Friends = () => {
             .is("checked_out_at", null)
             .single();
 
+          // Get friend's next planned visit
+          const { data: plannedVisitData } = await supabase
+            .from("planned_visits")
+            .select(`
+              planned_at,
+              parks (name)
+            `)
+            .eq("user_id", friendId)
+            .order("planned_at", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
           return {
             friendId,
             profile: profileData || {
@@ -230,6 +248,10 @@ const Friends = () => {
               gender: null,
             },
             presence: presenceData,
+            plannedVisit: plannedVisitData ? {
+              park_name: (plannedVisitData.parks as any)?.name || "Unknown Park",
+              planned_at: plannedVisitData.planned_at,
+            } : null,
           } as FriendWithPresence;
         })
       );
@@ -538,6 +560,15 @@ const Friends = () => {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span className="text-lg">🎾</span>
                           <span>DUPR Rating: {formatDuprRating(friend.profile.dupr_rating)}</span>
+                        </div>
+                      )}
+
+                      {friend.plannedVisit && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                          <span className="text-lg">📅</span>
+                          <span>
+                            Next visit: {formatPlannedVisitDate(new Date(friend.plannedVisit.planned_at))} at {format(new Date(friend.plannedVisit.planned_at), "h:mm a")} - {friend.plannedVisit.park_name}
+                          </span>
                         </div>
                       )}
                     </div>
