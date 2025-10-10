@@ -116,7 +116,7 @@ const FriendFinder = () => {
           {pendingRequests.length > 0 ? (
             <>
               <h1 className="text-4xl font-headline mb-4">
-                {pendingRequests.length} {pendingRequests.length === 1 ? 'person wants' : 'people want'} to be friends with you
+                {pendingRequests.length} {pendingRequests.length === 1 ? 'person wants' : 'people want'} to be your friend
               </h1>
               <p className="text-muted-foreground mb-6">
                 Choose how you want to proceed
