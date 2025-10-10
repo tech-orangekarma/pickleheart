@@ -7,8 +7,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, ArrowLeft, Users } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChevronDown, ArrowLeft, Users, UserPlus, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 type FriendFinderMode = "everyone" | "auto_friends" | "auto_requests" | "receive_all" | "manual";
 
@@ -21,6 +23,8 @@ const FriendFinder = () => {
   const [ratingRange, setRatingRange] = useState<[number, number]>([2.0, 5.0]);
   const [loading, setLoading] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [newFriends, setNewFriends] = useState<any[]>([]);
 
   useEffect(() => {
     const init = async () => {
@@ -53,7 +57,7 @@ const FriendFinder = () => {
         setPendingRequests(requests || []);
       } catch (error) {
         console.error("Error during initialization:", error);
-        toast.error("Failed to load friend requests");
+        toast({ description: "Failed to load friend requests", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -99,22 +103,58 @@ const FriendFinder = () => {
         completed_ready: true,
       }).eq("user_id", userId);
 
-      toast.success("Friend settings saved!");
-      
-      // Redirect based on mode
-      if (mode === "manual") {
-        // Closed mode - go to home page
-        navigate("/");
+      // For auto-friend modes, fetch accepted friendships
+      if (mode === "everyone" || mode === "auto_friends") {
+        const { data: friends } = await supabase
+          .from("friendships")
+          .select(`
+            id,
+            requester_id,
+            addressee_id,
+            requester:profiles!friendships_requester_id_fkey (
+              display_name,
+              avatar_url,
+              dupr_rating
+            ),
+            addressee:profiles!friendships_addressee_id_fkey (
+              display_name,
+              avatar_url,
+              dupr_rating
+            )
+          `)
+          .eq("status", "accepted")
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+        // Map to get the other person's profile
+        const mappedFriends = friends?.map(f => {
+          const isRequester = f.requester_id === userId;
+          return {
+            id: f.id,
+            profile: isRequester ? f.addressee : f.requester
+          };
+        }) || [];
+
+        setNewFriends(mappedFriends);
+        setShowResultsDialog(true);
+      } else if (mode === "auto_requests" || mode === "receive_all") {
+        // Show pending requests
+        setShowResultsDialog(true);
       } else {
-        // All other modes - go to friends page to see friends/requests
-        navigate("/friends");
+        // Manual mode - go straight to home
+        toast({ description: "Friend settings saved!" });
+        navigate("/");
       }
     } catch (error) {
       console.error("Error saving friend finder settings:", error);
-      toast.error("Failed to save settings");
+      toast({ description: "Failed to save settings", variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseResults = () => {
+    setShowResultsDialog(false);
+    navigate("/");
   };
 
   return (
@@ -310,6 +350,81 @@ const FriendFinder = () => {
           step 7 of 8
         </p>
       </div>
+
+      {/* Results Dialog */}
+      <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {mode === "everyone" || mode === "auto_friends" ? (
+                <>
+                  <Check className="w-5 h-5 text-green-500" />
+                  Your New Friends ({newFriends.length})
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-5 h-5 text-primary" />
+                  Friend Requests ({pendingRequests.length})
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="max-h-[400px] overflow-y-auto space-y-3">
+            {mode === "everyone" || mode === "auto_friends" ? (
+              newFriends.length > 0 ? (
+                newFriends.map(({ id, profile }) => (
+                  <div key={id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={profile?.avatar_url} />
+                      <AvatarFallback>{profile?.display_name?.[0] || "?"}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-semibold">{profile?.display_name || "Unknown"}</p>
+                      {profile?.dupr_rating && (
+                        <p className="text-sm text-muted-foreground">
+                          DUPR: {profile.dupr_rating}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No new friends yet
+                </p>
+              )
+            ) : (
+              pendingRequests.length > 0 ? (
+                pendingRequests.map((request) => (
+                  <div key={request.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={request.profiles?.avatar_url} />
+                      <AvatarFallback>{request.profiles?.display_name?.[0] || "?"}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-semibold">{request.profiles?.display_name || "Unknown"}</p>
+                      {request.profiles?.dupr_rating && (
+                        <p className="text-sm text-muted-foreground">
+                          DUPR: {request.profiles.dupr_rating}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No pending requests yet
+                </p>
+              )
+            )}
+          </div>
+
+          <Button onClick={handleCloseResults} className="w-full">
+            Go to Home
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
