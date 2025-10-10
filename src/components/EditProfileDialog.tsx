@@ -19,9 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload, GraduationCap } from "lucide-react";
+import { Upload, GraduationCap, Star, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -62,7 +63,8 @@ export const EditProfileDialog = ({
     birthdayDate ? birthdayDate.getFullYear().toString() : ""
   );
   
-  const [homeParkId, setHomeParkId] = useState<string>(profile.home_park_id || "");
+  const [selectedParks, setSelectedParks] = useState<string[]>([]);
+  const [favoritePark, setFavoritePark] = useState<string | null>(null);
   const [parks, setParks] = useState<{ id: string; name: string }[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
@@ -80,6 +82,7 @@ export const EditProfileDialog = ({
 
   useEffect(() => {
     loadParks();
+    loadUserParks();
   }, []);
 
   const loadParks = async () => {
@@ -88,6 +91,44 @@ export const EditProfileDialog = ({
       .select("id, name")
       .order("name");
     if (data) setParks(data);
+  };
+
+  const loadUserParks = async () => {
+    const { data } = await supabase
+      .from("user_parks")
+      .select("favorite_park_id, park2_id, park3_id")
+      .eq("user_id", profile.id)
+      .maybeSingle();
+
+    if (data) {
+      const parks = [data.favorite_park_id, data.park2_id, data.park3_id].filter(Boolean) as string[];
+      setSelectedParks(parks);
+      setFavoritePark(data.favorite_park_id);
+    }
+  };
+
+  const toggleParkSelection = (parkId: string) => {
+    setSelectedParks(prev => {
+      if (prev.includes(parkId)) {
+        if (favoritePark === parkId) {
+          setFavoritePark(null);
+        }
+        return prev.filter(id => id !== parkId);
+      }
+      if (prev.length >= 3) {
+        toast.error("You can only select up to 3 parks");
+        return prev;
+      }
+      return [...prev, parkId];
+    });
+  };
+
+  const toggleFavorite = (parkId: string) => {
+    if (!selectedParks.includes(parkId)) {
+      toast.error("Please select this park first");
+      return;
+    }
+    setFavoritePark(favoritePark === parkId ? null : parkId);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,11 +191,32 @@ export const EditProfileDialog = ({
           avatar_url: avatarUrl,
           gender: gender || null,
           birthday: birthdayString,
-          home_park_id: homeParkId || null,
         })
         .eq("id", profile.id);
 
       if (error) throw error;
+
+      // Save user parks
+      if (selectedParks.length > 0) {
+        // Ensure favorite is in the selected parks, otherwise use the first one
+        const finalFavorite = favoritePark && selectedParks.includes(favoritePark) 
+          ? favoritePark 
+          : selectedParks[0];
+        
+        // Get remaining parks (excluding favorite)
+        const otherParks = selectedParks.filter(id => id !== finalFavorite);
+        
+        const { error: parksError } = await supabase
+          .from("user_parks")
+          .upsert({
+            user_id: profile.id,
+            favorite_park_id: finalFavorite,
+            park2_id: otherParks[0] || null,
+            park3_id: otherParks[1] || null,
+          });
+
+        if (parksError) throw parksError;
+      }
 
       toast.success("Profile updated successfully");
       onProfileUpdated();
@@ -313,19 +375,53 @@ export const EditProfileDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="home-park">Home Park</Label>
-            <Select value={homeParkId} onValueChange={setHomeParkId}>
-              <SelectTrigger id="home-park">
-                <SelectValue placeholder="Select your home park" />
-              </SelectTrigger>
-              <SelectContent>
-                {parks.map((park) => (
-                  <SelectItem key={park.id} value={park.id}>
-                    {park.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>My Parks (select up to 3)</Label>
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2">
+                {parks.map((park) => {
+                  const isSelected = selectedParks.includes(park.id);
+                  const isFavorite = favoritePark === park.id;
+                  
+                  return (
+                    <Card
+                      key={park.id}
+                      className={`p-3 cursor-pointer transition-colors ${
+                        isSelected ? "bg-primary/10 border-primary" : "hover:bg-accent"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div 
+                          className="flex items-center gap-2 flex-1"
+                          onClick={() => toggleParkSelection(park.id)}
+                        >
+                          <MapPin className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{park.name}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(park.id);
+                          }}
+                        >
+                          <Star
+                            className={`w-4 h-4 ${
+                              isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                            }`}
+                          />
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+            <p className="text-xs text-muted-foreground">
+              Click a park to select it, click the star to mark as favorite
+            </p>
           </div>
         </div>
 
