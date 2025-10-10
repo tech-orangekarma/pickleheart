@@ -41,9 +41,9 @@ const Home = () => {
   const navigate = useNavigate();
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkId, setSelectedParkId] = useState<string>("");
-  const [playersCount, setPlayersCount] = useState(10);
-  const [skillRange, setSkillRange] = useState<[number, number]>([2.93, 3.43]);
-  const [skillPlayersCount, setSkillPlayersCount] = useState(7);
+  const [playersCount, setPlayersCount] = useState(0);
+  const [skillRange, setSkillRange] = useState<[number, number]>([2.5, 3.5]);
+  const [skillPlayersCount, setSkillPlayersCount] = useState(0);
   const [quality, setQuality] = useState<"bad" | "good" | "great">("great");
   const [loading, setLoading] = useState(true);
   const [showSkillDialog, setShowSkillDialog] = useState(false);
@@ -55,8 +55,8 @@ const Home = () => {
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
-  const [latestStackCount, setLatestStackCount] = useState<number | null>(2);
-  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("sunny and dry");
+  const [latestStackCount, setLatestStackCount] = useState<number | null>(null);
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
@@ -255,7 +255,9 @@ const Home = () => {
   };
 
   const getQualityMessage = () => {
-    return "The courts are perfect for you!";
+    if (quality === "great") return "Yes, the courts are perfect for you!";
+    if (quality === "good") return "Pretty good time to play!";
+    return "Courts might be crowded";
   };
 
   const calculateAge = (birthday: string | null): number | null => {
