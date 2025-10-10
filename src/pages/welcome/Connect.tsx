@@ -85,13 +85,30 @@ const FriendFinder = () => {
 
       if (settingsError) throw settingsError;
 
+      // If manual mode, auto-deny all pending friend requests
+      if (mode === "manual" && pendingRequests.length > 0) {
+        const requestIds = pendingRequests.map(req => req.id);
+        await supabase
+          .from("friendships")
+          .delete()
+          .in("id", requestIds);
+      }
+
       // Mark welcome as complete
       await supabase.from("welcome_progress").update({
         completed_ready: true,
       }).eq("user_id", userId);
 
       toast.success("Friend settings saved!");
-      navigate("/");
+      
+      // Redirect based on mode
+      if (mode === "manual") {
+        // Closed mode - go to home page
+        navigate("/");
+      } else {
+        // All other modes - go to friends page to see friends/requests
+        navigate("/friends");
+      }
     } catch (error) {
       console.error("Error saving friend finder settings:", error);
       toast.error("Failed to save settings");
