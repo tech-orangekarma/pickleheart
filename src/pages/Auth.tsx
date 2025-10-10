@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
 import heartIcon from "@/assets/heart-icon.png";
-import pickleheartLogo from "@/assets/pickleheart-logo.png";
+import pickleheartLogo from "@/assets/pickleheart-logo-new.png";
 
 const Auth = () => {
   const navigate = useNavigate();

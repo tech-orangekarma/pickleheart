@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Users, MapPin, Bell, ChevronRight } from "lucide-react";
 import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import heartIcon from "@/assets/heart-icon.png";
-import pickleheartLogo from "@/assets/pickleheart-logo.png";
+import pickleheartLogo from "@/assets/pickleheart-logo-new.png";
 import arrowNav from "@/assets/arrow-nav.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
