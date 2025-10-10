@@ -24,39 +24,42 @@ const FriendFinder = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUserId(session.user.id);
-      
-      // First, process friend finder to generate matches based on user's profile
       setLoading(true);
+      
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+        setUserId(session.user.id);
+        
+        // First, process friend finder to generate matches based on user's profile
         await supabase.functions.invoke('process-friend-finder');
+        
+        // Then load pending friend requests (after friend finder completes)
+        const { data: requests } = await supabase
+          .from("friendships")
+          .select(`
+            id,
+            requester_id,
+            created_at,
+            profiles!friendships_requester_id_fkey (
+              display_name,
+              avatar_url,
+              dupr_rating
+            )
+          `)
+          .eq("addressee_id", session.user.id)
+          .eq("status", "pending");
+        
+        setPendingRequests(requests || []);
       } catch (error) {
-        console.error("Error processing friend finder:", error);
+        console.error("Error during initialization:", error);
+        toast.error("Failed to load friend requests");
+      } finally {
+        setLoading(false);
       }
-      
-      // Then load pending friend requests
-      const { data: requests } = await supabase
-        .from("friendships")
-        .select(`
-          id,
-          requester_id,
-          created_at,
-          profiles!friendships_requester_id_fkey (
-            display_name,
-            avatar_url,
-            dupr_rating
-          )
-        `)
-        .eq("addressee_id", session.user.id)
-        .eq("status", "pending");
-      
-      setPendingRequests(requests || []);
-      setLoading(false);
     };
 
     init();
