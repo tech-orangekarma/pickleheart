@@ -15,7 +15,7 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
   const [inviteLink, setInviteLink] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+  const [showQR, setShowQR] = useState(true);
   const { toast } = useToast();
 
   const generateInvite = async () => {
@@ -147,29 +147,14 @@ export function InviteFriendsDialog({ open, onOpenChange }: InviteFriendsDialogP
                 </p>
               )}
 
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => setShowQR(!showQR)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <QrCode className="h-4 w-4 mr-2" />
-                  {showQR ? "Hide QR Code" : "Show QR Code"}
-                </Button>
-                
-                <Button 
-                  onClick={() => {
-                    setInviteLink("");
-                    setExpiresAt(null);
-                    setShowQR(false);
-                    generateInvite();
-                  }} 
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Generate New Invite
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setShowQR(!showQR)}
+                variant="outline"
+                className="w-full"
+              >
+                <QrCode className="h-4 w-4 mr-2" />
+                {showQR ? "Hide QR Code" : "Show QR Code"}
+              </Button>
             </>
           ) : null}
         </div>
