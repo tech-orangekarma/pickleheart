@@ -26,6 +26,7 @@ const Parks = () => {
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkId, setSelectedParkId] = useState<string>("");
   const [playersCount, setPlayersCount] = useState(0);
+  const [membersCount, setMembersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [courtsDialogOpen, setCourtsDialogOpen] = useState(false);
   const [suggestParkDialogOpen, setSuggestParkDialogOpen] = useState(false);
@@ -124,6 +125,14 @@ const Parks = () => {
       .is("checked_out_at", null);
 
     setPlayersCount(count || 0);
+
+    // Count total members who have selected this park
+    const { count: membersCount } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("home_park_id", selectedParkId);
+
+    setMembersCount(membersCount || 0);
   };
 
   const handleSuggestPark = async () => {
@@ -308,16 +317,17 @@ const Parks = () => {
             <div className="text-xs text-center font-medium">Courts</div>
           </button>
 
-          {/* Rules and Norms Card */}
+          {/* Guidelines and Volunteers Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
             <div className="text-4xl mb-2">📋</div>
-            <div className="text-xs text-center font-medium mt-2">Rules and<br/>Norms</div>
+            <div className="text-xs text-center font-medium mt-2">Guidelines<br/>& Volunteers</div>
           </div>
 
-          {/* Volunteer Info Card */}
+          {/* Total Members Card */}
           <div className="bg-card/50 backdrop-blur rounded-2xl p-4 border-2 border-dashed border-foreground/20 flex flex-col items-center">
-            <div className="text-4xl mb-2">🙋</div>
-            <div className="text-xs text-center font-medium mt-2">Volunteer<br/>Info</div>
+            <div className="text-4xl mb-2">👥</div>
+            <div className="text-3xl font-bold mb-1">{membersCount}</div>
+            <div className="text-xs text-center font-medium">Total<br/>Members</div>
           </div>
         </div>
       </div>
