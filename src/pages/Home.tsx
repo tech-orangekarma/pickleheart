@@ -41,10 +41,10 @@ const Home = () => {
   const navigate = useNavigate();
   const [parks, setParks] = useState<Park[]>([]);
   const [selectedParkId, setSelectedParkId] = useState<string>("");
-  const [playersCount, setPlayersCount] = useState(10);
+  const [playersCount, setPlayersCount] = useState(0);
   const [skillRange, setSkillRange] = useState<[number, number]>([2.75, 3.75]);
-  const [skillPlayersCount, setSkillPlayersCount] = useState(8);
-  const [quality, setQuality] = useState<"bad" | "good" | "great">("great");
+  const [skillPlayersCount, setSkillPlayersCount] = useState(0);
+  const [quality, setQuality] = useState<"bad" | "good" | "great">("good");
   const [loading, setLoading] = useState(true);
   const [showSkillDialog, setShowSkillDialog] = useState(false);
   const [showStackDialog, setShowStackDialog] = useState(false);
@@ -55,8 +55,8 @@ const Home = () => {
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
-  const [latestStackCount, setLatestStackCount] = useState<number | null>(2);
-  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("Dry");
+  const [latestStackCount, setLatestStackCount] = useState<number | null>(null);
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
@@ -64,13 +64,13 @@ const Home = () => {
     loadData();
   }, []);
 
-  // useEffect(() => {
-  //   if (selectedParkId) {
-  //     loadParkData();
-  //     loadLatestReports();
-  //     loadPlannedVisit(selectedParkId);
-  //   }
-  // }, [selectedParkId, skillRange]);
+  useEffect(() => {
+    if (selectedParkId) {
+      loadParkData();
+      loadLatestReports();
+      loadPlannedVisit(selectedParkId);
+    }
+  }, [selectedParkId, skillRange]);
 
   const loadPlannedVisit = async (parkId: string) => {
     try {
@@ -134,16 +134,16 @@ const Home = () => {
       }
 
       // Set skill range based on user's rating
-      // if (profileData?.dupr_rating) {
-      //   const rating = profileData.dupr_rating;
-      //   if (rating > 4.75) {
-      //     setSkillRange([4.5, 5.0]);
-      //   } else {
-      //     const lower = Math.max(0, rating - 0.25);
-      //     const upper = Math.min(5.0, rating + 0.25);
-      //     setSkillRange([lower, upper]);
-      //   }
-      // }
+      if (profileData?.dupr_rating) {
+        const rating = profileData.dupr_rating;
+        if (rating > 4.75) {
+          setSkillRange([4.5, 5.0]);
+        } else {
+          const lower = Math.max(0, rating - 0.25);
+          const upper = Math.min(5.0, rating + 0.25);
+          setSkillRange([lower, upper]);
+        }
+      }
 
       // Load parks
       const { data: parksData } = await supabase
