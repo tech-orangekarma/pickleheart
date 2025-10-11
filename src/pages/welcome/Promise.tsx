@@ -40,12 +40,12 @@ const Promise = () => {
           <img src={promisePreview} alt="Home screen preview" className="w-full rounded-2xl shadow-lg" />
           
           {/* Hover box for parks */}
-          <div className="absolute top-[18%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <div className="absolute top-[14%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             info for three parks, adding more!
           </div>
           
           {/* Hover box for center algorithm */}
-          <div className="absolute top-[32%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity max-w-[200px] text-center">
+          <div className="absolute top-[28%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity max-w-[200px] text-center">
             A quick check that tells you if now&apos;s the moment to hit the courts
           </div>
           
