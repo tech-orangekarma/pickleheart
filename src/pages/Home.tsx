@@ -454,7 +454,7 @@ const Home = () => {
         </div>
 
         {/* Check-in Button */}
-        <div className="max-w-md mx-auto w-full px-2 mt-6 mb-2">
+        <div className="max-w-md mx-auto w-full px-2 mt-4 mb-2">
           <Button
             onClick={handleCheckIn}
             size="sm"
@@ -466,7 +466,7 @@ const Home = () => {
         </div>
 
         {/* Planned Visit Button */}
-        <div className="max-w-md mx-auto w-full px-2 mb-6">
+        <div className="max-w-md mx-auto w-full px-2 mb-4">
           <Button
             onClick={() => setShowPlannedVisitDialog(true)}
             size="sm"
