@@ -330,7 +330,7 @@ const Home = () => {
         return;
       }
 
-      // Create new presence record
+      // Create new presence record with 3-hour duration
       const { error } = await supabase
         .from("presence")
         .insert({
@@ -342,8 +342,23 @@ const Home = () => {
 
       if (error) throw error;
 
-      toast.success(`Checked in at ${selectedPark?.name || "park"}`);
+      toast.success(`Checked in at ${selectedPark?.name || "park"} for 3 hours`);
       loadParkData(); // Refresh player count
+
+      // Auto check-out after 3 hours
+      setTimeout(async () => {
+        const { error: checkoutError } = await supabase
+          .from("presence")
+          .update({ checked_out_at: new Date().toISOString() })
+          .eq("user_id", session.user.id)
+          .eq("park_id", selectedParkId)
+          .is("checked_out_at", null);
+
+        if (!checkoutError) {
+          toast.info("You've been automatically checked out");
+          loadParkData();
+        }
+      }, 3 * 60 * 60 * 1000); // 3 hours in milliseconds
     } catch (error) {
       console.error("Error checking in:", error);
       toast.error("Failed to check in");
