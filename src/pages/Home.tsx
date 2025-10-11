@@ -203,7 +203,24 @@ const Home = () => {
         .eq("park_id", selectedParkId)
         .is("checked_out_at", null);
 
-      const players = presenceData?.map((p: any) => p.profiles).filter(Boolean) || [];
+      const allPlayers = presenceData?.map((p: any) => p.profiles).filter(Boolean) || [];
+
+      // Get friendships for current user
+      const { data: friendships } = await supabase
+        .from("friendships")
+        .select("requester_id, addressee_id")
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${session.user.id},addressee_id.eq.${session.user.id}`);
+
+      // Create a set of friend IDs
+      const friendIds = new Set(
+        friendships?.map(f => 
+          f.requester_id === session.user.id ? f.addressee_id : f.requester_id
+        ) || []
+      );
+
+      // Filter to only friends
+      const players = allPlayers.filter(p => friendIds.has(p.id));
       setPlayersAtPark(players);
       setPlayersCount(players.length);
 
