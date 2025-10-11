@@ -56,7 +56,7 @@ const Home = () => {
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showCourtConditionsDialog, setShowCourtConditionsDialog] = useState(false);
   const [latestStackCount, setLatestStackCount] = useState<number | null>(2);
-  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("Sunny and Dry");
+  const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>("Dry");
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
 
