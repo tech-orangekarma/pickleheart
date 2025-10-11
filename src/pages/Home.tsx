@@ -453,6 +453,32 @@ const Home = () => {
           </button>
         </div>
 
+        {/* Check-in Button */}
+        <div className="max-w-md mx-auto w-full px-2 mt-6 mb-2">
+          <Button
+            onClick={handleCheckIn}
+            size="sm"
+            variant="outline"
+            className="w-full"
+          >
+            check in at {selectedPark?.name || "park"}
+          </Button>
+        </div>
+
+        {/* Planned Visit Button */}
+        <div className="max-w-md mx-auto w-full px-2 mb-6">
+          <Button
+            onClick={() => setShowPlannedVisitDialog(true)}
+            size="sm"
+            variant="outline"
+            className="w-full"
+          >
+            {plannedVisit 
+              ? `Next planned visit ${formatPlannedVisitDate(new Date(plannedVisit.planned_at))} at ${format(new Date(plannedVisit.planned_at), "h:mm a")}`
+              : "Plan your next visit"}
+          </Button>
+        </div>
+
         {/* Info Cards */}
         <div className="max-w-md mx-auto grid grid-cols-4 gap-3 w-full px-2">
           <button
@@ -493,32 +519,6 @@ const Home = () => {
             <div className="text-xs font-medium text-center">court conditions</div>
             <div className="text-xs font-medium mt-1 text-center">report</div>
           </button>
-        </div>
-
-        {/* Check-in Button */}
-        <div className="max-w-md mx-auto w-full px-2 mt-4 mb-2">
-          <Button
-            onClick={handleCheckIn}
-            size="sm"
-            variant="outline"
-            className="w-full"
-          >
-            check in at {selectedPark?.name || "park"}
-          </Button>
-        </div>
-
-        {/* Planned Visit Button */}
-        <div className="max-w-md mx-auto w-full px-2 mb-4">
-          <Button
-            onClick={() => setShowPlannedVisitDialog(true)}
-            size="sm"
-            variant="outline"
-            className="w-full"
-          >
-            {plannedVisit 
-              ? `Next planned visit ${formatPlannedVisitDate(new Date(plannedVisit.planned_at))} at ${format(new Date(plannedVisit.planned_at), "h:mm a")}`
-              : "Plan your next visit"}
-          </Button>
         </div>
       </main>
 
