@@ -219,13 +219,13 @@ const Home = () => {
         ) || []
       );
 
-      // Filter to only friends
+      // Filter to only friends for the "Friends at the Park" count
       const players = allPlayers.filter(p => friendIds.has(p.id));
       setPlayersAtPark(players);
       setPlayersCount(players.length);
 
-      // Count players in skill range
-      const skillPlayers = players.filter((p: PlayerAtPark) => 
+      // Count ALL players (not just friends) in skill range
+      const skillPlayers = allPlayers.filter((p: PlayerAtPark) => 
         p.dupr_rating && p.dupr_rating >= skillRange[0] && p.dupr_rating <= skillRange[1]
       );
       setSkillPlayersCount(skillPlayers.length);
