@@ -59,7 +59,7 @@ const Promise = () => {
           i'm in
         </Button>
 
-        <p className="mt-4 text-xs text-muted-foreground">step 1 of 6</p>
+        <p className="mt-4 text-xs text-muted-foreground">step 1 of 7</p>
       </div>
     </div>
   );

@@ -198,7 +198,7 @@ const Privacy = () => {
 
           <div className="mt-4 text-center">
             <p className="text-xs text-muted-foreground">
-              step 6 of 8 (part 1 of 2) • you can change this anytime
+              step 6 of 7 (part 1 of 2) • you can change this anytime
             </p>
           </div>
         </div>
@@ -280,7 +280,7 @@ const Privacy = () => {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground">
-            step 6 of 8 (part 2 of 2) • you can change this anytime
+            step 6 of 7 (part 2 of 2) • you can change this anytime
           </p>
         </div>
       </div>

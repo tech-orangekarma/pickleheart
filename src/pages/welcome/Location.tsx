@@ -232,7 +232,7 @@ const Location = () => {
         </Button>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          step 5 of 8
+          step 5 of 7
         </p>
       </div>
 

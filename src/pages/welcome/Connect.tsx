@@ -521,7 +521,7 @@ const FriendFinder = () => {
         </Button>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          step 7 of 8
+          step 7 of 7
         </p>
       </div>
 

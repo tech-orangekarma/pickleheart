@@ -211,7 +211,7 @@ const Profile = () => {
         </Button>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          step 3 of 7
+          step 2 of 7
         </p>
       </div>
     </div>
