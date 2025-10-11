@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import homePreview from "@/assets/home-preview.png";
+import promisePreview from "@/assets/promise-preview.png";
 
 const Promise = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ const Promise = () => {
         </h1>
         
         <div className="relative mb-8 group">
-          <img src={homePreview} alt="Home screen preview" className="w-full rounded-2xl shadow-lg" />
+          <img src={promisePreview} alt="Home screen preview" className="w-full rounded-2xl shadow-lg" />
           
           {/* Hover box for parks */}
           <div className="absolute top-[18%] left-1/2 -translate-x-1/2 bg-[hsl(var(--light-butter))] text-foreground px-3 py-2 rounded-lg text-xs font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
