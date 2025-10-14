@@ -331,6 +331,24 @@ const FriendFinder = () => {
     }
   };
 
+  const handleAcceptAll = async () => {
+    if (pendingRequests.length === 0) return;
+    
+    try {
+      const requestIds = pendingRequests.map(req => req.id);
+      await supabase
+        .from("friendships")
+        .update({ status: "accepted" })
+        .in("id", requestIds);
+      
+      setPendingRequests([]);
+      toast({ description: `Accepted ${requestIds.length} friend request${requestIds.length === 1 ? '' : 's'}!` });
+    } catch (error) {
+      console.error("Error accepting all requests:", error);
+      toast({ description: "Failed to accept all requests", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -570,39 +588,54 @@ const FriendFinder = () => {
               )
             ) : (
               pendingRequests.length > 0 ? (
-                pendingRequests.map((request) => (
-                  <div key={request.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={request.profiles?.avatar_url} />
-                      <AvatarFallback>{request.profiles?.display_name?.[0] || "?"}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-semibold">{request.profiles?.display_name || "Unknown"}</p>
-                      {request.profiles?.dupr_rating && (
-                        <p className="text-sm text-muted-foreground">
-                          DUPR: {request.profiles.dupr_rating}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
+                <>
+                  {pendingRequests.length > 1 && (
+                    <div className="flex justify-end mb-3">
                       <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleAcceptRequest(request.id)}
-                        className="h-8 w-8 p-0"
+                        onClick={handleAcceptAll}
+                        className="gap-2"
                       >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDenyRequest(request.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <X className="w-4 h-4" />
+                        <UserPlus className="w-4 h-4" />
+                        Accept All
                       </Button>
                     </div>
-                  </div>
-                ))
+                  )}
+                  {pendingRequests.map((request) => (
+                    <div key={request.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={request.profiles?.avatar_url} />
+                        <AvatarFallback>{request.profiles?.display_name?.[0] || "?"}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-semibold">{request.profiles?.display_name || "Unknown"}</p>
+                        {request.profiles?.dupr_rating && (
+                          <p className="text-sm text-muted-foreground">
+                            DUPR: {request.profiles.dupr_rating}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAcceptRequest(request.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDenyRequest(request.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
                   No pending requests yet
