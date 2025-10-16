@@ -14,6 +14,14 @@ import ResetPasswords from "./pages/ResetPasswords";
 import DeleteUsers from "./pages/DeleteUsers";
 import InviteAccept from "./pages/InviteAccept";
 import Privacy from "./pages/welcome/Privacy";
+import { AdminRoute } from "./components/admin/AdminRoute";
+import { AdminLayout } from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminParks from "./pages/admin/Parks";
+import AdminFriendships from "./pages/admin/Friendships";
+import AdminReports from "./pages/admin/Reports";
+import AdminInvites from "./pages/admin/Invites";
 
 import Promise from "./pages/welcome/Promise";
 import WelcomeProfile from "./pages/welcome/Profile";
@@ -50,6 +58,17 @@ const AppContent = () => {
       <Route path="/welcome/location" element={<Location />} />
       <Route path="/welcome/connect" element={<Connect />} />
       <Route path="/bg-removal-tool" element={<BackgroundRemovalTool />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="parks" element={<AdminParks />} />
+        <Route path="friendships" element={<AdminFriendships />} />
+        <Route path="reports" element={<AdminReports />} />
+        <Route path="invites" element={<AdminInvites />} />
+      </Route>
+
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
