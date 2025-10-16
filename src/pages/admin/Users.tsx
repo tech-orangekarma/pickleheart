@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { DataTable } from "@/components/admin/DataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Trash2, RotateCcw } from "lucide-react";
+import { Trash2, RotateCcw, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +19,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function AdminUsers() {
+  const [isImporting, setIsImporting] = useState(false);
+  
   const { data: users, refetch } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
@@ -53,6 +56,59 @@ export default function AdminUsers() {
       toast.success("All passwords reset successfully");
     } catch (error: any) {
       toast.error(error.message || "Failed to reset passwords");
+    }
+  };
+
+  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      // Skip first 3 lines (empty + header)
+      const dataLines = lines.slice(3);
+      
+      const users = dataLines.map(line => {
+        const cols = line.split(',');
+        return {
+          user_id: cols[1]?.trim(),
+          display_name: cols[2]?.trim(),
+          dupr_rating: cols[3]?.trim(),
+          gender: cols[4]?.trim(),
+          birthday: cols[5]?.trim(),
+          first_name: cols[6]?.trim(),
+          last_name: cols[7]?.trim(),
+          favorite_park_id: cols[8]?.trim(),
+          park2_id: cols[9]?.trim(),
+          park3_id: cols[10]?.trim(),
+          mode: cols[11]?.trim(),
+          min_age: cols[12]?.trim(),
+          max_age: cols[13]?.trim(),
+          gender_filter: cols[14]?.trim(),
+          min_rating: cols[15]?.trim(),
+          max_rating: cols[16]?.trim(),
+        };
+      }).filter(u => u.display_name);
+
+      const { data, error } = await supabase.functions.invoke("bulk-import-users", {
+        body: { users },
+      });
+
+      if (error) throw error;
+
+      toast.success(`Imported ${data.success} users successfully. ${data.failed} failed.`);
+      if (data.failed > 0) {
+        console.error('Import errors:', data.errors);
+      }
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to import users");
+    } finally {
+      setIsImporting(false);
+      event.target.value = '';
     }
   };
 
@@ -101,6 +157,23 @@ export default function AdminUsers() {
           <p className="text-muted-foreground">Manage all registered users</p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={() => document.getElementById('csv-upload')?.click()}
+            disabled={isImporting}
+          >
+            <Upload className="w-4 h-4" />
+            {isImporting ? 'Importing...' : 'Import CSV'}
+          </Button>
+          <input
+            id="csv-upload"
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleBulkImport}
+          />
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="gap-2">
