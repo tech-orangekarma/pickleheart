@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, MapPin, Search, Filter } from "lucide-react";
+import { Users, MapPin, Search, Filter, ArrowUpDown } from "lucide-react";
 import heartIcon from "@/assets/heart-icon.png";
 import { toast } from "sonner";
 import { InviteFriendsDialog } from "@/components/InviteFriendsDialog";
@@ -75,6 +75,7 @@ const Friends = () => {
   const [friendFinderOpen, setFriendFinderOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<FriendWithPresence | null>(null);
   const [friendDetailOpen, setFriendDetailOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<'age' | 'dupr' | 'status'>('status');
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -367,6 +368,23 @@ const Friends = () => {
     (f) => f.presence && selectedPark && f.presence.park_id === selectedPark.id
   );
 
+  const sortedFriends = [...friends].sort((a, b) => {
+    if (sortBy === 'age') {
+      const ageA = a.profile.age || 0;
+      const ageB = b.profile.age || 0;
+      return ageB - ageA;
+    } else if (sortBy === 'dupr') {
+      const duprA = a.profile.dupr_rating || 0;
+      const duprB = b.profile.dupr_rating || 0;
+      return duprB - duprA;
+    } else {
+      // Sort by status - online friends first
+      const statusA = a.presence ? 1 : 0;
+      const statusB = b.presence ? 1 : 0;
+      return statusB - statusA;
+    }
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -525,7 +543,67 @@ const Friends = () => {
           )}
 
           {(pendingRequests.length > 0 || sentRequests.length > 0) && friends.length > 0 && (
-            <h2 className="text-lg font-semibold mt-6">Friends</h2>
+            <div className="flex items-center justify-between mt-6 mb-2">
+              <h2 className="text-lg font-semibold">Friends</h2>
+              <div className="flex gap-2">
+                <Button
+                  variant={sortBy === 'status' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('status')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  Status
+                </Button>
+                <Button
+                  variant={sortBy === 'age' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('age')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  Age
+                </Button>
+                <Button
+                  variant={sortBy === 'dupr' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('dupr')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  DUPR
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {friends.length > 0 && (pendingRequests.length === 0 && sentRequests.length === 0) && (
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold">Friends</h2>
+              <div className="flex gap-2">
+                <Button
+                  variant={sortBy === 'status' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('status')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  Status
+                </Button>
+                <Button
+                  variant={sortBy === 'age' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('age')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  Age
+                </Button>
+                <Button
+                  variant={sortBy === 'dupr' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('dupr')}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-1" />
+                  DUPR
+                </Button>
+              </div>
+            </div>
           )}
 
           {friends.length === 0 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
@@ -536,7 +614,7 @@ const Friends = () => {
               </p>
             </Card>
           ) : (
-            friends.map((friend) => {
+            sortedFriends.map((friend) => {
               const status = getFriendStatus(friend);
               return (
                 <Card
