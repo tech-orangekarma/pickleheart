@@ -349,6 +349,24 @@ const FriendFinder = () => {
     }
   };
 
+  const handleDenyAll = async () => {
+    if (pendingRequests.length === 0) return;
+    
+    try {
+      const requestIds = pendingRequests.map(req => req.id);
+      await supabase
+        .from("friendships")
+        .delete()
+        .in("id", requestIds);
+      
+      setPendingRequests([]);
+      toast({ description: `Denied ${requestIds.length} friend request${requestIds.length === 1 ? '' : 's'}` });
+    } catch (error) {
+      console.error("Error denying all requests:", error);
+      toast({ description: "Failed to deny all requests", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -590,7 +608,16 @@ const FriendFinder = () => {
               pendingRequests.length > 0 ? (
                 <>
                   {pendingRequests.length > 1 && (
-                    <div className="flex justify-end mb-3">
+                    <div className="flex justify-end gap-2 mb-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDenyAll}
+                        className="gap-2"
+                      >
+                        <X className="w-4 h-4" />
+                        Deny All
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
