@@ -44,8 +44,9 @@ Deno.serve(async (req) => {
 
     console.log(`Starting bulk import of ${users.length} users`);
 
-    // Build a complete map of existing auth users by email
+    // Build a complete map of existing auth users by email and collect all users
     const emailToUserId = new Map<string, string>();
+    const allAuthUsers: any[] = [];
     let page = 1;
     const perPage = 1000;
     
@@ -53,9 +54,10 @@ Deno.serve(async (req) => {
       const { data: authUsers } = await supabaseClient.auth.admin.listUsers({ page, perPage });
       if (!authUsers?.users || authUsers.users.length === 0) break;
       
-      for (const user of authUsers.users) {
-        if (user.email) {
-          emailToUserId.set(user.email.toLowerCase(), user.id);
+      for (const authUser of authUsers.users) {
+        allAuthUsers.push(authUser);
+        if (authUser.email) {
+          emailToUserId.set(authUser.email.toLowerCase(), authUser.id);
         }
       }
       
@@ -64,6 +66,18 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Found ${emailToUserId.size} existing auth users`);
+
+    // Build displayName lookup map
+    const displayNameToUserId = new Map<string, string>();
+    for (const authUser of allAuthUsers) {
+      const metadata = authUser.user_metadata || {};
+      const displayName = metadata.display_name || metadata.full_name;
+      if (displayName) {
+        const normalized = displayName.trim().toLowerCase();
+        displayNameToUserId.set(normalized, authUser.id);
+      }
+    }
+    console.log(`Found ${displayNameToUserId.size} users with display names`);
 
     // Normalize gender values to satisfy DB check constraint gender_check
     const normalizeGender = (g: string | null | undefined): 'male' | 'female' | 'prefer_not_to_say' | null => {
@@ -81,12 +95,19 @@ Deno.serve(async (req) => {
       updated: 0,
       failed: 0,
       errors: [] as string[],
+      unmatched: [] as string[],
     };
 
     for (const userData of users) {
       try {
-        const email = `${userData.display_name.toLowerCase().replace(/\s+/g, '.')}@pickleheart.app`;
-        const existingUserId = emailToUserId.get(email);
+        const derivedEmail = `${userData.display_name.toLowerCase().replace(/\s+/g, '')}@pickleheart.com`;
+        let existingUserId = emailToUserId.get(derivedEmail);
+        
+        // If not found by email, try display name
+        if (!existingUserId) {
+          const normalizedName = userData.display_name.trim().toLowerCase();
+          existingUserId = displayNameToUserId.get(normalizedName);
+        }
 
         // Map mode from CSV to friend_finder_mode enum
         let mode = 'receive_all';
@@ -154,12 +175,12 @@ Deno.serve(async (req) => {
           results.updated++;
           console.log(`Successfully updated user: ${userData.display_name}`);
         } else {
-          // User doesn't exist - create new
+          // Not found by email or display name - create new user
           console.log(`Creating new user: ${userData.display_name}`);
           const password = `temp${Math.random().toString(36).slice(2)}`;
 
-          const { data: authUser, error: authError } = await supabaseClient.auth.admin.createUser({
-            email,
+          const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
+            email: derivedEmail,
             password,
             email_confirm: true,
             user_metadata: {
@@ -169,25 +190,55 @@ Deno.serve(async (req) => {
             },
           });
 
-          if (authError) {
-            console.error(`Failed to create auth user for ${userData.display_name}:`, authError);
+          if (createError) {
+            // Check if user already exists but wasn't in our map
+            if (createError.message?.includes('already registered') || createError.message?.includes('duplicate')) {
+              console.log(`User ${userData.display_name} already exists, attempting to find and update...`);
+              // Refresh email map by checking if user was just created
+              existingUserId = emailToUserId.get(derivedEmail);
+              if (!existingUserId) {
+                // Try a single page lookup
+                const { data: freshUsers } = await supabaseClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+                const foundUser = freshUsers?.users?.find(u => u.email?.toLowerCase() === derivedEmail);
+                if (foundUser) {
+                  existingUserId = foundUser.id;
+                } else {
+                  results.failed++;
+                  results.errors.push(`${userData.display_name}: ${createError.message}`);
+                  results.unmatched.push(userData.display_name);
+                  continue;
+                }
+              }
+              // Fall through to update logic below with existingUserId
+            } else {
+              console.error(`Error creating user ${userData.display_name}:`, createError);
+              results.failed++;
+              results.errors.push(`${userData.display_name}: ${createError.message}`);
+              continue;
+            }
+          }
+
+          const userId = existingUserId || newUser?.user?.id;
+          if (!userId) {
             results.failed++;
-            results.errors.push(`${userData.display_name}: ${authError.message}`);
+            results.errors.push(`${userData.display_name}: No user ID available`);
             continue;
           }
 
-          // Insert profile
+          const isUpdate = !!existingUserId;
+
+          // Insert/upsert profile
           const { error: profileError } = await supabaseClient
             .from('profiles')
-            .insert({
-              id: authUser.user.id,
+            .upsert({
+              id: userId,
               display_name: userData.display_name,
               first_name: userData.first_name,
               last_name: userData.last_name,
               gender: normalizeGender(userData.gender),
               birthday: userData.birthday || null,
               dupr_rating: userData.dupr_rating ? parseFloat(userData.dupr_rating) : null,
-            });
+            }, { onConflict: 'id' });
 
           if (profileError) {
             console.error(`Failed to create profile for ${userData.display_name}:`, profileError);
@@ -196,41 +247,46 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          // Insert user_parks
+          // Insert/upsert user_parks
           if (userData.favorite_park_id) {
             const { error: parksError } = await supabaseClient
               .from('user_parks')
-              .insert({
-                user_id: authUser.user.id,
+              .upsert({
+                user_id: userId,
                 favorite_park_id: userData.favorite_park_id || null,
                 park2_id: userData.park2_id || null,
                 park3_id: userData.park3_id || null,
-              });
+              }, { onConflict: 'user_id' });
 
             if (parksError) {
               console.error(`Failed to create user_parks for ${userData.display_name}:`, parksError);
             }
           }
 
-          // Insert friend_finder_settings
+          // Insert/upsert friend_finder_settings
           const { error: settingsError } = await supabaseClient
             .from('friend_finder_settings')
-            .insert({
-              user_id: authUser.user.id,
+            .upsert({
+              user_id: userId,
               mode,
               min_age: userData.min_age ? parseInt(userData.min_age) : 18,
               max_age: userData.max_age ? parseInt(userData.max_age) : 100,
               gender_filter: userData.gender_filter || 'all',
               min_rating: userData.min_rating ? parseFloat(userData.min_rating) : 2.0,
               max_rating: userData.max_rating ? parseFloat(userData.max_rating) : 5.0,
-            });
+            }, { onConflict: 'user_id' });
 
           if (settingsError) {
             console.error(`Failed to create friend_finder_settings for ${userData.display_name}:`, settingsError);
           }
 
-          results.created++;
-          console.log(`Successfully created user: ${userData.display_name}`);
+          if (isUpdate) {
+            results.updated++;
+            console.log(`Updated user: ${userData.display_name}`);
+          } else {
+            results.created++;
+            console.log(`Created user: ${userData.display_name}`);
+          }
         }
       } catch (error) {
         console.error(`Error processing user ${userData.display_name}:`, error);

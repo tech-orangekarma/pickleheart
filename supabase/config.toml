@@ -1,4 +1,19 @@
 project_id = "aetwpwkizsduopvhswvh"
 
+[functions.backfill-profiles]
+verify_jwt = false
+
+[functions.bulk-import-users]
+verify_jwt = false
+
 [functions.delete-all-users]
+verify_jwt = false
+
+[functions.email-login]
+verify_jwt = false
+
+[functions.process-friend-finder]
+verify_jwt = false
+
+[functions.reset-all-passwords]
 verify_jwt = false

@@ -1,4 +1,4 @@
-// Admin function to delete all users
+// Admin function to delete all users (except current admin)
 // WARNING: This is destructive and should only be used in development/testing.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -61,7 +61,9 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    console.log("Starting deletion of all users...");
+
+    const currentUserId = user.id;
+    console.log("Starting deletion of all users (except current admin)...");
 
     // Get all users
     const { data: { users }, error: listError } = await admin.auth.admin.listUsers();
@@ -74,36 +76,59 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Found ${users?.length || 0} users to delete`);
+    console.log(`Found ${users?.length || 0} users to process`);
 
-    const results = [];
-    for (const user of users || []) {
-      console.log(`Deleting user: ${user.email} (${user.id})`);
+    const results = {
+      deleted: 0,
+      skipped: 0,
+      failed: 0,
+      errors: [] as string[],
+      details: [] as any[],
+    };
+
+    for (const authUser of users || []) {
+      // Skip current admin user
+      if (authUser.id === currentUserId) {
+        results.skipped++;
+        results.details.push({
+          userId: authUser.id,
+          email: authUser.email,
+          status: 'skipped',
+          reason: 'current admin user'
+        });
+        console.log(`Skipped current admin user: ${authUser.email}`);
+        continue;
+      }
+
+      console.log(`Deleting user: ${authUser.email} (${authUser.id})`);
       
-      const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
+      const { error: deleteError } = await admin.auth.admin.deleteUser(authUser.id);
 
       if (deleteError) {
-        console.error(`Failed to delete user ${user.email}:`, deleteError);
-        results.push({ user_id: user.id, email: user.email, success: false, error: deleteError.message });
+        console.error(`Failed to delete user ${authUser.email}:`, deleteError);
+        results.failed++;
+        results.errors.push(deleteError.message);
+        results.details.push({ 
+          userId: authUser.id, 
+          email: authUser.email, 
+          status: 'failed',
+          error: deleteError.message 
+        });
       } else {
-        console.log(`Successfully deleted user ${user.email}`);
-        results.push({ user_id: user.id, email: user.email, success: true });
+        console.log(`Successfully deleted user ${authUser.email}`);
+        results.deleted++;
+        results.details.push({ 
+          userId: authUser.id, 
+          email: authUser.email, 
+          status: 'deleted' 
+        });
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
-
-    console.log(`Deletion complete. Success: ${successCount}, Failed: ${failCount}`);
+    console.log(`Deletion complete. Deleted: ${results.deleted}, Skipped: ${results.skipped}, Failed: ${results.failed}`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        total: users?.length || 0,
-        deleted: successCount,
-        failed: failCount,
-        results 
-      }),
+      JSON.stringify(results),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {

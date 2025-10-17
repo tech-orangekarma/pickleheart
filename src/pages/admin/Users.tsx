@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DataTable } from "@/components/admin/DataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Trash2, RotateCcw, Upload } from "lucide-react";
+import { Trash2, RotateCcw, Upload, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import {
@@ -20,6 +20,7 @@ import {
 
 export default function AdminUsers() {
   const [isImporting, setIsImporting] = useState(false);
+  const [isBackfilling, setIsBackfilling] = useState(false);
   
   const { data: users, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -36,12 +37,42 @@ export default function AdminUsers() {
     },
   });
 
-  const handleDeleteAllUsers = async () => {
+  const handleBackfillProfiles = async () => {
+    setIsBackfilling(true);
     try {
-      const { error } = await supabase.functions.invoke("delete-all-users");
+      const { data, error } = await supabase.functions.invoke("backfill-profiles");
       if (error) throw error;
       
-      toast.success("All users deleted successfully");
+      const parts = [];
+      if (data.created > 0) parts.push(`${data.created} profiles created`);
+      if (data.already_existing > 0) parts.push(`${data.already_existing} already exist`);
+      
+      const message = parts.length > 0 ? `Backfill complete: ${parts.join(', ')}` : 'Backfill complete';
+      toast.success(message);
+      
+      if (data.errors?.length > 0) {
+        console.error('Backfill errors:', data.errors);
+      }
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to backfill profiles");
+    } finally {
+      setIsBackfilling(false);
+    }
+  };
+
+  const handleDeleteAllUsers = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-all-users");
+      if (error) throw error;
+      
+      const parts = [];
+      if (data.deleted > 0) parts.push(`${data.deleted} deleted`);
+      if (data.skipped > 0) parts.push(`${data.skipped} skipped (admins)`);
+      if (data.failed > 0) parts.push(`${data.failed} failed`);
+      
+      const message = parts.length > 0 ? `${parts.join(', ')}` : 'All users deleted';
+      toast.success(message);
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete users");
@@ -110,6 +141,9 @@ export default function AdminUsers() {
       if (data.failed > 0) {
         console.error('Import errors:', data.errors);
       }
+      if (data.unmatched?.length > 0) {
+        console.log('Unmatched users (first 10):', data.unmatched.slice(0, 10));
+      }
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Failed to import users");
@@ -164,6 +198,16 @@ export default function AdminUsers() {
           <p className="text-muted-foreground">Manage all registered users</p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={handleBackfillProfiles}
+            disabled={isBackfilling}
+          >
+            <RefreshCw className={`w-4 h-4 ${isBackfilling ? 'animate-spin' : ''}`} />
+            {isBackfilling ? 'Backfilling...' : 'Backfill Profiles'}
+          </Button>
+
           <Button 
             variant="outline" 
             className="gap-2" 
