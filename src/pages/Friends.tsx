@@ -519,13 +519,13 @@ const Friends = () => {
                   </div>
                 </Card>
               ))}
-              {pendingRequests.length > 10 && !showAllPendingRequests && (
+              {pendingRequests.length > 10 && (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setShowAllPendingRequests(true)}
+                  onClick={() => setShowAllPendingRequests(!showAllPendingRequests)}
                 >
-                  See All ({pendingRequests.length})
+                  {showAllPendingRequests ? 'Show Less' : `See All (${pendingRequests.length})`}
                 </Button>
               )}
             </>
@@ -565,13 +565,13 @@ const Friends = () => {
                   </div>
                 </Card>
               ))}
-              {sentRequests.length > 10 && !showAllSentRequests && (
+              {sentRequests.length > 10 && (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setShowAllSentRequests(true)}
+                  onClick={() => setShowAllSentRequests(!showAllSentRequests)}
                 >
-                  See All ({sentRequests.length})
+                  {showAllSentRequests ? 'Show Less' : `See All (${sentRequests.length})`}
                 </Button>
               )}
             </>
@@ -732,13 +732,13 @@ const Friends = () => {
                   </Card>
                 );
               })}
-              {friends.length > 10 && !showAllFriends && (
+              {friends.length > 10 && (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setShowAllFriends(true)}
+                  onClick={() => setShowAllFriends(!showAllFriends)}
                 >
-                  See All ({friends.length})
+                  {showAllFriends ? 'Show Less' : `See All (${friends.length})`}
                 </Button>
               )}
             </>
