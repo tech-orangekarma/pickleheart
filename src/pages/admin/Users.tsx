@@ -99,13 +99,16 @@ export default function AdminUsers() {
 
       if (error) throw error;
 
-      const message = `Imported ${data.success} users successfully${data.skipped > 0 ? `, ${data.skipped} skipped (already exist)` : ''}${data.failed > 0 ? `, ${data.failed} failed` : ''}.`;
+      const parts = [];
+      if (data.created > 0) parts.push(`${data.created} created`);
+      if (data.updated > 0) parts.push(`${data.updated} updated`);
+      if (data.failed > 0) parts.push(`${data.failed} failed`);
+      
+      const message = parts.length > 0 ? `Import complete: ${parts.join(', ')}` : 'Import complete';
       toast.success(message);
+      
       if (data.failed > 0) {
         console.error('Import errors:', data.errors);
-      }
-      if (data.skipped > 0) {
-        console.log('Skipped users:', data.skipped_users);
       }
       refetch();
     } catch (error: any) {
