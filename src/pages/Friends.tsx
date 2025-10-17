@@ -483,7 +483,18 @@ const Friends = () => {
           {/* Pending Friend Requests */}
           {pendingRequests.length > 0 && (
             <>
-              <h2 className="text-lg font-semibold">Friend Requests</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Friend Requests</h2>
+                {pendingRequests.length > 10 && showAllPendingRequests && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAllPendingRequests(false)}
+                  >
+                    Show Less
+                  </Button>
+                )}
+              </div>
               {(showAllPendingRequests ? pendingRequests : pendingRequests.slice(0, 10)).map((request) => (
                 <Card key={request.id} className="p-4 border-2 border-dashed">
                   <div className="flex items-center justify-between gap-3">
@@ -534,7 +545,18 @@ const Friends = () => {
           {/* Sent Friend Requests */}
           {sentRequests.length > 0 && (
             <>
-              <h2 className="text-lg font-semibold mt-4">Pending Requests You've Sent</h2>
+              <div className="flex items-center justify-between mt-4">
+                <h2 className="text-lg font-semibold">Pending Requests You've Sent</h2>
+                {sentRequests.length > 10 && showAllSentRequests && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAllSentRequests(false)}
+                  >
+                    Show Less
+                  </Button>
+                )}
+              </div>
               {(showAllSentRequests ? sentRequests : sentRequests.slice(0, 10)).map((request) => (
                 <Card key={request.id} className="p-4 border-2 border-dashed bg-muted/30">
                   <div className="flex items-center justify-between gap-3">
@@ -581,6 +603,15 @@ const Friends = () => {
             <div className="flex items-center justify-between mt-6 mb-2">
               <h2 className="text-lg font-semibold">Friends</h2>
               <div className="flex gap-2">
+                {friends.length > 10 && showAllFriends && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAllFriends(false)}
+                  >
+                    Show Less
+                  </Button>
+                )}
                 <Button
                   variant={sortBy === 'status' ? 'default' : 'outline'}
                   size="sm"
@@ -613,6 +644,15 @@ const Friends = () => {
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-semibold">Friends</h2>
               <div className="flex gap-2">
+                {friends.length > 10 && showAllFriends && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAllFriends(false)}
+                  >
+                    Show Less
+                  </Button>
+                )}
                 <Button
                   variant={sortBy === 'status' ? 'default' : 'outline'}
                   size="sm"
