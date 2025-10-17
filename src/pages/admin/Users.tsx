@@ -4,6 +4,7 @@ import { DataTable } from "@/components/admin/DataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Trash2, RotateCcw, Upload, RefreshCw } from "lucide-react";
+import Papa from "papaparse";
 import { toast } from "sonner";
 import { useState } from "react";
 import {
@@ -96,33 +97,72 @@ export default function AdminUsers() {
 
     setIsImporting(true);
     try {
-    const text = await file.text();
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    // Skip first 3 lines (empty + header)
-    const dataLines = lines.slice(3);
-    
-    const users = dataLines.map(line => {
-      const cols = line.split(',');
-      return {
-        user_id: cols[1]?.trim(),
-        display_name: cols[2]?.trim(),
-        dupr_rating: cols[3]?.trim(),
-        gender: cols[4]?.trim(),
-        birthday: cols[5]?.trim(),
-        first_name: cols[6]?.trim(),
-        last_name: cols[7]?.trim(),
-        favorite_park_id: cols[8]?.trim(),
-        park2_id: cols[9]?.trim(),
-        park3_id: cols[10]?.trim(),
-        mode: cols[11]?.trim(),
-        min_age: cols[12]?.trim(),
-        max_age: cols[13]?.trim(),
-        gender_filter: cols[14]?.trim(),
-        min_rating: cols[15]?.trim(),
-        max_rating: cols[16]?.trim(),
-      };
-    }).filter(u => u.display_name);
+      const text = await file.text();
+
+      // Robust CSV parsing (handles quotes, commas, CRLF)
+      const parsed = Papa.parse<string[]>(text, {
+        header: false,
+        skipEmptyLines: true,
+      });
+
+      const rows = (parsed.data as unknown as string[][])
+        .filter((r) => Array.isArray(r) && r.length > 0);
+
+      // Detect a header row and skip it; also keep prior behavior of skipping preface lines
+      let startIndex = 0;
+      const first = rows[0]?.map((c) => String(c).toLowerCase());
+      if (first && first.some((c) => c.includes('display') || c.includes('name'))) {
+        startIndex = 1; // header detected
+      }
+      const dataLines = rows.slice(Math.max(startIndex, 3));
+
+      const users = dataLines
+        .map((cols) => {
+          const get = (i: number) => (cols[i] ?? '').toString().trim();
+          const entry: any = {
+            user_id: get(1) || undefined,
+            display_name: get(2) || undefined,
+            dupr_rating: get(3) || undefined,
+            gender: get(4) || undefined,
+            birthday: get(5) || undefined,
+            first_name: get(6) || undefined,
+            last_name: get(7) || undefined,
+            favorite_park_id: get(8) || undefined,
+            park2_id: get(9) || undefined,
+            park3_id: get(10) || undefined,
+            mode: get(11) || undefined,
+            min_age: get(12) || undefined,
+            max_age: get(13) || undefined,
+            gender_filter: get(14) || undefined,
+            min_rating: get(15) || undefined,
+            max_rating: get(16) || undefined,
+          };
+
+          // Strip any extra characters from UUID-looking fields
+          ['favorite_park_id', 'park2_id', 'park3_id'].forEach((k) => {
+            const v = entry[k] as string | undefined;
+            if (v) {
+              const match = v.match(/[0-9a-fA-F-]{36}/);
+              entry[k] = match ? match[0] : undefined;
+            }
+          });
+
+          // Normalize MM/DD/YYYY to YYYY-MM-DD for Postgres
+          if (entry.birthday && entry.birthday.includes('/')) {
+            const parts = entry.birthday.split('/').map((p: string) => p.trim());
+            if (parts.length === 3) {
+              const [m, d, y] = parts;
+              if (y.length === 4) {
+                const mm = m.padStart(2, '0');
+                const dd = d.padStart(2, '0');
+                entry.birthday = `${y}-${mm}-${dd}`;
+              }
+            }
+          }
+
+          return entry;
+        })
+        .filter((u) => u.display_name);
 
       const { data, error } = await supabase.functions.invoke("bulk-import-users", {
         body: { users },
@@ -130,14 +170,14 @@ export default function AdminUsers() {
 
       if (error) throw error;
 
-      const parts = [];
+      const parts: string[] = [];
       if (data.created > 0) parts.push(`${data.created} created`);
       if (data.updated > 0) parts.push(`${data.updated} updated`);
       if (data.failed > 0) parts.push(`${data.failed} failed`);
-      
+
       const message = parts.length > 0 ? `Import complete: ${parts.join(', ')}` : 'Import complete';
       toast.success(message);
-      
+
       if (data.failed > 0) {
         console.error('Import errors:', data.errors);
       }
