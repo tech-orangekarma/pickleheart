@@ -59,6 +59,7 @@ const Home = () => {
   const [latestCourtCondition, setLatestCourtCondition] = useState<string | null>(null);
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -173,6 +174,16 @@ const Home = () => {
         .eq("status", "pending");
       
       setFriendRequestsCount(friendRequests?.length || 0);
+
+      // Check if user is admin
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      setIsAdmin(!!roleData);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -382,6 +393,16 @@ const Home = () => {
         <div className="max-w-md mx-auto flex items-center justify-between">
           <img src={pickleheartLogo} alt="pickleheart" className="h-20" />
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="text-xs"
+              >
+                Admin Portal
+              </Button>
+            )}
             <button 
               onClick={() => navigate("/profile")}
               className="text-sm font-medium hover:underline"
