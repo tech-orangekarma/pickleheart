@@ -76,6 +76,7 @@ const Friends = () => {
   const [selectedFriend, setSelectedFriend] = useState<FriendWithPresence | null>(null);
   const [friendDetailOpen, setFriendDetailOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'age' | 'dupr' | 'status'>('status');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -369,21 +370,34 @@ const Friends = () => {
   );
 
   const sortedFriends = [...friends].sort((a, b) => {
+    let comparison = 0;
+    
     if (sortBy === 'age') {
       const ageA = a.profile.age || 0;
       const ageB = b.profile.age || 0;
-      return ageB - ageA;
+      comparison = ageB - ageA;
     } else if (sortBy === 'dupr') {
       const duprA = a.profile.dupr_rating || 0;
       const duprB = b.profile.dupr_rating || 0;
-      return duprB - duprA;
+      comparison = duprB - duprA;
     } else {
       // Sort by status - online friends first
       const statusA = a.presence ? 1 : 0;
       const statusB = b.presence ? 1 : 0;
-      return statusB - statusA;
+      comparison = statusB - statusA;
     }
+    
+    return sortOrder === 'desc' ? comparison : -comparison;
   });
+
+  const handleSortClick = (type: 'age' | 'dupr' | 'status') => {
+    if (sortBy === type) {
+      setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortBy(type);
+      setSortOrder('desc');
+    }
+  };
 
   if (loading) {
     return (
@@ -549,7 +563,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'status' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('status')}
+                  onClick={() => handleSortClick('status')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   Status
@@ -557,7 +571,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'age' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('age')}
+                  onClick={() => handleSortClick('age')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   Age
@@ -565,7 +579,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'dupr' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('dupr')}
+                  onClick={() => handleSortClick('dupr')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   DUPR
@@ -581,7 +595,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'status' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('status')}
+                  onClick={() => handleSortClick('status')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   Status
@@ -589,7 +603,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'age' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('age')}
+                  onClick={() => handleSortClick('age')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   Age
@@ -597,7 +611,7 @@ const Friends = () => {
                 <Button
                   variant={sortBy === 'dupr' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSortBy('dupr')}
+                  onClick={() => handleSortClick('dupr')}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-1" />
                   DUPR
