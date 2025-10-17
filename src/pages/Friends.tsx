@@ -77,6 +77,9 @@ const Friends = () => {
   const [friendDetailOpen, setFriendDetailOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'age' | 'dupr' | 'status'>('status');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showAllFriends, setShowAllFriends] = useState(false);
+  const [showAllPendingRequests, setShowAllPendingRequests] = useState(false);
+  const [showAllSentRequests, setShowAllSentRequests] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -481,7 +484,7 @@ const Friends = () => {
           {pendingRequests.length > 0 && (
             <>
               <h2 className="text-lg font-semibold">Friend Requests</h2>
-              {pendingRequests.map((request) => (
+              {(showAllPendingRequests ? pendingRequests : pendingRequests.slice(0, 10)).map((request) => (
                 <Card key={request.id} className="p-4 border-2 border-dashed">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -516,6 +519,15 @@ const Friends = () => {
                   </div>
                 </Card>
               ))}
+              {pendingRequests.length > 10 && !showAllPendingRequests && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowAllPendingRequests(true)}
+                >
+                  See All ({pendingRequests.length})
+                </Button>
+              )}
             </>
           )}
 
@@ -523,7 +535,7 @@ const Friends = () => {
           {sentRequests.length > 0 && (
             <>
               <h2 className="text-lg font-semibold mt-4">Pending Requests You've Sent</h2>
-              {sentRequests.map((request) => (
+              {(showAllSentRequests ? sentRequests : sentRequests.slice(0, 10)).map((request) => (
                 <Card key={request.id} className="p-4 border-2 border-dashed bg-muted/30">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -553,6 +565,15 @@ const Friends = () => {
                   </div>
                 </Card>
               ))}
+              {sentRequests.length > 10 && !showAllSentRequests && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowAllSentRequests(true)}
+                >
+                  See All ({sentRequests.length})
+                </Button>
+              )}
             </>
           )}
 
@@ -628,88 +649,99 @@ const Friends = () => {
               </p>
             </Card>
           ) : (
-            sortedFriends.map((friend) => {
-              const status = getFriendStatus(friend);
-              return (
-                <Card
-                  key={friend.friendId}
-                  className="p-4 border-2 border-dashed"
-                  style={{
-                    backgroundColor: friend.presence
-                      ? "rgba(134, 239, 172, 0.1)"
-                      : "rgba(229, 229, 229, 0.1)",
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Avatar */}
-                    <div className="relative flex-shrink-0">
-                      <Avatar className="w-16 h-16 border-4 border-dashed border-foreground">
-                        <AvatarImage src={friend.profile.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {getInitials(friend.profile.display_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 
-                        className="font-semibold text-lg mb-2 cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleFriendClick(friend)}
-                      >
-                        {friend.profile.display_name || "Anonymous"}
-                      </h3>
-                      
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">{status.icon}</span>
-                        <span className={`text-sm font-medium ${status.color}`}>
-                          {status.label}
-                        </span>
+            <>
+              {(showAllFriends ? sortedFriends : sortedFriends.slice(0, 10)).map((friend) => {
+                const status = getFriendStatus(friend);
+                return (
+                  <Card
+                    key={friend.friendId}
+                    className="p-4 border-2 border-dashed"
+                    style={{
+                      backgroundColor: friend.presence
+                        ? "rgba(134, 239, 172, 0.1)"
+                        : "rgba(229, 229, 229, 0.1)",
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="w-16 h-16 border-4 border-dashed border-foreground">
+                          <AvatarImage src={friend.profile.avatar_url || undefined} />
+                          <AvatarFallback>
+                            {getInitials(friend.profile.display_name)}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
 
-                      {/* Age and Gender */}
-                      {(friend.profile.age || friend.profile.gender) && (
-                        <div className="text-sm text-muted-foreground mb-1">
-                          {friend.profile.age && (
-                            <span>{friend.profile.age} years old</span>
-                          )}
-                          {friend.profile.age && friend.profile.gender && <span> • </span>}
-                          {friend.profile.gender && <span>{friend.profile.gender}</span>}
-                        </div>
-                      )}
-
-                      {friend.profile.dupr_rating && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span className="text-lg">🎾</span>
-                          <span>DUPR Rating: {formatDuprRating(friend.profile.dupr_rating)}</span>
-                        </div>
-                      )}
-
-                      {friend.plannedVisit && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                          <span className="text-lg">📅</span>
-                          <span>
-                            Next visit: {formatPlannedVisitDate(new Date(friend.plannedVisit.planned_at))} at {format(new Date(friend.plannedVisit.planned_at), "h:mm a")} - {friend.plannedVisit.park_name}
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 
+                          className="font-semibold text-lg mb-2 cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => handleFriendClick(friend)}
+                        >
+                          {friend.profile.display_name || "Anonymous"}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl">{status.icon}</span>
+                          <span className={`text-sm font-medium ${status.color}`}>
+                            {status.label}
                           </span>
                         </div>
+
+                        {/* Age and Gender */}
+                        {(friend.profile.age || friend.profile.gender) && (
+                          <div className="text-sm text-muted-foreground mb-1">
+                            {friend.profile.age && (
+                              <span>{friend.profile.age} years old</span>
+                            )}
+                            {friend.profile.age && friend.profile.gender && <span> • </span>}
+                            {friend.profile.gender && <span>{friend.profile.gender}</span>}
+                          </div>
+                        )}
+
+                        {friend.profile.dupr_rating && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span className="text-lg">🎾</span>
+                            <span>DUPR Rating: {formatDuprRating(friend.profile.dupr_rating)}</span>
+                          </div>
+                        )}
+
+                        {friend.plannedVisit && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <span className="text-lg">📅</span>
+                            <span>
+                              Next visit: {formatPlannedVisitDate(new Date(friend.plannedVisit.planned_at))} at {format(new Date(friend.plannedVisit.planned_at), "h:mm a")} - {friend.plannedVisit.park_name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      {friend.presence && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0 bg-green-100 hover:bg-green-200 border-green-400 border-2 border-dashed"
+                        >
+                          <span className="text-lg mr-1">🎾</span>
+                          Invite to Play
+                        </Button>
                       )}
                     </div>
-
-                    {/* Action Button */}
-                    {friend.presence && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-shrink-0 bg-green-100 hover:bg-green-200 border-green-400 border-2 border-dashed"
-                      >
-                        <span className="text-lg mr-1">🎾</span>
-                        Invite to Play
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              );
-            })
+                  </Card>
+                );
+              })}
+              {friends.length > 10 && !showAllFriends && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowAllFriends(true)}
+                >
+                  See All ({friends.length})
+                </Button>
+              )}
+            </>
           )}
         </div>
 
