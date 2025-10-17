@@ -68,28 +68,28 @@ export default function AdminUsers() {
     const text = await file.text();
     const lines = text.split('\n').filter(line => line.trim());
     
-    // Skip header line
-    const dataLines = lines.slice(1);
+    // Skip first 3 lines (empty + header)
+    const dataLines = lines.slice(3);
     
     const users = dataLines.map(line => {
       const cols = line.split(',');
       return {
-        user_id: cols[0]?.trim(),
-        display_name: cols[1]?.trim(),
-        dupr_rating: cols[2]?.trim(),
-        gender: cols[3]?.trim(),
-        birthday: cols[4]?.trim(),
-        first_name: cols[5]?.trim(),
-        last_name: cols[6]?.trim(),
-        favorite_park_id: cols[7]?.trim(),
-        park2_id: cols[8]?.trim(),
-        park3_id: cols[9]?.trim(),
-        mode: cols[10]?.trim(),
-        min_age: cols[11]?.trim(),
-        max_age: cols[12]?.trim(),
-        gender_filter: cols[13]?.trim(),
-        min_rating: cols[14]?.trim(),
-        max_rating: cols[15]?.trim(),
+        user_id: cols[1]?.trim(),
+        display_name: cols[2]?.trim(),
+        dupr_rating: cols[3]?.trim(),
+        gender: cols[4]?.trim(),
+        birthday: cols[5]?.trim(),
+        first_name: cols[6]?.trim(),
+        last_name: cols[7]?.trim(),
+        favorite_park_id: cols[8]?.trim(),
+        park2_id: cols[9]?.trim(),
+        park3_id: cols[10]?.trim(),
+        mode: cols[11]?.trim(),
+        min_age: cols[12]?.trim(),
+        max_age: cols[13]?.trim(),
+        gender_filter: cols[14]?.trim(),
+        min_rating: cols[15]?.trim(),
+        max_rating: cols[16]?.trim(),
       };
     }).filter(u => u.display_name);
 
