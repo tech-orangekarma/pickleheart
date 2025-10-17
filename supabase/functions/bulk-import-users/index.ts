@@ -47,12 +47,26 @@ Deno.serve(async (req) => {
     const results = {
       success: 0,
       failed: 0,
+      skipped: 0,
       errors: [] as string[],
+      skipped_users: [] as string[],
     };
 
     for (const userData of users) {
       try {
         const email = `${userData.display_name.toLowerCase().replace(/\s+/g, '.')}@pickleheart.app`;
+        
+        // Check if user with this email already exists
+        const { data: existingUsers } = await supabaseClient.auth.admin.listUsers();
+        const userExists = existingUsers?.users?.some(u => u.email === email);
+        
+        if (userExists) {
+          console.log(`User ${userData.display_name} already exists, skipping`);
+          results.skipped++;
+          results.skipped_users.push(userData.display_name);
+          continue;
+        }
+
         const password = `temp${Math.random().toString(36).slice(2)}`;
 
         // Create auth user
@@ -143,7 +157,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Bulk import complete: ${results.success} success, ${results.failed} failed`);
+    console.log(`Bulk import complete: ${results.success} success, ${results.skipped} skipped, ${results.failed} failed`);
 
     return new Response(
       JSON.stringify(results),

@@ -99,9 +99,13 @@ export default function AdminUsers() {
 
       if (error) throw error;
 
-      toast.success(`Imported ${data.success} users successfully. ${data.failed} failed.`);
+      const message = `Imported ${data.success} users successfully${data.skipped > 0 ? `, ${data.skipped} skipped (already exist)` : ''}${data.failed > 0 ? `, ${data.failed} failed` : ''}.`;
+      toast.success(message);
       if (data.failed > 0) {
         console.error('Import errors:', data.errors);
+      }
+      if (data.skipped > 0) {
+        console.log('Skipped users:', data.skipped_users);
       }
       refetch();
     } catch (error: any) {
