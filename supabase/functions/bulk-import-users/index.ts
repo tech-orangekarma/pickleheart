@@ -65,6 +65,17 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${emailToUserId.size} existing auth users`);
 
+    // Normalize gender values to satisfy DB check constraint gender_check
+    const normalizeGender = (g: string | null | undefined): 'male' | 'female' | 'prefer_not_to_say' | null => {
+      const val = String(g ?? '').trim().toLowerCase();
+      if (!val) return null;
+      if (["male", "m", "man", "boy"].includes(val)) return "male";
+      if (["female", "f", "woman", "girl"].includes(val)) return "female";
+      if (["non-binary", "nonbinary", "non binary", "nb", "genderqueer", "gender nonconforming"].includes(val)) return "prefer_not_to_say";
+      if (["prefer not to say", "prefer_not_to_say", "unspecified", "unknown", "n/a", "na"].includes(val)) return "prefer_not_to_say";
+      return null; // fallback to null to pass CHECK constraint
+    };
+
     const results = {
       created: 0,
       updated: 0,
@@ -95,7 +106,7 @@ Deno.serve(async (req) => {
               display_name: userData.display_name,
               first_name: userData.first_name,
               last_name: userData.last_name,
-              gender: userData.gender || null,
+              gender: normalizeGender(userData.gender),
               birthday: userData.birthday || null,
               dupr_rating: userData.dupr_rating ? parseFloat(userData.dupr_rating) : null,
             }, { onConflict: 'id' });
@@ -173,7 +184,7 @@ Deno.serve(async (req) => {
               display_name: userData.display_name,
               first_name: userData.first_name,
               last_name: userData.last_name,
-              gender: userData.gender || null,
+              gender: normalizeGender(userData.gender),
               birthday: userData.birthday || null,
               dupr_rating: userData.dupr_rating ? parseFloat(userData.dupr_rating) : null,
             });
