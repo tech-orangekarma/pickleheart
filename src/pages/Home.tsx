@@ -61,6 +61,7 @@ const Home = () => {
   const [showPlannedVisitDialog, setShowPlannedVisitDialog] = useState(false);
   const [plannedVisit, setPlannedVisit] = useState<{ park_name: string; planned_at: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [spinAnimation, setSpinAnimation] = useState<'left' | 'right' | null>(null);
 
   useEffect(() => {
     loadData();
@@ -456,6 +457,8 @@ const Home = () => {
             onClick={() => {
               const currentIndex = parks.findIndex(p => p.id === selectedParkId);
               if (currentIndex > 0) {
+                setSpinAnimation('left');
+                setTimeout(() => setSpinAnimation(null), 600);
                 setSelectedParkId(parks[currentIndex - 1].id);
               }
             }}
@@ -478,7 +481,10 @@ const Home = () => {
             <img 
               src={pickleballGreen} 
               alt="Pickleball" 
-              className="absolute inset-0 w-full h-full object-contain"
+              className={`absolute inset-0 w-full h-full object-contain ${
+                spinAnimation === 'left' ? 'animate-spin-left' : 
+                spinAnimation === 'right' ? 'animate-spin-right' : ''
+              }`}
             />
             
             {/* Content overlay */}
@@ -496,6 +502,8 @@ const Home = () => {
             onClick={() => {
               const currentIndex = parks.findIndex(p => p.id === selectedParkId);
               if (currentIndex < parks.length - 1) {
+                setSpinAnimation('right');
+                setTimeout(() => setSpinAnimation(null), 600);
                 setSelectedParkId(parks[currentIndex + 1].id);
               }
             }}
