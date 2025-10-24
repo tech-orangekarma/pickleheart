@@ -475,16 +475,47 @@ const Home = () => {
             'bg-status-bad'
           }`} />
           
-          {/* Central Message */}
+          {/* Central Pickleball Button */}
           <button
             onClick={() => setShowMediaDialog(true)}
-            className="relative z-10 bg-card rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-2 border-dashed border-foreground/20 hover:bg-card/70 transition-colors cursor-pointer"
+            className="relative z-10 rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-4 border-foreground/10 hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+            }}
           >
-            <p className="text-xs text-muted-foreground mb-2">{selectedPark?.name}</p>
-            <p className="font-headline text-2xl text-center leading-tight">
-              {getQualityMessage()}
-            </p>
-            <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3" />
+            {/* Pickleball holes pattern */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Center holes */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90" />
+              
+              {/* Ring 1 - 6 holes around center */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-16 w-6 h-6 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-10 -translate-y-10 w-6 h-6 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-10 translate-y-6 w-6 h-6 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-12 w-6 h-6 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-14 translate-y-6 w-6 h-6 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-14 -translate-y-10 w-6 h-6 rounded-full bg-background/90" />
+              
+              {/* Ring 2 - outer holes */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-24 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-16 -translate-y-18 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-20 -translate-y-4 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-18 translate-y-12 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 translate-x-4 translate-y-20 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-8 translate-y-22 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-20 translate-y-14 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-24 -translate-y-2 w-5 h-5 rounded-full bg-background/90" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-20 -translate-y-16 w-5 h-5 rounded-full bg-background/90" />
+            </div>
+            
+            {/* Content overlay */}
+            <div className="relative z-10 flex flex-col items-center">
+              <p className="text-xs text-white/80 mb-2 font-medium">{selectedPark?.name}</p>
+              <p className="font-headline text-xl text-white text-center leading-tight drop-shadow-md">
+                {getQualityMessage()}
+              </p>
+              <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3 drop-shadow-md" />
+            </div>
           </button>
 
           {/* Right Arrow */}
