@@ -490,8 +490,8 @@ const Home = () => {
             
             {/* Content overlay */}
             <div className="relative z-10 flex flex-col items-center">
-              <p className="text-xs mb-2 font-medium" style={{ color: '#FA8787' }}>{selectedPark?.name}</p>
-              <p className="font-headline text-xl text-center leading-tight drop-shadow-md" style={{ color: '#FA8787' }}>
+              <p className="text-xs mb-2 font-medium" style={{ color: '#FFEB99' }}>{selectedPark?.name}</p>
+              <p className="font-headline text-xl text-center leading-tight drop-shadow-md" style={{ color: '#FFEB99' }}>
                 {getQualityMessage()}
               </p>
               <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3 drop-shadow-md" />
