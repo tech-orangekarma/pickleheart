@@ -489,7 +489,7 @@ const Home = () => {
             
             {/* Content overlay */}
             <div className="relative z-10 flex flex-col items-center mt-12">
-              <div className="backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg flex flex-col items-center min-w-[160px]" style={{ backgroundColor: 'rgba(250, 243, 235, 0.95)' }}>
+              <div className="backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg flex flex-col items-center max-w-[180px]" style={{ backgroundColor: 'rgba(250, 243, 235, 0.95)' }}>
                 <p className="text-xs mb-1 font-medium text-gray-700">{selectedPark?.name}</p>
                 <p className="font-headline text-lg text-center leading-tight text-gray-800">
                   {getQualityMessage()}
