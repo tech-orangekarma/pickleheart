@@ -469,13 +469,6 @@ const Home = () => {
             />
           </button>
 
-          {/* Decorative Circle */}
-          <div className={`absolute inset-8 rounded-full opacity-40 border-4 border-dashed border-foreground/20 ${
-            quality === 'great' ? 'bg-status-great' : 
-            quality === 'good' ? 'bg-status-good' : 
-            'bg-status-bad'
-          }`} />
-          
           {/* Central Pickleball Button */}
           <button
             onClick={() => setShowMediaDialog(true)}
