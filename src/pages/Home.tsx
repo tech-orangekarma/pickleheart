@@ -9,6 +9,7 @@ import { SkillFilterDialog } from "@/components/SkillFilterDialog";
 import heartIcon from "@/assets/heart-icon.png";
 import pickleheartLogo from "@/assets/pickleheart-logo-new.png";
 import arrowNav from "@/assets/arrow-nav.png";
+import pickleballGreen from "@/assets/pickleball-green.png";
 import { StackReportDialog } from "@/components/StackReportDialog";
 import { ParkMediaDialog } from "@/components/ParkMediaDialog";
 import { CourtConditionsDialog } from "@/components/CourtConditionsDialog";
@@ -478,40 +479,19 @@ const Home = () => {
           {/* Central Pickleball Button */}
           <button
             onClick={() => setShowMediaDialog(true)}
-            className="relative z-10 rounded-full w-64 h-64 flex flex-col items-center justify-center p-6 shadow-lg border-4 border-foreground/10 hover:scale-105 transition-transform cursor-pointer overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-            }}
+            className="relative z-10 w-64 h-64 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
           >
-            {/* Pickleball holes pattern */}
-            <div className="absolute inset-0 pointer-events-none">
-              {/* Center holes */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90" />
-              
-              {/* Ring 1 - 6 holes around center */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-16 w-6 h-6 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-10 -translate-y-10 w-6 h-6 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-10 translate-y-6 w-6 h-6 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-12 w-6 h-6 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-14 translate-y-6 w-6 h-6 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-14 -translate-y-10 w-6 h-6 rounded-full bg-background/90" />
-              
-              {/* Ring 2 - outer holes */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-24 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-16 -translate-y-18 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-20 -translate-y-4 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-18 translate-y-12 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 translate-x-4 translate-y-20 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-8 translate-y-22 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-20 translate-y-14 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-24 -translate-y-2 w-5 h-5 rounded-full bg-background/90" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-20 -translate-y-16 w-5 h-5 rounded-full bg-background/90" />
-            </div>
+            {/* Pickleball background image */}
+            <img 
+              src={pickleballGreen} 
+              alt="Pickleball" 
+              className="absolute inset-0 w-full h-full object-contain"
+            />
             
             {/* Content overlay */}
             <div className="relative z-10 flex flex-col items-center">
-              <p className="text-xs text-white/80 mb-2 font-medium">{selectedPark?.name}</p>
-              <p className="font-headline text-xl text-white text-center leading-tight drop-shadow-md">
+              <p className="text-xs mb-2 font-medium" style={{ color: '#FA8787' }}>{selectedPark?.name}</p>
+              <p className="font-headline text-xl text-center leading-tight drop-shadow-md" style={{ color: '#FA8787' }}>
                 {getQualityMessage()}
               </p>
               <img src={heartIcon} alt="heart" className="w-8 h-8 mt-3 drop-shadow-md" />
